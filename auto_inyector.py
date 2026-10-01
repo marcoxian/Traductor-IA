@@ -123,8 +123,9 @@ class OllamaTranslator:
 
 class GameEngineInjector:
     """Gestor universal de detección de motores gráficos y estrategias de inyección."""
-    def __init__(self, game_path):
+    def __init__(self, game_path, target_file=None):
         self.game_path = Path(game_path)
+        self.target_file = target_file
         self.translator = OllamaTranslator()
 
     def detect_engine(self):
@@ -293,6 +294,11 @@ class GameEngineInjector:
             return
             
         json_files = list(data_dir.glob("*.json"))
+        if self.target_file:
+            json_files = [f for f in json_files if f.name.lower() == self.target_file.lower()]
+            if not json_files:
+                logging.error(f"No se encontró el archivo {self.target_file} en {data_dir}")
+                return
         
         def process_json_data(data):
             if isinstance(data, dict):
@@ -313,6 +319,25 @@ class GameEngineInjector:
                                 reason = f"Faltan etiquetas: {set(orig_tags)-set(trans_tags)}" if set(orig_tags)-set(trans_tags) else f"Sobrantes: {set(trans_tags)-set(orig_tags)}"
                                 logging.warning(f"{YELLOW}  ⚠ Etiquetas rotas: {reason}{RESET}")
                                 translated = self.translator.autocorrect(sanitized, translated, reason)
+                                
+                            # Aplicar saltos de línea automáticos a descripciones largas
+                            if key == "description" and len(translated) > 48:
+                                words = translated.split()
+                                lines = []
+                                current_line = []
+                                current_length = 0
+                                for word in words:
+                                    if current_length + len(word) + 1 > 48 and current_line:
+                                        lines.append(" ".join(current_line))
+                                        current_line = [word]
+                                        current_length = len(word)
+                                    else:
+                                        current_line.append(word)
+                                        current_length += len(word) + 1
+                                if current_line:
+                                    lines.append(" ".join(current_line))
+                                translated = "\n".join(lines)
+                                
                             data[key] = translated
 
                 # Traducir los términos del sistema (System.json) como New Game, Continue, HP, MP, etc.
@@ -331,6 +356,14 @@ class GameEngineInjector:
                             if isinstance(msg_str, str) and msg_str.strip() and any(c.isalpha() for c in msg_str):
                                 logging.info(f"-> Traduciendo mensaje del sistema: {msg_str[:30]}...")
                                 terms["messages"][msg_key] = self.translator.translate(msg_str)
+                                
+                # Traducir los tipos de equipamiento, armas, armaduras, elementos y habilidades (System.json)
+                for array_key in ["equipTypes", "weaponTypes", "armorTypes", "elements", "skillTypes"]:
+                    if array_key in data and isinstance(data[array_key], list):
+                        for idx, item in enumerate(data[array_key]):
+                            if isinstance(item, str) and item.strip() and any(c.isalpha() for c in item):
+                                logging.info(f"-> Traduciendo tipo ({array_key}): {item[:30]}...")
+                                data[array_key][idx] = self.translator.translate(item)
                 
                 # Traducir opciones de diálogo (code 402)
                 if "code" in data and "parameters" in data:
@@ -479,11 +512,12 @@ class GameEngineInjector:
 def main():
     parser = argparse.ArgumentParser(description="Auto-Inyector de IA Traductora Local en Videojuegos.")
     parser.add_argument("--ruta", type=str, required=True, help="Ruta absoluta de la carpeta del juego.")
+    parser.add_argument("--archivo", type=str, required=False, help="Traducir solo un archivo específico (ej. System.json)")
     
     args = parser.parse_args()
 
     logging.info("--- INICIANDO GESTOR UNIVERSAL DE TRADUCCIÓN ---")
-    injector = GameEngineInjector(args.ruta)
+    injector = GameEngineInjector(args.ruta, args.archivo)
     injector.run()
     logging.info("--- PROCESO FINALIZADO ---")
 
