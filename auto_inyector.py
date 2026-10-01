@@ -299,7 +299,7 @@ class GameEngineInjector:
                 # Evitar traducir nombres de archivos de audio (tienen volume y pitch)
                 if not ("name" in data and "volume" in data and "pitch" in data):
                     # Traducir campos comunes de base de datos
-                    for key in ["name", "description", "message1", "message2", "message3", "nickname"]:
+                    for key in ["name", "description", "message1", "message2", "message3", "nickname", "gameTitle"]:
                         if key in data and isinstance(data[key], str) and data[key].strip():
                             original = data[key]
                             if not any(c.isalpha() for c in original):
@@ -314,6 +314,23 @@ class GameEngineInjector:
                                 logging.warning(f"{YELLOW}  ⚠ Etiquetas rotas: {reason}{RESET}")
                                 translated = self.translator.autocorrect(sanitized, translated, reason)
                             data[key] = translated
+
+                # Traducir los términos del sistema (System.json) como New Game, Continue, HP, MP, etc.
+                if "terms" in data and isinstance(data["terms"], dict):
+                    terms = data["terms"]
+                    # Los terms tienen arrays (commands, basic, params) y dicts (messages)
+                    for term_category in ["commands", "basic", "params"]:
+                        if term_category in terms and isinstance(terms[term_category], list):
+                            for idx, term_str in enumerate(terms[term_category]):
+                                if isinstance(term_str, str) and term_str.strip() and any(c.isalpha() for c in term_str):
+                                    logging.info(f"-> Traduciendo menú ({term_category}): {term_str[:30]}...")
+                                    terms[term_category][idx] = self.translator.translate(term_str)
+                                    
+                    if "messages" in terms and isinstance(terms["messages"], dict):
+                        for msg_key, msg_str in terms["messages"].items():
+                            if isinstance(msg_str, str) and msg_str.strip() and any(c.isalpha() for c in msg_str):
+                                logging.info(f"-> Traduciendo mensaje del sistema: {msg_str[:30]}...")
+                                terms["messages"][msg_key] = self.translator.translate(msg_str)
                 
                 # Traducir opciones de diálogo (code 402)
                 if "code" in data and "parameters" in data:
