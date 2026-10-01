@@ -1,0 +1,14 @@
+venv/
+.venv/
+env/
+venv_traductor/
+__pycache__/
+*.pyc
+
+# Modelos y cachés
+unsloth_compiled_cache/
+traductor_juegos_gguf/
+traductor_juegos_gguf_gguf/
+
+# Resultados y salidas
+outputs/
