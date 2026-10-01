@@ -1,14 +1,38 @@
+# Entornos virtuales
 venv/
 .venv/
 env/
 venv_traductor/
+
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.env
 
-# Modelos y cachés
+# Entornos e IDEs
+.vscode/
+.idea/
+
+# Modelos, cachés y dependencias de IA
 unsloth_compiled_cache/
 traductor_juegos_gguf/
 traductor_juegos_gguf_gguf/
+traductor_juegos_gguf_final/
+traductor_juegos_gguf_final_gguf/
+*.gguf
 
 # Resultados y salidas
 outputs/
+outputs_mini/
+*.log
+
+# Datasets y archivos descargados/grandes
+*.zip
+*.jsonl
+KDE4.en-es.xml
+
+# SO
+.DS_Store
+Thumbs.db

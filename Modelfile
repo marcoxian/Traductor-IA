@@ -1,1 +1,1 @@
-FROM ./traductor_juegos_gguf_gguf/Meta-Llama-3.1-8B.Q4_K_M.gguf
+FROM ./Meta-Llama-3.1-8B-Q4_K_M-Final.gguf
