@@ -99,10 +99,11 @@ class OllamaTranslator:
 
     def autocorrect(self, original, bad_translation, reason, max_attempts=3):
         """Reenvía a Ollama con el motivo del fallo para autocorregir."""
+        last_corrected = bad_translation
         for attempt in range(max_attempts):
             correction_prompt = (
                 f"Texto original: {original}\n"
-                f"Tu traducción: {bad_translation}\n"
+                f"Tu traducción: {last_corrected}\n"
                 f"Has fallado por este motivo: {reason}\n"
                 f"Vuelve a traducirlo corrigiendo este error específico. "
                 f"Devuelve únicamente el texto final, sin explicaciones ni comillas extra."
@@ -117,9 +118,26 @@ class OllamaTranslator:
                 return corrected
             else:
                 logging.warning(f"{YELLOW}  ✗ Intento {attempt + 1}/{max_attempts} sigue fallando{RESET}")
+                last_corrected = corrected
         
-        logging.error(f"{RED}  ✖ Irrecuperable tras {max_attempts} intentos. Se deja en inglés.{RESET}")
-        return original
+        # Fallback de emergencia: Añadir las etiquetas faltantes a la fuerza
+        logging.warning(f"{RED}  ✖ Irrecuperable. Aplicando Fallback de emergencia usando la primera traducción.{RESET}")
+        orig_tags_list = self.extract_format_tags(original)
+        trans_tags_list = self.extract_format_tags(bad_translation)
+        
+        missing = []
+        for tag in orig_tags_list:
+            if tag in trans_tags_list:
+                trans_tags_list.remove(tag)
+            else:
+                missing.append(tag)
+                
+        if missing:
+            fallback = "".join(missing) + " " + bad_translation
+            logging.info(f"{BLUE}  ✔ Fallback inyectado: {fallback[:40]}...{RESET}")
+            return fallback
+            
+        return bad_translation
 
 class GameEngineInjector:
     """Gestor universal de detección de motores gráficos y estrategias de inyección."""
@@ -431,41 +449,35 @@ class GameEngineInjector:
                         logging.warning(f"{YELLOW}  ⚠ Etiquetas rotas en diálogo: {reason}{RESET}")
                         translated = self.translator.autocorrect(merged, translated, reason)
                     
-                    # Repartir la traducción inteligente: llenar líneas hasta ~50 caracteres
-                    # para evitar que queden líneas con 2 palabras
-                    num_lines = len(fragments)
-                    if num_lines == 1:
-                        commands[group_start]["parameters"][0] = translated
-                    else:
-                        words = translated.split()
-                        current_line = []
-                        current_length = 0
-                        lines = []
-                        
-                        for word in words:
-                            # 50 caracteres es un buen límite seguro para RPG Maker
-                            if current_length + len(word) + 1 > 50 and current_line:
-                                lines.append(" ".join(current_line))
-                                current_line = [word]
-                                current_length = len(word)
-                            else:
-                                current_line.append(word)
-                                current_length += len(word) + 1
-                                
-                        if current_line:
+                    # Repartir la traducción inteligente: llenar líneas hasta ~45 caracteres
+                    words = translated.split()
+                    current_line = []
+                    current_length = 0
+                    lines = []
+                    
+                    for word in words:
+                        # 45 caracteres es un buen límite seguro para RPG Maker
+                        if current_length + len(word) + 1 > 45 and current_line:
                             lines.append(" ".join(current_line))
+                            current_line = [word]
+                            current_length = len(word)
+                        else:
+                            current_line.append(word)
+                            current_length += len(word) + 1
                             
-                        # Si ocupamos más líneas que las originales, embutir las sobrantes en la última
-                        while len(lines) > num_lines:
-                            lines[-2] = lines[-2] + " " + lines[-1]
-                            lines.pop()
-                            
-                        # Rellenar con cadenas vacías si usamos menos líneas
-                        while len(lines) < num_lines:
-                            lines.append("")
-                            
-                        for j in range(num_lines):
-                            commands[group_start + j]["parameters"][0] = lines[j]
+                    if current_line:
+                        lines.append(" ".join(current_line))
+                        
+                    import copy
+                    new_commands = []
+                    for line_text in lines:
+                        new_cmd = copy.deepcopy(commands[group_start])
+                        new_cmd["parameters"][0] = line_text
+                        new_commands.append(new_cmd)
+                        
+                    # Reemplazar los comandos originales por los nuevos divididos
+                    commands[group_start:i] = new_commands
+                    i = group_start + len(new_commands)
                 else:
                     i += 1
             return commands
