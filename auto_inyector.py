@@ -73,6 +73,12 @@ class OllamaTranslator:
                 if resp.startswith('"') and resp.endswith('"'): resp = resp[1:-1]
                 if resp.startswith("'") and resp.endswith("'"): resp = resp[1:-1]
                 
+                # Filtro agresivo para alucinaciones con el prompt
+                if "Texto de videojuego" in resp and ":" in resp:
+                    resp = resp.split(":", 1)[-1].strip()
+                if "Texto original:" in resp and "Tu traducción:" in resp:
+                    resp = resp.split("Tu traducción:", 1)[-1].strip()
+                
                 # Si se coló alguna etiqueta residual
                 if "<|im_start|>" in resp: resp = resp.split("<|im_start|>")[0].strip()
                 
