@@ -1,0 +1,1156 @@
+﻿ingles;correccion
+Language;Idioma
+Level;Nivel
+Max HP;PV mÃ¡x.
+Max MP;PM mÃ¡x.
+ATK;ATQ
+DEF;DEF
+Magic ATK;ATQ mÃ¡gico
+Magic DEF;DEF mÃ¡gica
+SPD;VEL
+LUCK;SUERTE
+CRI;CRÃ
+Hit Rate;PrecisiÃ³n
+Dodge;EvasiÃ³n
+Battle;Luchar
+Retreat;Huir
+Attack;Atacar
+Defend;Defender
+Item;Objetos
+Skills;Habilidades
+Equipment;Equipo
+Status;Estado
+Formation;FormaciÃ³n
+Options;Opciones
+Save;Guardar
+Load;Cargar
+Exit;Salir
+Weapons;Armas
+Armor;Armaduras
+Key Items;Objetos clave
+Equip;Equipar
+Best Gear;Equipo Ã³ptimo
+Unequip All;Quitar todo
+Buy;Comprar
+Sell;Vender
+New Game;Nueva partida
+Continue;Continuar
+Return to Title;Volver al tÃ­tulo
+Cancel;Cancelar
+Toggle Sprint;Correr siempre
+Remember Commands;Recordar comandos
+BGM Volume;Volumen de mÃºsica
+BGS Volume;Volumen de ambiente
+ME Volume;Volumen de melodÃ­as
+SE Volume;Volumen de efectos
+Owned;En posesiÃ³n
+Current %1;%1 actual
+Until Next %1;Para el siguiente %1
+Save Files;Partidas guardadas
+%1 's Party;Grupo de %1
+Save Count;Veces guardado
+Current Location;UbicaciÃ³n actual
+Play Time;Tiempo de juego
+Money;Dinero
+Days;DÃ­as
+Quests;Misiones
+Main Quest;MisiÃ³n principal
+Sub Quests;Misiones secundarias
+Hills;Hills
+Ult Skill;Habilidad definitiva
+All Enemies;Todos los enemigos
+All Allies;Todos los aliados
+Random Enemy;Enemigo aleatorio
+%1 appears!;Â¡Aparece %1!
+%1 is ambushed!;Â¡%1 cae en una emboscada!
+%1 runs away!;Â¡%1 huye!
+%1 is victorious!;Â¡%1 se alza con la victoria!
+%1 is defeated!;Â¡%1 ha sido derrotado!
+Obtained %1 %2!;Â¡Has obtenido %1 %2!
+Obtained %1!;Â¡Has obtenido %1!
+Learned %1!;Â¡Has aprendido %1!
+%1 uses %2!;Â¡%1 usa %2!
+Critical Hit!!;Â¡Â¡Golpe crÃ­tico!!
+Crit taken!;Â¡Has recibido un crÃ­tico!
+%1 takes %2 DMG!;Â¡%1 recibe %2 de daÃ±o!
+%1's %2 recovers %3!;Â¡%1 recupera %3 de %2!
+%1's %2 lost %3!;Â¡%1 pierde %3 de %2!
+%1 takes no DMG!;Â¡%1 no recibe daÃ±o!
+%1 dodges the attack!;Â¡%1 esquiva el ataque!
+%1 resists the spell!;Â¡%1 resiste el hechizo!
+%1 reflects the spell!;Â¡%1 refleja el hechizo!
+%1 counters!;Â¡%1 contraataca!
+%1's %2 increases!;Â¡Aumenta el %2 de %1!
+%1's %2 decreases!;Â¡Disminuye el %2 de %1!
+Action failed!;Â¡La acciÃ³n ha fallado!
+PHY;FÃS
+Fire;Fuego
+Ice;Hielo
+Thunder;Rayo
+Water;Agua
+Earth;Tierra
+Wind;Viento
+Light;Luz
+Dark;Oscuridad
+Dagger;Daga
+Longsword;Espada larga
+Club;Maza
+Axe;Hacha
+Whip;LÃ¡tigo
+Staff;BastÃ³n
+Bow;Arco
+Crossbow;Ballesta
+Gun;Arma de fuego
+Claw;Garra
+Gauntlet;Guantelete
+Lance;Lanza
+Normal Armor;Armadura normal
+Magic Armor;Armadura mÃ¡gica
+Light Armor;Armadura ligera
+Heavy Armor;Armadura pesada
+Small Shield;Escudo pequeÃ±o
+Large Shield;Escudo grande
+Finger;Dedo
+Hands;Manos
+Clothing;Ropa
+Accessory;Accesorio
+Knocked Out;Fuera de combate
+is defeated!;cae derrotado!
+Unable to act.;No puede actuar.
+Undying;Inmortal
+Poison;Veneno
+is poisoned!;sufre envenenamiento!
+Blind;Ceguera
+is blinded! Accuracy decreases!;se queda ciego! Â¡Baja la precisiÃ³n!
+Silence;Silencio
+Rage;Furia
+ATK increases by 100%.;El ATQ aumenta un 100 %.
+Frenzy;FrenesÃ­
+enters a frenzied state!;entra en frenesÃ­!
+Confusion;ConfusiÃ³n
+Charm;Encanto
+Sleep;SueÃ±o
+Block;Bloqueo
+Cover;Cubrir
+Stun;Aturdimiento
+Paralysis;ParÃ¡lisis
+is paralyzed!;sufre parÃ¡lisis!
+Steal;Robar
+Empty;VacÃ­o
+ATK Down;ATQ abajo
+gained ATK Down!;sufre ATQ abajo!
+ATK decreases by 25%.;El ATQ disminuye un 25 %.
+Burn;Quemadura
+Protective Ward;Ã‰gida protectora
+Mana Conduction;ConducciÃ³n de manÃ¡
+gained Mana Conduction!;obtiene ConducciÃ³n de manÃ¡!
+Indomitable Will;Voluntad indomable
+Safe Fall;CaÃ­da segura
+ATK Up;ATQ arriba
+gained ATK Up!;obtiene ATQ arriba!
+s ATK increases!;ve aumentado su ATQ!
+ATK increases by 25%.;El ATQ aumenta un 25 %.
+ATK increases by 50%.;El ATQ aumenta un 50 %.
+DEF Down;DEF abajo
+DEF decreases by 25%.;La DEF disminuye un 25 %.
+Fighting Spirit;EspÃ­ritu de lucha
+gained Fighting Spirit!;obtiene EspÃ­ritu de lucha!
+Crit Up;CrÃ­tico arriba
+gained Crit Up!;obtiene CrÃ­tico arriba!
+Energy Up;EnergÃ­a arriba
+Dodge Up;EvasiÃ³n arriba
+gained Dodge Up!;obtiene EvasiÃ³n arriba!
+DEF Up;DEF arriba
+gained DEF Up!;obtiene DEF arriba!
+DEF increases by 25%.;La DEF aumenta un 25 %.
+Endurance Up;Aguante arriba
+Vitality Up;Vitalidad arriba
+Bleed;Sangrado
+Stealth;Sigilo
+Enters Stealth!;Â¡Entra en sigilo!
+Fear;Miedo
+Primordial Potential;Potencial primordial
+gained Primordial Potential!;obtiene Potencial primordial!
+Follow-Through;Remate
+Action Count +1;Acciones +1
+Silver Will;Voluntad de plata
+DEF Down (Large);DEF abajo (grande)
+DEF decreases by 50%.;La DEF disminuye un 50 %.
+Morale Boost;SubidÃ³n de moral
+shouts to boost morale!;grita para subir la moral!
+Defense Stance;Postura defensiva
+Tentacle Bind;Atadura de tentÃ¡culos
+Adversity Combat I;Lucha en la adversidad I
+gained Adversity Combat I;obtiene Lucha en la adversidad I
+Adversity Combat II;Lucha en la adversidad II
+gained Adversity Combat II;obtiene Lucha en la adversidad II
+Adversity Combat III;Lucha en la adversidad III
+gained Adversity Combat III;obtiene Lucha en la adversidad III
+Adversity Combat IV;Lucha en la adversidad IV
+gained Adversity Combat IV;obtiene Lucha en la adversidad IV
+Adversity Combat V;Lucha en la adversidad V
+gained Adversity Combat V;obtiene Lucha en la adversidad V
+DEF Down (Tiny);DEF abajo (mÃ­nima)
+DEF Down (Small);DEF abajo (pequeÃ±a)
+DEF Down (Medium);DEF abajo (media)
+DEF Down (Huge);DEF abajo (enorme)
+DEF Down (Massive);DEF abajo (masiva)
+Dawn Flash;Destello del alba
+Prism Shield;Escudo prismÃ¡tico
+Primordial Potential+;Potencial primordial+
+gained Primordial Potential+!;obtiene Potencial primordial+!
+Pain Endure;Aguantar el dolor
+Dodge Down;EvasiÃ³n abajo
+gained Dodge Down!;sufre EvasiÃ³n abajo!
+Warped Barrier;Barrera distorsionada
+Fatigue Curse;MaldiciÃ³n de fatiga
+TP gained decreases 100%.;Los PT obtenidos disminuyen un 100 %.
+Anti-Magic Ward;Ã‰gida antimagia
+Crystallization;CristalizaciÃ³n
+gained Crystallization!;obtiene CristalizaciÃ³n!
+Mana Burn;Quemadura de manÃ¡
+gained Mana Burn!;sufre Quemadura de manÃ¡!
+Wheel of Death;Rueda de la muerte
+War Will;Voluntad de guerra
+Unsteady;Tambaleante
+SPD decreases by 90%.;La VEL disminuye un 90 %.
+Hangover;Resaca
+Do-or-Die;Todo o nada
+Agile Footwork;Juego de pies Ã¡gil
+Expose Weakness;Exponer debilidad
+Thunder Resistance;Resistencia al rayo
+Dark Resistance;Resistencia a la oscuridad
+Wind Resistance;Resistencia al viento
+gained Thunder Resistance!;obtiene Resistencia al rayo!
+gained Dark Resistance!;obtiene Resistencia a la oscuridad!
+gained Wind Resistance!;obtiene Resistencia al viento!
+Thunder Resistance has dispersed.;La Resistencia al rayo se ha disipado.
+Dark Resistance has dispersed.;La Resistencia a la oscuridad se ha disipado.
+Wind Resistance has dispersed.;La Resistencia al viento se ha disipado.
+Indomitable Will+;Voluntad indomable+
+Reckless;Temerario
+has gone berserk!;se ha vuelto loco de furia!
+Perfect Position;PosiciÃ³n perfecta
+takes a favorable position!;toma una posiciÃ³n ventajosa!
+Big Bang;Big Bang
+All stats are enhanced.;Todos los atributos aumentan.
+Rat;Rata
+Blue Rat;Rata azul
+Shirtless Man;Hombre sin camiseta
+â¤ Homeless Man;â¤ Vagabundo
+Homeless Man;Vagabundo
+â¤ Vagrant Leader;â¤ LÃ­der de los vagabundos
+Vagrant Leader;LÃ­der de los vagabundos
+â¤ Slaver;â¤ Esclavista
+Slaver;Esclavista
+â¤ Albert;â¤ Albert
+â¤ Goblin;â¤ Goblin
+Berserk Goblin;Goblin enloquecido
+Berserk Goblin King;Rey goblin enloquecido
+â¤ Shirtless Man;â¤ Hombre sin camiseta
+â¤ Man in Black;â¤ Hombre de negro
+â¤ Green-Haired Man;â¤ Hombre de pelo verde
+Big Pumpkin;Calabaza gigante
+Training Dummy Lv.1;MuÃ±eco de entrenamiento Nv. 1
+Training Dummy Lv.2;MuÃ±eco de entrenamiento Nv. 2
+Training Dummy Lv.3;MuÃ±eco de entrenamiento Nv. 3
+Training Dummy Lv.4;MuÃ±eco de entrenamiento Nv. 4
+â¤ Mansion Guard;â¤ Guardia de la mansiÃ³n
+Dune;Dune
+Testing Post;Poste de pruebas
+Mansion Guard;Guardia de la mansiÃ³n
+Guard;Guardia
+Guard Captain;CapitÃ¡n de la guardia
+â¤ Mutant Tentacle (Pink);â¤ TentÃ¡culo mutante (rosa)
+â¤ Mutant Tentacle (Purple);â¤ TentÃ¡culo mutante (morado)
+â¤ Mutant Tentacle (Yellow);â¤ TentÃ¡culo mutante (amarillo)
+â¤ Alpha Tentacle;â¤ TentÃ¡culo alfa
+Mutant Tentacle (Pink);TentÃ¡culo mutante (rosa)
+Mutant Tentacle (Purple);TentÃ¡culo mutante (morado)
+Mutant Tentacle (Yellow);TentÃ¡culo mutante (amarillo)
+Alpha Tentacle;TentÃ¡culo alfa
+â¤ Cove;â¤ Cove
+Cove - Calamity Incarnate;Cove - Calamidad encarnada
+â¤ Spike;â¤ Spike
+Spike;Spike
+Albert;Albert
+â¤ Laborer;â¤ PeÃ³n
+Laborer;PeÃ³n
+Aldora;Aldora
+â¤ Turban Gang Member;â¤ Miembro de la banda del turbante
+Richard;Richard
+Mysterious Merchant;Mercader misterioso
+Thug;MatÃ³n
+Slaver Boss;Jefe esclavista
+Iron Armor;Armadura de hierro
+Round Shield;Escudo redondo
+White Dress;Vestido blanco
+Hills' everyday garb.;La ropa de diario de Hills.
+Training Ring;Anillo de entrenamiento
+Fang Talisman;TalismÃ¡n de colmillo
+Warlock Robe;TÃºnica de brujo
+Manastone Ring;Anillo de piedra de manÃ¡
+Spiritwood Bracelet;Brazalete de madera espiritual
+Maid Uniform;Uniforme de criada
+Bunny Suit;Traje de conejita
+Power Band;Cinta de poder
+White Bikini;Bikini blanco
+Leather Bracer;Brazal de cuero
+Copper Ring;Anillo de cobre
+Cat Hair Clip;Horquilla de gato
+Ruby Ring;Anillo de rubÃ­
+Burgundy Coat;Abrigo burdeos
+Black Leather Gloves;Guantes de cuero negro
+Goggles;Gafas protectoras
+Diamond Ring;Anillo de diamante
+Friend of the Guild;Amiga del gremio
+Canvas Gloves;Guantes de lona
+Youth Armor;Armadura juvenil
+Silver Ring;Anillo de plata
+Steel Gauntlets;Guanteletes de acero
+Adventurer's Outfit;Atuendo de aventurera
+Mercenary Bracers;Brazales de mercenario
+Pure Silver Cuirass;Coraza de plata pura
+Silver Gauntlets;Guanteletes de plata
+Pendant of Endurance;Colgante de aguante
+Pendant of Happiness;Colgante de la felicidad
+Vanguard Gauntlets;Guanteletes de vanguardia
+Snakebone Necklace;Collar de hueso de serpiente
+Tattered Clothes;Ropa andrajosa
+Green Cloak;Capa verde
+Obedience Collar;Collar de obediencia
+Worn Dagger;Daga desgastada
+Adventurer Longsword;Espada larga de aventurero
+Rusty Shortsword;Espada corta oxidada
+Thief's Scimitar;Cimitarra de ladrÃ³n
+Grimoire;Grimorio
+Silver Dagger;Daga de plata
+Serrated Longsword;Espada larga dentada
+Iron Shortsword;Espada corta de hierro
+Adventurer's Dagger;Daga de aventurero
+Sacred Sword;Espada sagrada
+Mithril Sword;Espada de mithril
+The Blue Sparrow;El GorriÃ³n Azul
+Runeblade;Hoja rÃºnica
+Miya's Letter;Carta de Miya
+Charbel's Breakfast;Desayuno de Charbel
+Job Posting 01;Anuncio de trabajo 01
+Rat Corpse;CadÃ¡ver de rata
+Bagged sewer rat corpses.;CadÃ¡veres de ratas de alcantarilla en una bolsa.
+Filthy Collar;Collar mugriento
+Rough Copper Coin;Moneda de cobre tosca
+Blue Herb;Hierba azul
+Healing Potion;PociÃ³n curativa
+Vitality Mushroom;Seta de vitalidad
+Vitality Mushroom (?);Seta de vitalidad (?)
+Tattered Cloth;Trapo andrajoso
+Poisonous Mushroom;Seta venenosa
+Charbel's Bag;Bolsa de Charbel
+Fresh Grilled Fish;Pescado fresco a la brasa
+Cheese Sandwich;SÃ¡ndwich de queso
+Boiled Egg;Huevo cocido
+Whole-Wheat Bread;Pan integral
+Apple Juice;Zumo de manzana
+Fast Travel;Viaje rÃ¡pido
+Apple;Manzana
+Grapes;Uvas
+Blueberries;ArÃ¡ndanos
+Cherries;Cerezas
+Tomato;Tomate
+Royal Potatoes;Patatas reales
+Carrot;Zanahoria
+Onion;Cebolla
+Potato;Patata
+Beast Meat;Carne de bestia
+Mushroom;Seta
+Greens;Verduras
+Candied Pumpkin;Calabaza confitada
+Small Amethyst;Amatista pequeÃ±a
+Entry Permit (Temporary);Permiso de entrada (temporal)
+Brightly Colored Candy;Caramelo de colores chillones
+Pink Punk Hash Browns;Patatas rÃ¶sti rosa punk
+Smoked Beast Meat;Carne de bestia ahumada
+Rich Meat Stew;Estofado de carne contundente
+Fruit Bread;Pan de frutas
+Bread Shroom Tower;Torre de pan y setas
+Tomato Salad;Ensalada de tomate
+Fruit Mash;PurÃ© de frutas
+Shroom Party;Fiesta de setas
+Dark Spud Stars;Estrellas de patata oscuras
+Bye-Bye Pumpkin Pie;Tarta de calabaza AdiÃ³s
+Medicinal Meat Soup;Sopa de carne medicinal
+Casino Chip;Ficha de casino
+Golden Chip;Ficha dorada
+Magic Die;Dado mÃ¡gico
+Golden Voucher;Vale dorado
+Job Posting 02;Anuncio de trabajo 02
+Job Posting 03;Anuncio de trabajo 03
+Job Posting 04;Anuncio de trabajo 04
+Milk Sandwich;SÃ¡ndwich de leche
+Instruction Manual;Manual de instrucciones
+Sample Bottle;Frasco de muestra
+Sunset Liquor;Licor del ocaso
+Bag of Treasure;Bolsa de tesoros
+Gang Emblem;Emblema de la banda
+Silverleaf;Hoja de plata
+Red Crown;Corona roja
+Wild Vine;Enredadera silvestre
+Medium Healing Potion;PociÃ³n curativa media
+Supreme Healing Potion;PociÃ³n curativa suprema
+Cracked Crystal;Cristal agrietado
+Cracked Red Crystal;Cristal rojo agrietado
+Entry Permit (Forged);Permiso de entrada (falsificado)
+Letter for Misty;Carta para Misty
+Poison-Tipped Dart;Dardo envenenado
+Throwing Star;Estrella arrojadiza
+Video Crystal;Cristal de vÃ­deo
+Volatile Explosive;Explosivo inestable
+Burly Man's Testimony;Testimonio del hombre fornido
+Blonde Woman's Testimony;Testimonio de la mujer rubia
+Old Man's Testimony;Testimonio del anciano
+Shop Ornament (Alarm Crystal);Adorno de la tienda (cristal de alarma)
+Bookstore Owner's Testimony;Testimonio del librero
+Shop Ornament (Placard);Adorno de la tienda (letrero)
+Tangled Thread;Hilo enredado
+Thick Rope;Cuerda gruesa
+Black Magnet;ImÃ¡n negro
+Wolf-Head Charm;Amuleto de cabeza de lobo
+Old Coin;Moneda antigua
+Prolonged Vitality Elixir;Elixir de vitalidad prolongada
+Prolonged Strength Elixir;Elixir de fuerza prolongada
+Prolonged Ward Elixir;Elixir de protecciÃ³n prolongada
+Strange Package;Paquete extraÃ±o
+Mutant Tentacle Notebook;Cuaderno del tentÃ¡culo mutante
+Tattered Journal;Diario andrajoso
+Strange Elixir;Elixir extraÃ±o
+Handwritten Note;Nota manuscrita
+Cove's Formula;FÃ³rmula de Cove
+Alchemy Ingredients;Ingredientes de alquimia
+Promotional Posters;Carteles promocionales
+Bag of Supplies;Bolsa de provisiones
+Bag of Medicine;Bolsa de medicinas
+Clearheart Powder;Polvo de corazÃ³n claro
+Gold Medallion;MedallÃ³n de oro
+Sleeve Blade;Hoja de manga
+Disguise Cloak;Capa de disfraz
+Amplification Crystal;Cristal de amplificaciÃ³n
+Spark of Inspiration;Chispa de inspiraciÃ³n
+Heart of Nourishment;CorazÃ³n nutritivo
+Heart of Longing;CorazÃ³n anhelante
+Roll of Recipes;Rollo de recetas
+Round Rolls;Panecillos redondos
+Moon Reunion;Reencuentro lunar
+Old Key;Llave antigua
+Bottle of Beer;Botella de cerveza
+Paralysis Potion;PociÃ³n paralizante
+Amorphous Construct;Constructo amorfo
+Fang Sigil;Sello del colmillo
+Adventurer Sigil;Sello del aventurero
+Endurance Sigil;Sello del aguante
+Sooth Sigil;Sello del alivio
+Serpent Sigil;Sello de la serpiente
+Electric Ward Potion;PociÃ³n de protecciÃ³n elÃ©ctrica
+Dark Ward Potion;PociÃ³n de protecciÃ³n oscura
+Wind Ward Potion;PociÃ³n de protecciÃ³n del viento
+Rebel Sigil;Sello rebelde
+Justin's Token;Ficha de Justin
+Rainbow Jelly;Gelatina arcoÃ­ris
+The Septa Aether;El Ã‰ter Septa
+Big Bang Rainbow Jelly;Gelatina arcoÃ­ris Big Bang
+Phantasm Crystal;Cristal fantasmal
+Hillsâ€™ Notes;Notas de Hills
+Ingredient Pack (Vegetable Dishes);Lote de ingredientes (platos de verdura)
+Downtown;Centro
+Port District;Distrito portuario
+City Forest;Bosque de la ciudad
+Joy Street;Calle del Placer
+Noble District;Distrito noble
+Slums;Barrios bajos
+Farmlands;Tierras de cultivo
+cast %1!;lanza %1!
+launches an attack!;lanza un ataque!
+takes a defensive stance!;adopta una postura defensiva!
+Bite;Mordisco
+Cleave;Hendidura
+Escape;Escapar
+Shield Bash;Golpe de escudo
+Shield Strike;Impacto de escudo
+Smash;Machaque
+Cleave+;Hendidura+
+Paralysis Bottle;Frasco paralizante
+Sticky Fingers;Manos largas
+Slash;Tajo
+Vile Strike;Golpe vil
+Wind Cutter;Cortaviento
+Handle Strike;Golpe de empuÃ±adura
+Lightning Call;Llamada del rayo
+Heal;Curar
+Mighty Blow;Golpe poderoso
+Phantom Blade;Hoja fantasma
+Whirlwind Slash;Tajo torbellino
+Fist Flurry;RÃ¡faga de puÃ±os
+Creamy Soup (Food Effect);Sopa cremosa (efecto de comida)
+Cassoulet (Food Effect);Cassoulet (efecto de comida)
+Claw Strike;Zarpazo
+Berserker Slash;Tajo berserker
+Battle Roar;Rugido de batalla
+Charge;Embestida
+Throw Stone;Lanzar piedra
+Single Mind;Mente Ãºnica
+Strong Luck;Gran suerte
+Unshakable;Inquebrantable
+stood unmoving.;se queda inmÃ³vil.
+Radiant Blade;Hoja radiante
+Silverflash Quadslash;CuÃ¡druple tajo de plata
+Holy Flash;Destello sagrado
+Battle Dominion;Dominio del combate
+Piercing Flurry;RÃ¡faga perforante
+Phantom Step;Paso fantasma
+Triple Slash;Tajo triple
+V Strike;Golpe en V
+Divine Arrow;Flecha divina
+Rain of Death;Lluvia de muerte
+Fierce Presence;Presencia feroz
+Shred;Desgarro
+Ultimate: Endless Rampage;Definitiva: Arrasamiento sin fin
+Passive: Fighting Spirit;Pasiva: EspÃ­ritu de lucha
+Silverfang Dance;Danza del colmillo de plata
+One Mind;Una sola mente
+Cleave Strike;Golpe hendiente
+Axe Smash;Hachazo
+War Cry;Grito de guerra
+Raise Shield;Alzar escudo
+Command;Ordenar
+Test: Self-Sacrifice;Prueba: Autosacrificio
+Tentacle Lash;Latigazo de tentÃ¡culo
+Struggle;Forcejear
+Charge Up;Cargar energÃ­a
+Desperate Struggle;Forcejeo desesperado
+Icy Judgement;Juicio helado
+Misty Iceblade;Hoja de hielo de Misty
+Twin Frost;Escarcha gemela
+Frost Cross;Cruz de escarcha
+Triple Whiplash;Triple latigazo
+Thunderstrike;Impacto de rayo
+Vital Flow;Flujo vital
+Passive: Adversity Combat;Pasiva: Lucha en la adversidad
+Mutant Body;Cuerpo mutante
+Tentacle Crush;Aplastamiento de tentÃ¡culo
+Sacred Word;Palabra sagrada
+Raging Fury;Furia desatada
+Squirter;Chorro
+Life Drain;Drenar vida
+Roar!;Â¡Rugido!
+delivers a menacing roar!;suelta un rugido amenazador!
+Debuff Cleanse;Purificar debilitaciones
+Passive: Primordial Potential+;Pasiva: Potencial primordial+
+Whirling Blade;Hoja giratoria
+Howl;Aullido
+Twin Windcutter;Cortaviento doble
+Heaven's Thunder;Rayo celestial
+Shadow Bind;Atadura de sombras
+Dark Orb;Orbe oscuro
+Healing Light;Luz curativa
+Cracked Barrier;Barrera agrietada
+Intimidated;Intimidado
+Rolling Thunder;Trueno ondulante
+Gale Dart;Dardo vendaval
+Brute Force;Fuerza bruta
+Heavy Blow;Golpe pesado
+Quick Reflexes;Reflejos rÃ¡pidos
+Vengeance;Venganza
+Passive: War Will;Pasiva: Voluntad de guerra
+Passive: Do-or-Die;Pasiva: Todo o nada
+Battle Insight I;VisiÃ³n de combate I
+Battle Insight II;VisiÃ³n de combate II
+Battle Insight III;VisiÃ³n de combate III
+Battle Insight IV;VisiÃ³n de combate IV
+Battle Insight V;VisiÃ³n de combate V
+Do Nothing;No hacer nada
+Energy;EnergÃ­a
+Blade Flurry;RÃ¡faga de cuchillas
+Swift Cleave;Hendidura veloz
+Fist of the Tiger;PuÃ±o del tigre
+Eradicate;Erradicar
+Fearless;IntrÃ©pida
+Shotgun a Potion;Beberse una pociÃ³n de golpe
+Shadow Annihilation;AniquilaciÃ³n sombrÃ­a
+Staff Strike;Golpe de bastÃ³n
+Double Strike;Golpe doble
+Rend;Desgarrar
+Triple Strike;Golpe triple
+Armor Tear;Rasgar armadura
+The Adventures of HILLS;The Adventures of HILLS
+Character Bios;BiografÃ­as
+Reset to Default Values;Restablecer valores predeterminados
+Swap A/B Buttons;Intercambiar botones A/B
+Instant Text Display;Texto instantÃ¡neo
+Run Speed;Velocidad al correr
+Window Style;Estilo de ventana
+Window Color R;Color de ventana R
+Window Color G;Color de ventana G
+Window Color B;Color de ventana B
+Window Opacity;Opacidad de ventana
+Back;AtrÃ¡s
+Fullscreen Mode;Pantalla completa
+Town Guide;GuÃ­a de la ciudad
+CG Sharpening;Nitidez de CG
+ON;SÃ
+OFF;NO
+Exit Game;Salir del juego
+New Game+;Nueva partida+
+SOLD OUT;AGOTADO
+Stock;Existencias
+Day [1] - Daytime;DÃ­a [1] - De dÃ­a
+Day [1] - Nighttime;DÃ­a [1] - De noche
+Auto Save;Autoguardado
+Reda;Reda
+Cove;Cove
+Misty;Misty
+Kiki;Kiki
+Micoco;Micoco
+Miya;Miya
+Charbel;Charbel
+Justin;Justin
+Marketplace hulabaloo...;El bullicio del mercado...
+This...is their story.;Esta... es su historia.
+The next morning...;A la maÃ±ana siguiente...
+Baskets full of ingredients.;Cestas llenas de ingredientes.
+Accept the deal;Aceptar el trato
+Reject the deal;Rechazar el trato
+Let me think;DÃ©jame pensarlo
+Creamy Soup;Sopa cremosa
+Hollerin' QQ Skewers;Brochetas QQ a grito pelado
+Cassoulet;Cassoulet
+Spicy Hash Browns;Patatas rÃ¶sti picantes
+Think about it;Pensarlo
+Cook;Cocinar
+Never Mind;Da igual
+Take-Out Food;Comida para llevar
+Tutorial;Tutorial
+The passerby leaves.;El transeÃºnte se marcha.
+Charbel leaves.;Charbel se marcha.
+The children leave.;Los niÃ±os se marchan.
+The guard passes out.;El guardia se desmaya.
+Meanwhile...;Mientras tanto...
+Aldora whispers.;Aldora susurra.
+The guard leaves.;El guardia se marcha.
+The head maid leaves.;La jefa de criadas se marcha.
+Obtained 500 G!;Â¡Has obtenido 500 G!
+Not long after...;Poco despuÃ©s...
+Charbel leaves the room.;Charbel sale de la habitaciÃ³n.
+Dune leaves the basement.;Dune sale del sÃ³tano.
+Miya leaves the room.;Miya sale de la habitaciÃ³n.
+Gadola Public Baths;BaÃ±os pÃºblicos de Gadola
+Steal it;Robarlo
+Never mind;Da igual
+Give in;Ceder
+Say no!;Â¡Negarse!
+Okay;Vale
+Reda's shield.;El escudo de Reda.
+Micoco's big pack.;La gran mochila de Micoco.
+Have a soak;Darse un baÃ±o
+Lost 150 G!;Â¡Has perdido 150 G!
+About the job;Sobre el trabajo
+HP fully restored!;Â¡PV restaurados por completo!
+The boilerman leaves.;El calderero se marcha.
+Hills leaves the bathhouse.;Hills sale de los baÃ±os.
+Let's do it;HagÃ¡moslo
+Not yet;TodavÃ­a no
+That's right;AsÃ­ es
+Lv. 1;Nv. 1
+Lv. 2;Nv. 2
+Lv. 3;Nv. 3
+Lv. 4;Nv. 4
+Begin training;Empezar el entrenamiento
+Obtained 100 G!;Â¡Has obtenido 100 G!
+Obtained 200 G!;Â¡Has obtenido 200 G!
+Obtained 450 G!;Â¡Has obtenido 450 G!
+Obtained 850 G!;Â¡Has obtenido 850 G!
+Beautiful artificial flowers.;Unas preciosas flores artificiales.
+Yes;SÃ­
+No;No
+*glug glug*;*glu glu*
+About the current situation;Sobre la situaciÃ³n actual
+About Reda;Sobre Reda
+About Micoco;Sobre Micoco
+Tell her;DecÃ­rselo
+Gleeful, Micoco leaves.;Micoco se marcha muy contenta.
+That wraps it up;Eso es todo
+Wait a little longer;Esperar un poco mÃ¡s
+The burly man;El hombre fornido
+The blonde woman;La mujer rubia
+The old man;El anciano
+View clues;Ver pistas
+Obtained 5,500 G;Has obtenido 5.500 G
+Bring it on!;Â¡Adelante!
+Accept job;Aceptar el trabajo
+Put up poster;Colgar el cartel
+Maybe later;QuizÃ¡ luego
+Successfully picked a pumpkin!;Â¡Has cogido una calabaza!
+Help Emma;Ayudar a Emma
+Obtained 1,200 G;Has obtenido 1.200 G
+Let's go!;Â¡Vamos!
+A big round boulder.;Una gran roca redonda.
+A broken toolbox.;Una caja de herramientas rota.
+Obtained 2,000 G;Has obtenido 2.000 G
+About Cove;Sobre Cove
+Chat with Miya;Charlar con Miya
+Go downtown.;Ve al centro.
+Earn more money.;Gana mÃ¡s dinero.
+Go to Joy Street.;Ve a la calle del Placer.
+Escape your pursuers!;Â¡Escapa de tus perseguidores!
+Rescue Cove!;Â¡Rescata a Cove!
+Continue searching for clues.;Sigue buscando pistas.
+Talk to people downtown.;Habla con la gente del centro.
+Rest up;Descansar
+Rescue Kiki.;Rescata a Kiki.
+Escape the mayor's residence.;Escapa de la residencia del alcalde.
+Go to the basement.;Ve al sÃ³tano.
+Look for Aldora.;Busca a Aldora.
+Escape the mayor's residence!;Â¡Escapa de la residencia del alcalde!
+Ask Miya;Preguntar a Miya
+Find the mayor.;Encuentra al alcalde.
+Kill the Alpha Tentacle.;Mata al tentÃ¡culo alfa.
+Leave the tentacle lair.;Sal de la guarida de los tentÃ¡culos.
+Escape from the sewers.;Escapa de las alcantarillas.
+Leave the slaver base.;Sal de la base de los esclavistas.
+Rescue the Civilian Victims;Rescatar a las vÃ­ctimas civiles
+Help the adventurer Reda;Ayudar a la aventurera Reda
+Collect alchemy materials;Reunir materiales de alquimia
+Find a boilerman;Encontrar un calderero
+Model for the painter;Posar para el pintor
+Make detox medicine;Preparar un antÃ­doto
+Help the adventurer Micoco;Ayudar a la aventurera Micoco
+Deliver the package;Entregar el paquete
+Unseal the treasure;Desprecintar el tesoro
+Buy materials;Comprar materiales
+Put up posters;Colgar carteles
+Deliver a care package;Entregar un paquete de ayuda
+Rescue Sarah;Rescatar a Sarah
+The Overzealous Suitor;El pretendiente pesado
+The Ultimate Recipe!;Â¡La receta definitiva!
+Job complete!;Â¡Trabajo completado!
+Mission complete!;Â¡MisiÃ³n cumplida!
+Mission failed!;Â¡MisiÃ³n fallida!
+Mission complete...?;Â¿MisiÃ³n cumplida...?
+The gate is locked.;La verja estÃ¡ cerrada.
+Trained with Aldora.;Has entrenado con Aldora.
+Hills received 400 EXP!;Â¡Hills ha recibido 400 EXP!
+Hills gained 500 EXP!;Â¡Hills ha ganado 500 EXP!
+Hills gained 600 EXP!;Â¡Hills ha ganado 600 EXP!
+Hills gained 800 EXP!;Â¡Hills ha ganado 800 EXP!
+Hills gained 1000 EXP!;Â¡Hills ha ganado 1000 EXP!
+Leave the port district?;Â¿Salir del distrito portuario?
+Warehouse Personnel Only;Solo personal del almacÃ©n
+A urinal for men.;Un urinario para hombres.
+A sit-down public toilet.;Un vÃ¡ter pÃºblico.
+Didn't know that...;No lo sabÃ­a...
+That doesn't interest me.;No me interesa.
+Takeout;Para llevar
+Just looking;Solo estoy mirando
+Ask about a job;Preguntar por trabajo
+I'm in.;Me apunto.
+Gulp, gulp, gulp~;Glu, glu, glu~
+Obtained 150 G!;Â¡Has obtenido 150 G!
+Some time passes...;Pasa un rato...
+(*Tremble*... *Tremble*...);(*Tiembla*... *Tiembla*...)
+Listen to the story.;Escuchar la historia.
+It doesn't interest me.;No me interesa.
+Trade;Intercambiar
+Hear the story again;Volver a escuchar la historia
+Maybe not;Mejor no
+Reset;Reiniciar
+Help;Ayudar
+Don't help;No ayudar
+Obtained 3,000 G!;Â¡Has obtenido 3.000 G!
+Browse fruit;Ver la fruta
+Obtained 4,000 G!;Â¡Has obtenido 4.000 G!
+Fruit;Fruta
+Sneak in;Colarse
+Obtained 1,600 G!;Â¡Has obtenido 1.600 G!
+Agree to help;Aceptar ayudar
+Refuse;Negarse
+Ask about Reda;Preguntar por Reda
+Reda joined the party!;Â¡Reda se ha unido al grupo!
+What should I do?;Â¿QuÃ© hago?
+I'm good to go.;Estoy lista.
+Obtained 50 G!;Â¡Has obtenido 50 G!
+Escape north;Huir al norte
+Escape west;Huir al oeste
+Reda's paralysis wore off!;Â¡A Reda se le ha pasado la parÃ¡lisis!
+Stay put;Quedarse quieta
+Keep searching;Seguir buscando
+A locked wooden door.;Una puerta de madera cerrada con llave.
+Sacks of stored food.;Sacos de comida almacenada.
+Bags filled with dirt.;Bolsas llenas de tierra.
+Tightly stacked crates.;Cajas bien apiladas.
+An unlit lantern.;Un farol apagado.
+The slavers leave.;Los esclavistas se marchan.
+An empty treasure chest.;Un cofre del tesoro vacÃ­o.
+Quick footsteps approach.;Se acercan pasos rÃ¡pidos.
+Hills finally loses consciousness.;Hills acaba perdiendo el conocimiento.
+Ask to join.;Pedir unirse.
+Think about it.;Pensarlo.
+Cooking;Cocinar
+Cleaning;Limpiar
+Ready;Lista
+Medium heat;Fuego medio
+High heat;Fuego alto
+Mandrake root;RaÃ­z de mandrÃ¡gora
+Butter;Mantequilla
+Death worm;Gusano de la muerte
+Chicken;Pollo
+Enter;Entrar
+Don't enter;No entrar
+The door unlocks!;Â¡La puerta se abre!
+Attempt to steal;Intentar robar
+Return to Gadola?;Â¿Volver a Gadola?
+Brewing potions;Preparar pociones
+Nah;Paso
+Ask about alchemy;Preguntar por la alquimia
+Obtained 800 G!;Â¡Has obtenido 800 G!
+I'll do it.;Lo harÃ©.
+After a short while...;Al poco rato...
+Leave Joy Street?;Â¿Salir de la calle del Placer?
+Civilians waiting in line.;Ciudadanos haciendo cola.
+Give it a try;Probar
+A soft, plush bed.;Una cama blandita y mullida.
+Draw first;Robar primero
+Draw second;Robar segunda
+Hills draws a card.;Hills roba una carta.
+Heads;Cara
+Tails;Cruz
+Try it out;Probarlo
+Obtained 1,500 G!;Â¡Has obtenido 1.500 G!
+Let's go;Vamos
+Stay for the show.;Quedarse al espectÃ¡culo.
+Call it a night.;Dar la noche por terminada.
+Deal;Repartir
+Ask about the rules;Preguntar las reglas
+Start the game;Empezar la partida
+Use;Usar
+High;Alta
+Low;Baja
+Fight back.;Defenderse.
+Obey quietly.;Obedecer en silencio.
+Hills passes out.;Hills se desmaya.
+Receive a blessing.;Recibir una bendiciÃ³n.
+Nothing happens.;No pasa nada.
+Join;Unirse
+Think it over again;Volver a pensarlo
+Hills loses consciousness...;Hills pierde el conocimiento...
+Obtained 5,000 G!;Â¡Has obtenido 5.000 G!
+Go in hard.;Ir a por todas.
+Think it over again.;Volver a pensarlo.
+Go with him.;Ir con Ã©l.
+In your dreams!;Â¡Ni en tus sueÃ±os!
+Obtained 2,000 G!;Â¡Has obtenido 2.000 G!
+Accept the job;Aceptar el trabajo
+Start working;Empezar a trabajar
+Nah...;Paso...
+Leave the Noble District?;Â¿Salir del distrito noble?
+The door is locked.;La puerta estÃ¡ cerrada con llave.
+The artist hurries off.;El artista se marcha a toda prisa.
+Not yet.;TodavÃ­a no.
+Go for it.;A por ello.
+Just then...;Justo entonces...
+Chat for a bit.;Charlar un rato.
+Refuse firmly.;Negarse en redondo.
+A plump purple mushroom.;Una seta morada y regordeta.
+Sell it;Venderlo
+Don't sell;No vender
+Brew potions;Preparar pociones
+Hills leaves the slums.;Hills sale de los barrios bajos.
+A desktop-sized communication crystal.;Un cristal de comunicaciÃ³n de sobremesa.
+A solid black safe.;Una robusta caja fuerte negra.
+Obtained 2,500 G!;Â¡Has obtenido 2.500 G!
+Let's play.;Juguemos.
+Rules;Reglas
+Big;Mayor
+Small;Menor
+Keep playing.;Seguir jugando.
+Give up.;Rendirse.
+Take on an adventure.;Emprender una aventura.
+Never mind.;Da igual.
+You lose 1,000 G...;Pierdes 1.000 G...
+Bring it on.;Adelante.
+Think it over.;Pensarlo.
+A dim dormitory;Un dormitorio en penumbra
+A gambling den;Un garito de apuestas
+A beggar's path;El camino del mendigo
+A maze of rooms;Un laberinto de habitaciones
+No way;Ni hablar
+You lose 50 G...;Pierdes 50 G...
+Try again!;Â¡Otra vez!
+That's enough for now.;Ya basta por ahora.
+Fortune favors the bold;La fortuna sonrÃ­e a los audaces
+You obtain 500 G!;Â¡Obtienes 500 G!
+Pay the price;Pagar el precio
+You lose 500 G...;Pierdes 500 G...
+Of course.;Por supuesto.
+Wait a moment.;Espera un momento.
+Left;Izquierda
+Middle;Centro
+Right;Derecha
+Free the prisoner;Liberar al prisionero
+Hills leaves the room.;Hills sale de la habitaciÃ³n.
+Browse goods;Ver la mercancÃ­a
+Challenge you!;Â¡Te desafÃ­o!
+Nothing;Nada
+The mysterious merchant leaves.;El mercader misterioso se marcha.
+Investigate further;Investigar mÃ¡s
+Persist;Insistir
+Think again;Pensarlo otra vez
+About the rescue;Sobre el rescate
+Go rescue them;Ir a rescatarlos
+Let's do this!;Â¡Vamos allÃ¡!
+Accept challenge;Aceptar el desafÃ­o
+You lose 300 G.;Pierdes 300 G.
+Hills pulls out...cash!;Hills saca... Â¡dinero!
+Hills pulls out...old coins!;Hills saca... Â¡monedas antiguas!
+Time to kick ass;Hora de repartir leÃ±a
+Flee like a wussy;Huir como una gallina
+Try to persuade him;Intentar convencerlo
+Confront him head-on;Plantarle cara
+The door locks automatically.;La puerta se cierra sola.
+The vagrants leave.;Los vagabundos se marchan.
+Reda joins the party!;Â¡Reda se une al grupo!
+Obtained 120 G!;Â¡Has obtenido 120 G!
+Shield Bash!;Â¡Golpe de escudo!
+Take him with us.;Llevarlo con nosotras.
+Reda leaves the city.;Reda se marcha de la ciudad.
+The vagrant leader collapses.;El lÃ­der de los vagabundos se desploma.
+Albert departs.;Albert se marcha.
+Leave.;Irse.
+Wait a bit longer.;Esperar un poco mÃ¡s.
+Accept;Aceptar
+You receive 200 G!;Â¡Recibes 200 G!
+Tell him the truth;Decirle la verdad
+Eat!;Â¡Comer!
+Just go!;Â¡Vete ya!
+Of course;Por supuesto
+No need for that;No hace falta
+Spike lies unconscious.;Spike yace inconsciente.
+Not long ago...;No hace mucho...
+An empty chest.;Un cofre vacÃ­o.
+An empty minecart.;Una vagoneta vacÃ­a.
+An inactive pillar.;Un pilar inactivo.
+Acquired 12,000 G!;Â¡Has conseguido 12.000 G!
+Move forward.;Seguir adelante.
+Turn back.;Dar media vuelta.
+Cove joins the party!;Â¡Cove se une al grupo!
+*Gulp* *Gulp*...;*Glu* *Glu*...
+Meanwhile, elsewhere...;Mientras tanto, en otro lugar...
+Miya loses consciousness.;Miya pierde el conocimiento.
+Wait to leave?;Â¿Esperar para salir?
+The guild worker leaves.;El empleado del gremio se marcha.
+Connection to the mayor;RelaciÃ³n con el alcalde
+Cove's goal;El objetivo de Cove
+The mayor's goal;El objetivo del alcalde
+End conversation;Terminar la conversaciÃ³n
+Surrender;Rendirse
+Fight back;Defenderse
+Fight to the death;Luchar hasta la muerte
+Alright;De acuerdo
+Sure;Claro
+Hills leaves the safehouse.;Hills sale del piso franco.
+Hills gained 50 EXP!;Â¡Hills ha ganado 50 EXP!
+Hills gained 40 EXP!;Â¡Hills ha ganado 40 EXP!
+Hills gained 25 EXP!;Â¡Hills ha ganado 25 EXP!
+Hills gained 80 EXP!;Â¡Hills ha ganado 80 EXP!
+Hills gained 70 EXP!;Â¡Hills ha ganado 70 EXP!
+Hills gained 1,000 EXP!;Â¡Hills ha ganado 1.000 EXP!
+Hills gained 95 EXP!;Â¡Hills ha ganado 95 EXP!
+Hills gained 120 EXP!;Â¡Hills ha ganado 120 EXP!
+Hills gained 150 EXP!;Â¡Hills ha ganado 150 EXP!
+An unactivated node crystal.;Un cristal nodal sin activar.
+Go back to sleep;Volver a dormir
+Continue exploring;Seguir explorando
+Confirm;Confirmar
+End exploration;Terminar la exploraciÃ³n
+Kiki's favorite teddy bear.;El osito de peluche favorito de Kiki.
+Enter the Memory Room?;Â¿Entrar en la Sala de Recuerdos?
+First Encounter;Primer encuentro
+Failed Escape;Huida fallida
+Know Reda;Conoces a Reda
+Don't Know Reda;No conoces a Reda
+First Defeat;Primera derrota
+After the Second Time;DespuÃ©s de la segunda vez
+Chocolate Bar;Tableta de chocolate
+Nipple Sucking;Chupando pezones
+Forced Blowjob;Mamada forzada
+Three Way;TrÃ­o
+Follow-up;ContinuaciÃ³n
+Defeat in the Slums;Derrota en los barrios bajos
+Caught Again;Atrapada otra vez
+Take a Peek;Echar un vistazo
+View Hint;Ver pista
+View;Ver
+Ending 3: Burning Gadola;Final 3: Gadola en llamas
+Ending 4: Human Ranch;Final 4: Granja humana
+Quick Recap;Resumen rÃ¡pido
+Full Memory;Recuerdo completo
+Choose target of attack;Elige el objetivo del ataque
+Citizen;Ciudadano
+Skip;Saltar
+Hills & Aldora;Hills y Aldora
+The man catches Hills!;Â¡El hombre atrapa a Hills!
+*gulp* *gulp*;*glu* *glu*
+%1 turn(s) left;Quedan %1 turno(s)
+No current statuses;Sin estados actualmente
+Defeat the Guard Captain.;Derrota al capitÃ¡n de la guardia.
+Afterward;DespuÃ©s
+Leave;Salir
+Don't leave;No salir
+OK;Aceptar
+Rest until night?;Â¿Descansar hasta la noche?
+Rest until day?;Â¿Descansar hasta el dÃ­a?
+Craft/Trade;Fabricar/Intercambiar
+Required items;Objetos necesarios
+Chinese;Chino
+Japanese;JaponÃ©s
+Voice Volume;Volumen de voces
+Voice Language;Idioma de las voces
+Done;Hecho
+Sausage Pizza;Pizza de salchicha
+Fruit & Veggie Salad;Ensalada de fruta y verdura
+Grilled Fresh Fish;Pescado fresco a la brasa
+Memory Room;Sala de Recuerdos
+Hideout Entrance;Entrada del escondite
+Hideout;Escondite
+North Slums;Barrios bajos del norte
+Abandoned Shack;CabaÃ±a abandonada
+West Slums;Barrios bajos del oeste
+Slum Residence;Vivienda de los barrios bajos
+Slum Tavern;Taberna de los barrios bajos
+Slum General Store;Tienda general de los barrios bajos
+Slum Item Shop;Tienda de objetos de los barrios bajos
+Guard Station;Cuartel de la guardia
+Underground Cell;Celda subterrÃ¡nea
+Adventurers Guild;Gremio de Aventureros
+Downtown Inn;Posada del centro
+Public Bathhouse;BaÃ±os pÃºblicos
+Training Grounds;Campo de entrenamiento
+Sewer Entrance;Entrada de las alcantarillas
+Sewers;Alcantarillas
+Empty Lot;Solar vacÃ­o
+Port Tavern;Taberna del puerto
+Dock Warehouse;AlmacÃ©n del muelle
+Small Warehouse;AlmacÃ©n pequeÃ±o
+Port Inn;Posada del puerto
+Port Item Shop;Tienda de objetos del puerto
+Public Toilet;Aseo pÃºblico
+Gadola;Gadola
+Safehouse;Piso franco
+Slaver Base;Base de los esclavistas
+Outskirts Road;Camino de las afueras
+Abandoned Mine â€” 1F;Mina abandonada â€” P1
+Abandoned Mine â€” 2F;Mina abandonada â€” P2
+Abandoned Mine â€” 3F;Mina abandonada â€” P3
+Mayor's Residence â€” 1F;Residencia del alcalde â€” P1
+Mayor's Residence â€” 2F;Residencia del alcalde â€” P2
+Stables;Establos
+Painter's Studio;Estudio del pintor
+Noble Item Shop;Tienda de objetos del distrito noble
+Noble General Store;Tienda general del distrito noble
+Crystal Shop;Tienda de cristales
+Bookstore;LibrerÃ­a
+Magical Goods;ArtÃ­culos mÃ¡gicos
+Joy Street Inn;Posada de la calle del Placer
+Punishment House;Casa del Castigo
+Nightingale;RuiseÃ±or
+Escape Room Club;Club de Escape
+Escape Room;Sala de escape
+Joy Street Bar;Bar de la calle del Placer
+Bar Basement;SÃ³tano del bar
+Changing Room;Vestuario
+Joy Street Casino;Casino de la calle del Placer
+Adult Shop;Tienda para adultos
+Mayor's Courtyard;Patio del alcalde
+Mayor's Residence â€” B1;Residencia del alcalde â€” S1
+Mayor's Residence â€” B2;Residencia del alcalde â€” S2
+Underground Labyrinth;Laberinto subterrÃ¡neo
+Tentacle Nest;Nido de tentÃ¡culos
+Slum Depths;Profundidades de los barrios bajos
+Great Underground Hall;Gran salÃ³n subterrÃ¡neo
+Massage Parlor;SalÃ³n de masajes
+Phantasmal Corridor;Pasillo fantasmal
+Town Residence;Vivienda de la ciudad
+UG Training Grounds;Campo de entrenamiento subterrÃ¡neo
+Battle Log;Registro de combate
+------Start Battle------;------Empieza el combate------
+------Turn %d  End------;------Fin del turno %d------
+Continue watching the scene?;Â¿Seguir viendo la escena?
+Challenge It Now;Desafiarlo ahora
+Come Back Later;Volver mÃ¡s tarde
+An inactive teleportation circle.;Un cÃ­rculo de teletransporte inactivo.
+Enter UG Training Grounds;Entrar al campo de entrenamiento subterrÃ¡neo
+Not now;Ahora no
+About Extra Challenges;Sobre los desafÃ­os extra
+Let's Go;Vamos
+Maybe Later;QuizÃ¡ luego
+Heroic Mode;Modo heroico
+Time Attack Mode;Modo contrarreloj
+Mode Info;InformaciÃ³n del modo
+Underground Training Grounds;Campo de entrenamiento subterrÃ¡neo
+Arcane Dagger;Daga arcana
+Arcane Dagger +1;Daga arcana +1
+Arcane Dagger +2;Daga arcana +2
+Arcane Dagger +3;Daga arcana +3
+Arcane Dagger +4;Daga arcana +4
+Arcane Dagger +5;Daga arcana +5
+Arc Prism;Prisma arcano
+Battle Matrix: Heal;Matriz de combate: CuraciÃ³n
+Battle Matrix: Ruin;Matriz de combate: Ruina
+Battle Matrix: Swift;Matriz de combate: Celeridad
+Battle Matrix: Devour;Matriz de combate: Devorar
+Power of Link;Poder del vÃ­nculo
+Link Break;Ruptura del vÃ­nculo
+Test of Might;Prueba de fuerza
+Jar of Crystal Powder;Tarro de polvo de cristal
+Give Spike a Beating.;Dale una paliza a Spike.
+
+Bakery Clerk;Dependiente de la panaderÃ­a
+Crowd;Multitud
+It smells so good...;Huele de maravilla...
+New flavor brand on sale now! Get it while it's hot!;Â¡Nuevo sabor a la venta! Â¡LlevÃ¡oslo mientras estÃ© caliente!
+
+\N<\C[5]Crowd\C[0]>This bakery sells out of bread as soon as it comes out of the oven. \nThis time I'm not missing out!;\N<\C[5]Multitud\C[0]>Esta panaderÃ­a agota el pan nada mÃ¡s salir del horno. \nÂ¡Esta vez no me quedo sin Ã©l!
+
+\N<\C[5]Crowd\C[0]>My darling daughter loves this place. Today I might as well buy three.;\N<\C[5]Multitud\C[0]>A mi querida hija le encanta este sitio. Hoy creo que me llevarÃ© tres.
+
+\N<\C[5]Crowd\C[0]>His lordship specifically requested this bakery's new flavor. \nMm...I wonder how it tastes.;\N<\C[5]Multitud\C[0]>El seÃ±or pidiÃ³ expresamente el nuevo sabor de esta panaderÃ­a. \nMm... me pregunto a quÃ© sabrÃ¡.
+
+\N<\C[5]Black-Haired Girl\C[0]>\F[10]\SK[Think|Hils_N|ForeArm_Lv2]\SA[Idle_01]Bread... *gurgle*... Boy am I hungry...;\N<\C[5]Chica de pelo negro\C[0]>\F[10]\SK[Think|Hils_N|ForeArm_Lv2]\SA[Idle_01]Pan... *ruÃ±ido de tripas*... Â¡Madre mÃ­a, quÃ© hambre tengo!
+
+\N<\C[5]Rude Voice\C[0]>\AA[N]\F[10]\SK[Normal|Hils_N|ForeArm_Lv1]\SA[Idle_01]Bitch! Stop right there!;\N<\C[5]Voz grosera\C[0]>\AA[N]\F[10]\SK[Normal|Hils_N|ForeArm_Lv1]\SA[Idle_01]¡Zorra! ¡Detente ahí mismo!
+
+\N<\C[5]Green-Haired Man\C[0]>*puff* *puff* Fuck! You're not getting away!;\N<\C[5]Hombre de pelo verde\C[0]>*jadeo* *jadeo* ¡Mierda! ¡No escaparás!
+
+\N<\C[5]Green-Haired Man\C[0]>Ha! Not so slick now, are you?;\N<\C[5]Hombre de pelo verde\C[0]>¡Ja! Ya no eres tan escurridiza, ¿verdad?
+
+\N<\C[5]Green-Haired Man\C[0]>I know this place like the back of my hand! My men have you surrounded!;\N<\C[5]Hombre de pelo verde\C[0]>¡Conozco este lugar como la palma de mi mano! ¡Mis hombres te tienen rodeada!
+
+\N<\C[5]Green-Haired Man\C[0]>Fuck you, it doesn't matter what you say. You'll get what's coming to you when we\ncatch you. Stand and face us if you have the balls!;\N<\C[5]Hombre de pelo verde\C[0]>¡Que te jodan, me da igual lo que digas! ¡Te vas a enterar cuando te pillemos! \n¡Párate y plántanos cara si tienes ovarios!
+
+\N<\C[5]Green-Haired Man\C[0]>Fuck, she's running again! Get her!;\N<\C[5]Hombre de pelo verde\C[0]>¡Mierda, está huyendo de nuevo! ¡A por ella!
+
+\N<\C[5]Men\C[0]>B-boss! Wait for us!;\N<\C[5]Hombres\C[0]>¡J-jefe! ¡Espéranos!
+
+\N<\C[5]Bakery Clerk\C[0]>Uh... Haha... I didn't expect that. That was scary...;\N<\C[5]Panadero\C[0]>Eh... Jaja... No me esperaba eso. Qué susto...
+
+\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]Well done, Hills. I knew you had it in you.;\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]Bien hecho, Hills. Sabía que serías capaz.
+
+\N<\C[27]Aldora\C[0]>\AA[FFFF]\FFF[10]\SSSK[Sad|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Complacent|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Complacent|Aldora_N]\SSSSA[Idle_01]Heheh... It was a bit tougher than usual. It took a while to shake them off, but it\nwas no problem for me!;\N<\C[27]Aldora\C[0]>\AA[FFFF]\FFF[10]\SSSK[Sad|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Complacent|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Complacent|Aldora_N]\SSSSA[Idle_01]Jeje... ¡Ha sido un poco más difícil de lo habitual! Tardé un rato en quitármelos de encima, ¡pero no ha sido\nningún problema para mí!
+
+\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Happy|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Normal|Aldora_N]\SSSSA[Idle_01]That's it for now. Go and rest. Anything important can wait until tomorrow. \nThanks, everyone.;\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Happy|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Normal|Aldora_N]\SSSSA[Idle_01]Eso es todo por ahora. Id a descansar. Cualquier cosa importante puede esperar hasta mañana. \nGracias a todas.
+
+Swipe one item from the enemy. \n(Each enemy can only be stolen from once.);Roba un objeto al enemigo. \n(Solo se puede robar a cada enemigo una vez).
+Swipe one item from the enemy. \n(Each enemy can only be stolen from once);Roba un objeto al enemigo. \n(Solo se puede robar a cada enemigo una vez)
+
+Hills is a gentle and timid young woman who endures whatever life throws her way. \nShe doesn't think she's very noticeable, though men seem to disagree.;Hills es una joven dulce y tímida que soporta cualquier cosa que le depare la vida. \nNo se considera alguien que llame mucho la atención, pero los hombres no opinan lo mismo.
+\C[16]~Hills~ (Part 1)\C[0]\n\nHills grew up in an orphanage and never knew her birth parents. \nAfter leaving the orphanage, she drifted from city to city, \nuntil a woman named Miya took her in. \n\nShe now lives in a hideout under a bridge \nnear the noble district with Miya and several other companions.\n\nSince she's not good at fighting, she usually survives on odd jobs,\npickpocketing, and small-time theft. Life in the hideout is far from luxurious,\nbut the trust between friends gives Hills a sense of belonging.\n\nEven if she has no idea what the future holds, \nshe firmly believes that as long as she and her companions work together, \nthere is no hardship they can't overcome.;\C[16]~Hills~ (Parte 1)\C[0]\n\nHills se crio en un orfanato y nunca conoció a sus padres biológicos. \nTras salir del orfanato, vagó de ciudad en ciudad \nhasta que una mujer llamada Miya la acogió. \n\nAhora vive en un escondite bajo un puente \ncerca del distrito noble con Miya y otras compañeras.\n\nComo no es buena peleando, suele sobrevivir haciendo trabajos esporádicos,\nrobando carteras y con pequeños hurtos. La vida en el escondite no es ningún lujo,\npero la confianza entre amigas le da un sentido de pertenencia.\n\nAunque no sabe qué le deparará el futuro, \ncree firmemente que mientras ella y sus compañeras trabajen juntas, \nno habrá dificultad que no puedan superar.
+\C[27]~Aldora~ (Part 1)\C[0]\n\nRelationship: Like family \n\nHills' close friend, who's a little older than Hills. \nAldora is a quick and agile woman, \nthough boyish and impulsive by nature. \n\nShe often acts way off-script during their plans,\nwhich gives Miya quite a headache. \n\nShe is fiercely loyal and protective of her companions \nand always steps up in times of crisis.\nAldora's lively personality is one of the group's greatest joys.;\C[27]~Aldora~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nAmiga íntima de Hills, un poco mayor que ella. \nAldora es una mujer rápida y ágil, \naunque de naturaleza algo poco femenina e impulsiva. \n\nA menudo se sale del guion durante los planes,\nlo que le da bastantes dolores de cabeza a Miya. \n\nEs ferozmente leal y protectora con sus compañeras \ny siempre da la cara en momentos de crisis.\nEl carácter alegre de Aldora es una de las mayores alegrías del grupo.
+\C[23]~Miya~ (Part 1)\C[0]\n\nRelationship: Like family \n\nAs the leader of Hills' crew, Miya gives off a calm and composed demeanor. \nHer plans for Hills and the others are always extremely well thought out and rational.\n\nDespite seeming cold on the surface, \nevery action she takes is for the sake of the group. \nShe always weighs the pros and cons before making any decision.;\C[23]~Miya~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nComo líder de la banda de Hills, Miya tiene una actitud tranquila y sosegada. \nSus planes para Hills y las demás siempre están muy bien pensados y son racionales.\n\nA pesar de parecer fría por fuera, \ncada acción que realiza es por el bien del grupo. \nSiempre sopesa los pros y los contras antes de tomar cualquier decisión.
+\C[20]~Charbel~ (Part 1)\C[0]\n\nRelationship: Like family \n\nA gentle, ladylike companion of Hills, \nCharbel handles all the household chores in and around the hideout. \nShe is a skilled cook and homemaker, \nand earned Hills' trust after earnestly teaching her how to cook.\n\nAs a young woman, she was kicked out of her home \nbecause of an unplanned pregnancy. \nIn this moment of despair, she met Miya, \nwho helped her safely give birth to her daughter, Kiki. \n\nFrom that moment on, Charbel and Kiki followed Miya, \nand have known her longer than anyone.;\C[20]~Charbel~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nUna amable y refinada compañera de Hills, \nCharbel se ocupa de todas las tareas domésticas en el escondite y sus alrededores. \nEs una cocinera y ama de casa experta, \ny se ganó la confianza de Hills tras enseñarle a cocinar con dedicación.\n\nCuando era joven, fue expulsada de su casa \ndebido a un embarazo no deseado. \nEn ese momento de desesperación conoció a Miya, \nquien la ayudó a dar a luz de forma segura a su hija, Kiki. \n\nDesde ese momento, Charbel y Kiki siguieron a Miya, \ny la conocen desde hace más tiempo que nadie.
