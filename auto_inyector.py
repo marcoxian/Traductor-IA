@@ -4,7 +4,9 @@ import argparse
 import logging
 import configparser
 import csv
+import shutil
 import requests
+from collections import Counter
 from pathlib import Path
 
 # Configuración básica del logging para mostrar mensajes por consola (CMD)
@@ -24,6 +26,41 @@ def sanitize_text(text):
     # Colapsar espacios múltiples en uno solo
     cleaned = re.sub(r' {2,}', ' ', cleaned)
     return cleaned.strip()
+
+# Nombres propios que la IA tiende a traducir literalmente -> formas incorrectas a deshacer
+NOMBRES_PROTEGIDOS = {
+    "Hills": r"\b(?:[Ll]as\s+)?[Cc]olinas\b",
+}
+
+def restore_names(source, translated):
+    """Si el original contiene un nombre protegido y la traducción lo ha perdido, lo restaura."""
+    for name, wrong in NOMBRES_PROTEGIDOS.items():
+        if name in source and name not in translated:
+            translated = re.sub(wrong, name, translated)
+    return translated
+
+def reinsert_breaks(translated, original_segments):
+    """Recoloca los saltos '\\n' literales en la traducción, en los espacios más cercanos a la
+    posición proporcional que tenían en el original (así el texto sigue cabiendo en la ventana)."""
+    total = sum(len(s.strip()) for s in original_segments) or 1
+    spaces = [i for i, c in enumerate(translated) if c == " "]
+    chosen, acc = [], 0
+    for seg in original_segments[:-1]:
+        acc += len(seg.strip())
+        target = acc / total * len(translated)
+        candidates = [s for s in spaces if s not in chosen and (not chosen or s > chosen[-1])]
+        if not candidates:
+            break
+        # Si en inglés el salto iba tras un final de frase, se prefiere un final de frase cercano
+        ends_sentence = seg.rstrip()[-1:] in ".!?…)"
+        bonus = 0.25 * len(translated) if ends_sentence else 0
+        def score(s):
+            return abs(s - target) - (bonus if translated[s - 1] in ".!?…)" else 0)
+        chosen.append(min(candidates, key=score))
+    out = list(translated)
+    for pos in chosen:
+        out[pos] = "\\n"
+    return "".join(out)
 
 # Códigos ANSI de colores para la consola
 GREEN  = "\033[92m"
@@ -147,10 +184,10 @@ class OllamaTranslator:
 
 class GameEngineInjector:
     """Gestor universal de detección de motores gráficos y estrategias de inyección."""
-    def __init__(self, game_path, target_file=None):
+    def __init__(self, game_path, target_file=None, model_name="IA_Traductora"):
         self.game_path = Path(game_path)
         self.target_file = target_file
-        self.translator = OllamaTranslator()
+        self.translator = OllamaTranslator(model_name=model_name)
 
     def detect_engine(self):
         """Fase 1: Detección del Motor (Engine Scanner)"""
@@ -220,84 +257,152 @@ class GameEngineInjector:
             
         logging.info(f"¡Éxito! Archivo de AutoTranslator generado en: {config_path}")
 
+    @staticmethod
+    def _read_lines(path):
+        """Lee un CSV como texto plano. Devuelve (bom, líneas).
+        Se parte por '\\n' igual que hace el plugin DKTools_Localization (sin interpretar comillas)."""
+        raw = path.read_bytes()
+        bom = raw.startswith(b"\xef\xbb\xbf")
+        text = raw.decode("utf-8-sig" if bom else "utf-8")
+        return bom, text.split("\n")
+
+    @staticmethod
+    def _write_lines(path, bom, lines):
+        """Escribe el CSV de forma atómica respetando BOM y saltos de línea originales."""
+        temp_file = path.with_name(path.name + ".tmp")
+        data = "\n".join(lines).encode("utf-8")
+        if bom:
+            data = b"\xef\xbb\xbf" + data
+        temp_file.write_bytes(data)
+        os.replace(temp_file, path)
+
+    @staticmethod
+    def _detect_delimiter(header_line):
+        counts = {d: header_line.count(d) for d in (";", ",", "\t")}
+        return max(counts, key=counts.get)
+
     def inject_godot(self):
-        """Fase 2: Estrategia para Godot con auditoría RegEx y autocorrección."""
-        logging.info("Buscando archivos .csv de localización en el directorio Godot...")
-        csv_files = list(self.game_path.glob("**/*.csv"))
+        """Fase 2: Estrategia para CSV de localización (Godot o plugins de idiomas de RPG Maker,
+        p. ej. DKTools_Localization). Solo traduce la columna de inglés ('en') y la sustituye
+        por español, manteniendo el formato exacto que espera el juego.
+        Se guarda una copia '<archivo>.original' para poder reanudar y restaurar."""
+        logging.info("Buscando archivos .csv de localización...")
+        csv_files = [f for f in self.game_path.glob("**/*.csv")]
         
         if not csv_files:
             logging.warning("No se encontraron archivos .csv para parchear.")
             return
 
         BATCH_SIZE = 30
+        tag_strip = re.compile(r'(%[sdfSDF]|%\d+|\\n|\\r|\{[^}]+\}|\[[^\]]+\]|\\[A-Za-z]+\[[^\]]*\]|\\[A-Za-z{}<>|.!^$]|<[^>]*>)')
+        # Prefijo de códigos de control al inicio del diálogo (caja de nombre \N<...>, caras, animaciones...).
+        # Se aparta y se vuelve a pegar intacto; a la IA solo le llega la frase.
+        prefix_re = re.compile(r'^(?:\\N<[^>]*>|\\[A-Za-z]+\[[^\]]*\]|\\[A-Za-z{}|.!^$<>](?![A-Za-z])|\s)+')
 
         for csv_file in csv_files:
             logging.info(f"Parcheando archivo: {csv_file.name}...")
-            
-            # Leer todas las filas del CSV
-            with open(csv_file, "r", encoding="utf-8", newline='') as infile:
-                reader = csv.reader(infile)
-                header = next(reader, None)
-                rows = list(reader)
-            
-            if not header:
+
+            # Copia de seguridad del original (solo la primera vez)
+            backup = csv_file.with_name(csv_file.name + ".original")
+            if not backup.exists():
+                shutil.copy2(csv_file, backup)
+                logging.info(f"Copia de seguridad creada: {backup.name}")
+
+            bom, orig_lines = self._read_lines(backup)
+            if not orig_lines or not orig_lines[0].strip():
                 continue
 
-            # Procesar en bloques de BATCH_SIZE
-            total_batches = (len(rows) + BATCH_SIZE - 1) // BATCH_SIZE
-            for batch_idx in range(total_batches):
-                start = batch_idx * BATCH_SIZE
-                end = min(start + BATCH_SIZE, len(rows))
-                batch = rows[start:end]
-                logging.info(f"--- Bloque {batch_idx + 1}/{total_batches} (líneas {start+1}-{end}) ---")
+            header_line = orig_lines[0].rstrip("\r")
+            delim = self._detect_delimiter(header_line)
+            header = [h.strip().lower() for h in header_line.split(delim)]
 
-                # Fase 1: Traducción del bloque
-                for row in batch:
-                    if len(row) <= 1:
+            # Localizar la columna de inglés
+            col = None
+            for name in ("en", "english", "en_us", "en-us"):
+                if name in header:
+                    col = header.index(name)
+                    break
+            if col is None:
+                logging.warning(f"No se encontró columna de inglés en {csv_file.name} (cabecera: {header[:6]}). Se omite.")
+                continue
+            logging.info(f"Separador '{delim}' | Columna de inglés: '{header[col]}' (índice {col})")
+
+            # Progreso previo: si el archivo actual tiene las mismas líneas, reutilizamos lo ya traducido
+            _, cur_lines = self._read_lines(csv_file)
+            if len(cur_lines) != len(orig_lines):
+                logging.warning("El archivo actual no coincide con el original; se empieza desde el original.")
+                cur_lines = list(orig_lines)
+
+            total = len(orig_lines) - 1
+            total_batches = (total + BATCH_SIZE - 1) // BATCH_SIZE
+            for batch_idx in range(total_batches):
+                start = 1 + batch_idx * BATCH_SIZE
+                end = min(start + BATCH_SIZE, len(orig_lines))
+                logging.info(f"--- Bloque {batch_idx + 1}/{total_batches} (líneas {start}-{end - 1}) ---")
+                changed = False
+
+                for i in range(start, end):
+                    o_line = orig_lines[i]
+                    cr = "\r" if o_line.endswith("\r") else ""
+                    o_parts = o_line[:-1].split(delim) if cr else o_line.split(delim)
+                    if len(o_parts) <= col:
                         continue
-                    original_text = row[1]
-                    
-                    if len(row) > 2 and row[2].strip() and row[2] != original_text:
-                        logging.info(f"-> Omitiendo (Ya traducido): {original_text[:20]}...")
+                    original_text = o_parts[col]
+
+                    # Ya traducido en una ejecución anterior
+                    c_line = cur_lines[i]
+                    c_parts = (c_line[:-1] if c_line.endswith("\r") else c_line).split(delim)
+                    if len(c_parts) == len(o_parts) and c_parts[col] != original_text:
                         continue
 
                     sanitized = sanitize_text(original_text)
-                    if not sanitized.strip() or not any(c.isalpha() for c in sanitized):
+                    m = prefix_re.match(sanitized)
+                    prefix = m.group(0) if m else ""
+                    body = sanitized[len(prefix):]
+                    if not any(c.isalpha() for c in tag_strip.sub("", body)):
                         continue
 
-                    logging.info(f"-> Traduciendo: {sanitized[:30]}...")
-                    translated_text = self.translator.translate(sanitized)
+                    logging.info(f"-> Traduciendo: {body[:50]}...")
+                    # Los '\n' literales se quitan para que la IA vea la frase completa
+                    # y se recolocan después (la IA los perdía constantemente).
+                    segments = re.split(r"\\n", body)
+                    to_translate = re.sub(r" {2,}", " ", " ".join(s.strip() for s in segments)).strip()
+                    translated_text = self.translator.translate(to_translate)
 
-                    # Fase 2: Auditoría RegEx
-                    is_valid, orig_tags, trans_tags = self.translator.validate_format_tags(sanitized, translated_text)
-                    
+                    # Auditoría RegEx de etiquetas (con conteo, no solo conjuntos)
+                    is_valid, orig_tags, trans_tags = self.translator.validate_format_tags(to_translate, translated_text)
                     if is_valid:
                         logging.info(f"{GREEN}  ✔ OK: {translated_text[:40]}...{RESET}")
                         final_text = translated_text
                     else:
-                        missing = set(orig_tags) - set(trans_tags)
-                        extra = set(trans_tags) - set(orig_tags)
+                        missing = list((Counter(orig_tags) - Counter(trans_tags)).elements())
+                        extra = list((Counter(trans_tags) - Counter(orig_tags)).elements())
                         reason = f"Faltan etiquetas: {missing}" if missing else f"Etiquetas sobrantes: {extra}"
                         logging.warning(f"{YELLOW}  ⚠ Etiquetas rotas en: {translated_text[:30]}... -> {reason}{RESET}")
-                        
-                        # Fase 3: Autocorrección
-                        final_text = self.translator.autocorrect(sanitized, translated_text, reason)
+                        final_text = self.translator.autocorrect(to_translate, translated_text, reason)
 
-                    if len(row) > 2:
-                        row[2] = final_text
-                    else:
-                        row.append(final_text)
+                    # El plugin parte por el separador y por saltos de línea sin entender comillas:
+                    # la traducción no puede contener ninguno de los dos.
+                    final_text = final_text.replace("\r", " ").replace("\n", " ")
+                    final_text = final_text.replace(delim, "," if delim != "," else ";").strip()
+                    if not final_text:
+                        continue
+                    final_text = restore_names(to_translate, final_text)
+                    if len(segments) > 1:
+                        final_text = reinsert_breaks(final_text, segments)
+                    final_text = prefix + final_text
+                    if final_text == original_text:
+                        continue
 
-                # Guardar el CSV completo parcheado tras cada bloque por seguridad
-                temp_file = csv_file.with_suffix(".csv.tmp")
-                with open(temp_file, "w", encoding="utf-8", newline='') as outfile:
-                    writer = csv.writer(outfile)
-                    writer.writerow(header)
-                    writer.writerows(rows)
-                
-                os.replace(temp_file, csv_file)
+                    o_parts[col] = final_text
+                    cur_lines[i] = delim.join(o_parts) + cr
+                    changed = True
 
-            logging.info(f"Archivo de Godot parcheado y guardado al completo: {csv_file.name}")
+                # Guardar tras cada bloque por seguridad
+                if changed:
+                    self._write_lines(csv_file, bom, cur_lines)
+
+            logging.info(f"Archivo parcheado y guardado al completo: {csv_file.name}")
 
     def inject_unreal(self):
         """Fase 2: Estrategia para Unreal Engine"""
@@ -532,11 +637,13 @@ def main():
     parser = argparse.ArgumentParser(description="Auto-Inyector de IA Traductora Local en Videojuegos.")
     parser.add_argument("--ruta", type=str, required=True, help="Ruta absoluta de la carpeta del juego.")
     parser.add_argument("--archivo", type=str, required=False, help="Traducir solo un archivo específico (ej. System.json)")
+    parser.add_argument("--modelo", type=str, default="IA_Traductora", help="Modelo de Ollama a usar (por defecto IA_Traductora)")
     
     args = parser.parse_args()
 
     logging.info("--- INICIANDO GESTOR UNIVERSAL DE TRADUCCIÓN ---")
-    injector = GameEngineInjector(args.ruta, args.archivo)
+    logging.info(f"Modelo: {args.modelo}")
+    injector = GameEngineInjector(args.ruta, args.archivo, args.modelo)
     injector.run()
     logging.info("--- PROCESO FINALIZADO ---")
 
