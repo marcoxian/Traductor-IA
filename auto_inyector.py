@@ -622,6 +622,10 @@ class GameEngineInjector:
     def run(self):
         engine = self.detect_engine()
         
+        if self.target_file and self.target_file.endswith('.json'):
+            logging.info("Forzando modo RPG Maker porque se especificó un archivo .json")
+            engine = "RPGMaker"
+            
         if engine == "Unity":
             self.inject_unity()
         elif engine == "Godot":

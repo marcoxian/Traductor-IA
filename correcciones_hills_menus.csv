@@ -1,4 +1,4 @@
-ingles;correccion
+﻿ingles;correccion
 Language;Idioma
 Level;Nivel
 Max HP;PV máx.
@@ -1110,3 +1110,47 @@ Link Break;Ruptura del vínculo
 Test of Might;Prueba de fuerza
 Jar of Crystal Powder;Tarro de polvo de cristal
 Give Spike a Beating.;Dale una paliza a Spike.
+
+Bakery Clerk;Dependiente de la panadería
+Crowd;Multitud
+It smells so good...;Huele de maravilla...
+Brand new flavor for sale now! Get it while it's hot!;¡Nuevo sabor a la venta! ¡Lleváoslo mientras esté caliente!
+
+\N<\C[5]Crowd\C[0]>This bakery sells out of bread as soon as it comes out of the oven. \nThis time I'm not missing out!;\N<\C[5]Multitud\C[0]>Esta panadería agota el pan nada más salir del horno. \n¡Esta vez no me quedo sin él!
+
+\N<\C[5]Crowd\C[0]>My darling daughter loves this place. Today I might as well buy three.;\N<\C[5]Multitud\C[0]>A mi querida hija le encanta este sitio. Hoy creo que me llevaré tres.
+
+\N<\C[5]Crowd\C[0]>His lordship specifically requested this bakery's new flavor. \nMm...I wonder how it tastes.;\N<\C[5]Multitud\C[0]>El señor pidió expresamente el nuevo sabor de esta panadería. \nMm... me pregunto a qué sabrá.
+
+\N<\C[5]Black-Haired Girl\C[0]>\F[10]\SK[Think|Hils_N|ForeArm_Lv2]\SA[Idle_01]Bread... *gurgle*... Boy am I hungry...;\N<\C[5]Chica de pelo negro\C[0]>\F[10]\SK[Think|Hils_N|ForeArm_Lv2]\SA[Idle_01]Pan... *ruñido de tripas*... ¡Madre mía, qué hambre tengo!
+
+\N<\C[5]Rude Voice\C[0]>\AA[N]\F[10]\SK[Normal|Hils_N|ForeArm_Lv1]\SA[Idle_01]Bitch! Stop right there!;\N<\C[5]Voz grosera\C[0]>\AA[N]\F[10]\SK[Normal|Hils_N|ForeArm_Lv1]\SA[Idle_01]¡Zorra! ¡Detente ahí mismo!
+
+\N<\C[5]Green-Haired Man\C[0]>*puff* *puff* Fuck! You're not getting away!;\N<\C[5]Hombre de pelo verde\C[0]>*jadeo* *jadeo* ¡Mierda! ¡No escaparás!
+
+\N<\C[5]Green-Haired Man\C[0]>Ha! Not so slick now, are you?;\N<\C[5]Hombre de pelo verde\C[0]>¡Ja! Ya no eres tan escurridiza, ¿verdad?
+
+\N<\C[5]Green-Haired Man\C[0]>I know this place like the back of my hand! My men have you surrounded!;\N<\C[5]Hombre de pelo verde\C[0]>¡Conozco este lugar como la palma de mi mano! ¡Mis hombres te tienen rodeada!
+
+\N<\C[5]Green-Haired Man\C[0]>Fuck you, it doesn't matter what you say. You'll get what's coming to you when we\ncatch you. Stand and face us if you have the balls!;\N<\C[5]Hombre de pelo verde\C[0]>¡Que te jodan, me da igual lo que digas! ¡Te vas a enterar cuando te pillemos! \n¡Párate y plántanos cara si tienes ovarios!
+
+\N<\C[5]Green-Haired Man\C[0]>Fuck, she's running again! Get her!;\N<\C[5]Hombre de pelo verde\C[0]>¡Mierda, está huyendo de nuevo! ¡A por ella!
+
+\N<\C[5]Men\C[0]>B-boss! Wait for us!;\N<\C[5]Hombres\C[0]>¡J-jefe! ¡Espéranos!
+
+\N<\C[5]Bakery Clerk\C[0]>Uh... Haha... I didn't expect that. That was scary...;\N<\C[5]Panadero\C[0]>Eh... Jaja... No me esperaba eso. Qué susto...
+
+\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]Well done, Hills. I knew you had it in you.;\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]Bien hecho, Hills. Sabía que serías capaz.
+
+\N<\C[27]Aldora\C[0]>\AA[FFFF]\FFF[10]\SSSK[Sad|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Complacent|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Complacent|Aldora_N]\SSSSA[Idle_01]Heheh... It was a bit tougher than usual. It took a while to shake them off, but it\nwas no problem for me!;\N<\C[27]Aldora\C[0]>\AA[FFFF]\FFF[10]\SSSK[Sad|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Normal|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Complacent|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Complacent|Aldora_N]\SSSSA[Idle_01]Jeje... ¡Ha sido un poco más difícil de lo habitual! Tardé un rato en quitármelos de encima, ¡pero no ha sido\nningún problema para mí!
+
+\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Happy|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Normal|Aldora_N]\SSSSA[Idle_01]That's it for now. Go and rest. Anything important can wait until tomorrow. \nThanks, everyone.;\N<\C[23]Miya\C[0]>\AA[FF]\FFF[10]\SSSK[Normal|Hils_N|ForeArm_Lv1]\SSSA[Idle_01]\F[90]\SK[Happy|Charbel_N]\SA[Idle_01]\FF[30]\SSK[Happy|Miya_N]\SSA[Idle_01]\FFFF[70]\SSSSK[Normal|Aldora_N]\SSSSA[Idle_01]Eso es todo por ahora. Id a descansar. Cualquier cosa importante puede esperar hasta mañana. \nGracias a todas.
+
+Swipe one item from the enemy. \n(Each enemy can only be stolen from once.);Roba un objeto al enemigo. \n(Solo se puede robar a cada enemigo una vez).
+Swipe one item from the enemy. \n(Each enemy can only be stolen from once);Roba un objeto al enemigo. \n(Solo se puede robar a cada enemigo una vez)
+
+Hills is a gentle and timid young woman who endures whatever life throws her way. \nShe doesn't think she's very noticeable, though men seem to disagree.;Hills es una joven dulce y tímida que soporta cualquier cosa que le depare la vida. \nNo se considera alguien que llame mucho la atención, pero los hombres no opinan lo mismo.
+\C[16]~Hills~　（Part 1）\C[0]\n\nHills grew up in an orphanage and never knew her birth parents. \nAfter leaving the orphanage, she drifted from city to city, \nuntil a woman named Miya took her in. \n\nShe now lives in a hideout under a bridge \nnear the noble district with Miya and several other companions.\n\nSince she's not good at fighting, she usually survives on odd jobs,\npickpocketing, and small-time theft. Life in the hideout is far from luxurious,\nbut the trust between friends gives Hills a sense of belonging.\n\nEven if she has no idea what the future holds, \nshe firmly believes that as long as she and her companions work together, \nthere is no hardship they can't overcome.;\C[16]~Hills~ (Parte 1)\C[0]\n\nHills se crio en un orfanato y nunca conoció a sus padres biológicos. \nTras salir del orfanato, vagó de ciudad en ciudad \nhasta que una mujer llamada Miya la acogió. \n\nAhora vive en un escondite bajo un puente \ncerca del distrito noble con Miya y otras compañeras.\n\nComo no es buena peleando, suele sobrevivir haciendo trabajos esporádicos,\nrobando carteras y con pequeños hurtos. La vida en el escondite no es ningún lujo,\npero la confianza entre amigas le da un sentido de pertenencia.\n\nAunque no sabe qué le deparará el futuro, \ncree firmemente que mientras ella y sus compañeras trabajen juntas, \nno habrá dificultad que no puedan superar.
+\C[27]~Aldora~　（Part 1）\C[0]\n\nRelationship: Like family \n\nHills' close friend, who's a little older than Hills. \nAldora is a quick and agile woman, \nthough boyish and impulsive by nature. \n\nShe often acts way off-script during their plans,\nwhich gives Miya quite a headache. \n\nShe is fiercely loyal and protective of her companions \nand always steps up in times of crisis.\nAldora's lively personality is one of the group's greatest joys.;\C[27]~Aldora~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nAmiga íntima de Hills, un poco mayor que ella. \nAldora es una mujer rápida y ágil, \naunque de naturaleza algo poco femenina e impulsiva. \n\nA menudo se sale del guion durante los planes,\nlo que le da bastantes dolores de cabeza a Miya. \n\nEs ferozmente leal y protectora con sus compañeras \ny siempre da la cara en momentos de crisis.\nEl carácter alegre de Aldora es una de las mayores alegrías del grupo.
+\C[23]~Miya~　（Part 1）\C[0]\n\nRelationship: Like family \n\nAs the leader of Hills' crew, Miya gives off a calm and composed demeanor. \nHer plans for Hills and the others are always extremely well thought out and rational.\n\nDespite seeming cold on the surface, \nevery action she takes is for the sake of the group. \nShe always weighs the pros and cons before making any decision.;\C[23]~Miya~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nComo líder de la banda de Hills, Miya tiene una actitud tranquila y sosegada. \nSus planes para Hills y las demás siempre están muy bien pensados y son racionales.\n\nA pesar de parecer fría por fuera, \ncada acción que realiza es por el bien del grupo. \nSiempre sopesa los pros y los contras antes de tomar cualquier decisión.
+\C[20]~Charbel~　（Part 1）\C[0]\n\nRelationship: Like family \n\nA gentle, ladylike companion of Hills, \nCharbel handles all the household chores in and around the hideout. \nShe is a skilled cook and homemaker, \nand earned Hills' trust after earnestly teaching her how to cook.\n\nAs a young woman, she was kicked out of her home \nbecause of an unplanned pregnancy. \nIn this moment of despair, she met Miya, \nwho helped her safely give birth to her daughter, Kiki. \n\nFrom that moment on, Charbel and Kiki followed Miya, \nand have known her longer than anyone.;\C[20]~Charbel~ (Parte 1)\C[0]\n\nRelación: Como de la familia \n\nUna amable y refinada compañera de Hills, \nCharbel se ocupa de todas las tareas domésticas en el escondite y sus alrededores. \nEs una cocinera y ama de casa experta, \ny se ganó la confianza de Hills tras enseñarle a cocinar con dedicación.\n\nCuando era joven, fue expulsada de su casa \ndebido a un embarazo no deseado. \nEn ese momento de desesperación conoció a Miya, \nquien la ayudó a dar a luz de forma segura a su hija, Kiki. \n\nDesde ese momento, Charbel y Kiki siguieron a Miya, \ny la conocen desde hace más tiempo que nadie.

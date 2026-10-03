@@ -39,6 +39,7 @@ def escribir(path, bom, lines):
 
 def limpiar(texto, delim):
     texto = texto.replace("\r", " ").replace("\n", " ")
+    texto = texto.replace('"', "'")
     return texto.replace(delim, "," if delim != "," else ";")
 
 
