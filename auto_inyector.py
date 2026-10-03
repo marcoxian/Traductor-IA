@@ -288,15 +288,16 @@ class GameEngineInjector:
                     else:
                         row.append(final_text)
 
-            # Guardar el CSV completo parcheado
-            temp_file = csv_file.with_suffix(".csv.tmp")
-            with open(temp_file, "w", encoding="utf-8", newline='') as outfile:
-                writer = csv.writer(outfile)
-                writer.writerow(header)
-                writer.writerows(rows)
-            
-            os.replace(temp_file, csv_file)
-            logging.info(f"Archivo de Godot parcheado y guardado: {csv_file.name}")
+                # Guardar el CSV completo parcheado tras cada bloque por seguridad
+                temp_file = csv_file.with_suffix(".csv.tmp")
+                with open(temp_file, "w", encoding="utf-8", newline='') as outfile:
+                    writer = csv.writer(outfile)
+                    writer.writerow(header)
+                    writer.writerows(rows)
+                
+                os.replace(temp_file, csv_file)
+
+            logging.info(f"Archivo de Godot parcheado y guardado al completo: {csv_file.name}")
 
     def inject_unreal(self):
         """Fase 2: Estrategia para Unreal Engine"""
