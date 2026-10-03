@@ -3,7 +3,7 @@ Reentrenamiento v2 del traductor (continúa desde el modelo actual, no desde cer
 
 Mezcla:
   - glosario_v2.jsonl (x3)  -> términos RPG, mensajes con %1, ejemplos con códigos, correcciones
-  - una muestra del dataset general (dataset_entrenamiento.jsonl) -> para que no "olvide"
+  - una muestra del dataset general (dataset_base_general.jsonl) -> para que no "olvide"
     traducir frases normales al centrarse en el glosario
 
 Todos los ejemplos usan EXACTAMENTE el mismo prompt que auto_inyector.py al traducir.
@@ -44,7 +44,7 @@ from datasets import Dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments
 
-MODELO_BASE = "traductor_juegos_gguf_final"   # Modelo actual (entreno de 18h + mini glosario)
+MODELO_BASE = "modelo_exportado_v2"   # Modelo actual (entreno de 18h + mini glosario)
 SALIDA = "traductor_juegos_v2"
 REPETIR_GLOSARIO = 3
 MUESTRA_GENERAL = 4000
@@ -65,7 +65,7 @@ def leer_jsonl(ruta):
         return [json.loads(l) for l in f if l.strip()]
 
 glosario = leer_jsonl("glosario_v2.jsonl")
-general = leer_jsonl("dataset_entrenamiento.jsonl")
+general = leer_jsonl("dataset_base_general.jsonl")
 general = random.sample(general, min(MUESTRA_GENERAL, len(general)))
 
 ejemplos = glosario * REPETIR_GLOSARIO + general
@@ -118,7 +118,7 @@ trainer = SFTTrainer(
         weight_decay = 0.01,
         lr_scheduler_type = "linear",
         seed = 3407,
-        output_dir = "outputs_v2",
+        output_dir = "checkpoints_entrenamiento_v2",
         save_steps = 200,              # Puntos de control por si se corta
         save_total_limit = 2,
     ),

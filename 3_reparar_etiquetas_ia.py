@@ -7,24 +7,24 @@ from collections import Counter
 
 sys.stdout.reconfigure(encoding='utf-8')
 
-def extract_format_tags(text):
+def extraer_etiquetas(texto):
     pattern = r'(%[sdfSDF]|%\d+|\\n|\\r|\{[^}]+\}|\[[^\]]+\]|\\[A-Za-z]+\[[^\]]*\]|\\[A-Za-z{}<>|.!^$]|<[^>]*>)'
-    return re.findall(pattern, text)
+    return re.findall(pattern, texto)
 
-def validate_format_tags(original, translated):
-    orig_tags = sorted(extract_format_tags(original))
-    trans_tags = sorted(extract_format_tags(translated))
-    return orig_tags == trans_tags
+def etiquetas_coinciden(original, traducido):
+    etiquetas_orig = sorted(extraer_etiquetas(original))
+    etiquetas_trad = sorted(extraer_etiquetas(traducido))
+    return etiquetas_orig == etiquetas_trad
 
-def fix_with_llama(ingles, traduccion_mala):
+def corregir_con_ia(texto_ingles, traduccion_con_errores):
     prompt = f"""You are a precise technical translator for an RPG game.
 Your task is to fix a Spanish translation that has broken or missing formatting tags.
 
 Original English text (contains correct tags):
-{ingles}
+{texto_ingles}
 
 Bad Spanish translation (tags are broken/missing):
-{traduccion_mala}
+{traduccion_con_errores}
 
 Instructions:
 1. Keep the Spanish translation natural.
@@ -46,7 +46,7 @@ Instructions:
         return resp
     except Exception as e:
         print(f"Error calling llama3.1: {e}")
-        return traduccion_mala
+        return traduccion_con_errores
 
 def main():
     archivo = "revision_The_Adventures_of_HILLS.csv"
@@ -64,32 +64,32 @@ def main():
         if row["correccion"].strip():
             continue
             
-        ingles = row["ingles"]
-        mala = row["traduccion_ia"]
+        texto_ingles = row["ingles"]
+        texto_traduccion_mala = row["traduccion_ia"]
         
         # If it's a long text truncation issue
         if "LONGITUD" in row["problema"]:
             print(f"[{i+1}/{len(filas)}] Refaciendo longitud truncada...")
-            mejorada = fix_with_llama(ingles, "")
+            traduccion_reparada = corregir_con_ia(texto_ingles, "")
         else:
             print(f"[{i+1}/{len(filas)}] Arreglando etiquetas/orden...")
-            mejorada = fix_with_llama(ingles, mala)
+            traduccion_reparada = corregir_con_ia(texto_ingles, texto_traduccion_mala)
             
         # Verify
-        if validate_format_tags(ingles, mejorada) or "LONGITUD" in row["problema"]:
-            row["correccion"] = mejorada
+        if etiquetas_coinciden(texto_ingles, traduccion_reparada) or "LONGITUD" in row["problema"]:
+            row["correccion"] = traduccion_reparada
             corregidas += 1
-            print(f"  -> OK: {mejorada[:50]}...")
+            print(f"  -> OK: {traduccion_reparada[:50]}...")
         else:
             print(f"  -> FALLO: Las etiquetas siguen sin coincidir. Usando fallback básico.")
             # Basic fallback: prepend missing tags
-            orig_tags = extract_format_tags(ingles)
-            trans_tags = extract_format_tags(mejorada)
-            missing = [t for t in orig_tags if t not in trans_tags]
-            if missing:
-                row["correccion"] = "".join(missing) + " " + mejorada
+            etiquetas_orig = extraer_etiquetas(texto_ingles)
+            etiquetas_trad = extraer_etiquetas(traduccion_reparada)
+            etiquetas_faltantes = [t for t in etiquetas_orig if t not in etiquetas_trad]
+            if etiquetas_faltantes:
+                row["correccion"] = "".join(etiquetas_faltantes) + " " + traduccion_reparada
             else:
-                row["correccion"] = mejorada
+                row["correccion"] = traduccion_reparada
             corregidas += 1
             
         # Save incrementally
