@@ -17,15 +17,12 @@ __pycache__/
 
 # Modelos, cachés y dependencias de IA
 unsloth_compiled_cache/
-traductor_juegos_gguf/
-traductor_juegos_gguf_gguf/
-traductor_juegos_gguf_final/
-traductor_juegos_gguf_final_gguf/
+modelo_exportado_v2/
+modelo_exportado_v2_gguf/
 *.gguf
 
 # Resultados y salidas
-outputs/
-outputs_mini/
+checkpoints_entrenamiento_v2/
 *.log
 
 # Datasets y archivos descargados/grandes
