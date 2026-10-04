@@ -52,8 +52,14 @@ def extraer_textos(ruta_langs, ruta_salida):
     print(f"\n¡Éxito! Se han extraído {pares_extraidos} frases bilingües.")
     print(f"Guardado en: {ruta_salida}")
 
+import sys
+
 if __name__ == '__main__':
-    ruta = r"J:\SteamLibrary\steamapps\common\My Summer Makeup Romance\Langs"
-    salida = "dataset_extra_mysummer.jsonl"
+    if len(sys.argv) < 3:
+        print("Uso: python extraer_textos_juego.py <ruta_Langs> <archivo_salida.jsonl>")
+        sys.exit(1)
+        
+    ruta = sys.argv[1]
+    salida = sys.argv[2]
     print(f"Analizando {ruta}...")
     extraer_textos(ruta, salida)
