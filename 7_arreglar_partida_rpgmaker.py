@@ -3,19 +3,31 @@ import json
 import lzstring
 import csv
 import shutil
+import argparse
+import sys
 
-save_dir = r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\save'
-diccionario = 'correcciones_hills_menus.csv'
+parser = argparse.ArgumentParser(description="Reparar textos en partidas guardadas de RPG Maker (.rpgsave).")
+parser.add_argument("--save-dir", default=r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\save', help="Ruta a la carpeta con archivos .rpgsave")
+parser.add_argument("--diccionario", default='glosarios/glosario_interfaz_rpgmaker.csv', help="Ruta al diccionario CSV de correcciones")
+args = parser.parse_args()
+
+save_dir = args.save_dir
+diccionario = args.diccionario
+
+if not os.path.exists(save_dir):
+    print(f"Aviso: Directorio de guardado no encontrado: {save_dir}")
+    print("Especifica la ruta usando: python 7_arreglar_partida_rpgmaker.py --save-dir <ruta>")
+    sys.exit(0)
 
 # Cargar correcciones
 correcciones = {}
-with open(diccionario, 'r', encoding='utf-8-sig', errors='ignore', newline='') as f:
-    for row in csv.reader(f, delimiter=';'):
-        if len(row) >= 2 and row[0]:
-            correcciones[row[0].strip()] = row[1].strip()
+if os.path.exists(diccionario):
+    with open(diccionario, 'r', encoding='utf-8-sig', errors='ignore', newline='') as f:
+        for row in csv.reader(f, delimiter=';'):
+            if len(row) >= 2 and row[0]:
+                correcciones[row[0].strip()] = row[1].strip()
 
-# Añadir también los textos literales malos si queremos reemplazarlos "a las bravas" en la partida
-# por si el diccionario no caza algo concreto que está suelto.
+# Reemplazos brutos comunes
 reemplazos_brutos = {
     'tímida y tímida': 'tímida',
     'Desliza un elemento': 'Roba un objeto',
@@ -26,9 +38,7 @@ def reparar_cadenas(obj):
     if isinstance(obj, dict):
         for k, v in obj.items():
             if isinstance(v, str):
-                # 1. Reemplazos directos
                 texto = v
-                # Intentamos limpiar caracteres raros por si acaso
                 for malo, bueno in reemplazos_brutos.items():
                     texto = texto.replace(malo, bueno)
                 obj[k] = texto

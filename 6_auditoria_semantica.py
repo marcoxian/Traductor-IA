@@ -1,12 +1,30 @@
 import csv
 import re
 import sys
+import os
+import argparse
 
 csv.field_size_limit(2147483647)
 
-path_orig = r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\locales\main.csv.original'
-path_trans = r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\locales\main.csv'
-path_dic = 'correcciones_hills_menus.csv'
+parser = argparse.ArgumentParser(description="Auditoría semántica de traducciones RPG Maker / CSV.")
+parser.add_argument("--original", default=r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\locales_backup\main.csv.original', help="Ruta al CSV original en inglés")
+parser.add_argument("--traducido", default=r'J:\SteamLibrary\steamapps\common\The Adventures of HILLS\www\locales\main.csv', help="Ruta al CSV traducido")
+parser.add_argument("--diccionario", default='glosarios/glosario_interfaz_rpgmaker.csv', help="Ruta al archivo CSV de diccionario / glosario")
+args = parser.parse_args()
+
+path_orig = args.original
+path_trans = args.traducido
+path_dic = args.diccionario
+
+if not os.path.exists(path_orig):
+    print(f"Aviso: Archivo original no encontrado en: {path_orig}")
+    print("Especifica la ruta correcta usando: python 6_auditoria_semantica.py --original <ruta> --traducido <ruta>")
+    sys.exit(0)
+
+if not os.path.exists(path_trans):
+    print(f"Aviso: Archivo traducido no encontrado en: {path_trans}")
+    print("Especifica la ruta correcta usando: python 6_auditoria_semantica.py --original <ruta> --traducido <ruta>")
+    sys.exit(0)
 
 # Reglas de sustitución: (palabra_ingles, regex_espanol_malo, reemplazo_espanol_bueno)
 reglas = [
@@ -38,10 +56,11 @@ with open(path_orig, 'r', encoding='utf-8-sig', errors='ignore', newline='') as 
 nuevas_correcciones = []
 # Leemos las ya existentes para no duplicar
 existentes = set()
-with open(path_dic, 'r', encoding='utf-8-sig', errors='ignore', newline='') as f:
-    for row in csv.reader(f, delimiter=';'):
-        if row:
-            existentes.add(row[0])
+if os.path.exists(path_dic):
+    with open(path_dic, 'r', encoding='utf-8-sig', errors='ignore', newline='') as f:
+        for row in csv.reader(f, delimiter=';'):
+            if row:
+                existentes.add(row[0])
 
 count = 0
 with open(path_trans, 'r', encoding='utf-8-sig', errors='ignore', newline='') as f:
@@ -70,7 +89,7 @@ with open(path_trans, 'r', encoding='utf-8-sig', errors='ignore', newline='') as
                     return good_word
                 es_modificado = re.sub(bad_regex, repl, es_modificado, flags=re.IGNORECASE)
                 
-        # Correcciones especiales de la usuaria que no matcheaban solas
+        # Correcciones especiales
         if 'tímida y tímida' in es_modificado:
             es_modificado = es_modificado.replace('tímida y tímida', 'tímida')
             
