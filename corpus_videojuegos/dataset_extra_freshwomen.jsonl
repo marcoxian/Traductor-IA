@@ -1,0 +1,1139 @@
+{"ingles": "{#weekday}Monday", "espanol": "{#weekday}Lunes", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Tuesday", "espanol": "{#weekday}Martes", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Wednesday", "espanol": "{#weekday}Miércoles", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Thursday", "espanol": "{#weekday}Jueves", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Friday", "espanol": "{#weekday}Viernes", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Saturday", "espanol": "{#weekday}Sábado", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday}Sunday", "espanol": "{#weekday}Domingo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-voicing disabled.", "espanol": "Voz automática desactivada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Clipboard voicing enabled.", "espanol": "'Portapapeles a voz' activado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-voicing enabled.", "espanol": "Voz automática activada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Select Gamepad to Calibrate", "espanol": "Selecciona mando para calibrar", "contexto": "oficial_renpy_ui"}
+{"ingles": "selected", "espanol": "seleccionado", "contexto": "oficial_renpy_ui"}
+{"ingles": "horizontal scroll", "espanol": "deslizamiento horizontal", "contexto": "oficial_renpy_ui"}
+{"ingles": "No Gamepads Available", "espanol": "No hay mandos disponibles", "contexto": "oficial_renpy_ui"}
+{"ingles": "vertical scroll", "espanol": "deslizamiento vertical", "contexto": "oficial_renpy_ui"}
+{"ingles": "activate", "espanol": "activar", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Mon", "espanol": "{#weekday_short}Lun", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Tue", "espanol": "{#weekday_short}Mar", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Wed", "espanol": "{#weekday_short}Mié", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Thu", "espanol": "{#weekday_short}Jue", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Fri", "espanol": "{#weekday_short}Vie", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Sat", "espanol": "{#weekday_short}Sáb", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#weekday_short}Sun", "espanol": "{#weekday_short}Dom", "contexto": "oficial_renpy_ui"}
+{"ingles": "deactivate", "espanol": "desactivar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Developer Menu", "espanol": "Menú de desarrollo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Displayable Inspector", "espanol": "Inspector de visualizables", "contexto": "oficial_renpy_ui"}
+{"ingles": "increase", "espanol": "aumentar", "contexto": "oficial_renpy_ui"}
+{"ingles": "decrease", "espanol": "disminuir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Interactive Director (D)", "espanol": "Director interactivo (D)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Reload Game (Shift+R)", "espanol": "Reiniciar juego (Shift+R)", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}January", "espanol": "{#month}Enero", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}February", "espanol": "{#month}Febrero", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}March", "espanol": "{#month}Marzo", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}April", "espanol": "{#month}Abril", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}May", "espanol": "{#month}Mayo", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}June", "espanol": "{#month}Junio", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}July", "espanol": "{#month}Julio", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}August", "espanol": "{#month}Agosto", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}September", "espanol": "{#month}Septiembre", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}October", "espanol": "{#month}Octubre", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}November", "espanol": "{#month}Noviembre", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month}December", "espanol": "{#month}Diciembre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Console (Shift+O)", "espanol": "Consola (Mayús.+O)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Variable Viewer", "espanol": "Visor de variables", "contexto": "oficial_renpy_ui"}
+{"ingles": "Image Location Picker", "espanol": "Selector de posición en imágenes", "contexto": "oficial_renpy_ui"}
+{"ingles": "Filename List", "espanol": "Lista de archivos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Calibrating [name] ([i]/[total])", "espanol": "Calibrando [name] ([i]/[total])", "contexto": "oficial_renpy_ui"}
+{"ingles": "Show Image Load Log (F4)", "espanol": "Mostrar registro de carga de imagen (F4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Press or move the '[control!s]' [kind].", "espanol": "Presiona o mueve el '[control!s]' [kind].", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hide Image Load Log (F4)", "espanol": "Ocultar registro de carga de imagen (F4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Size", "espanol": "Tamaño", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month_short}Jan", "espanol": "{#month_short}Ene", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month_short}Apr", "espanol": "{#month_short}Abr", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month_short}Aug", "espanol": "{#month_short}Ago", "contexto": "oficial_renpy_ui"}
+{"ingles": "{#month_short}Dec", "espanol": "{#month_short}Dic", "contexto": "oficial_renpy_ui"}
+{"ingles": "Style", "espanol": "Estilo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Skip (A)", "espanol": "Salto (A)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Location", "espanol": "Ubicación", "contexto": "oficial_renpy_ui"}
+{"ingles": "Back (B)", "espanol": "Atrás (B)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Renderer", "espanol": "Renderizador", "contexto": "oficial_renpy_ui"}
+{"ingles": "Automatically Choose", "espanol": "Escoger automáticamente", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force GL Renderer", "espanol": "Forzar renderizador GL", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force ANGLE Renderer", "espanol": "Force renderizador ANGLE", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force GLES Renderer", "espanol": "Forzar renderizador GLES", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force GL2 Renderer", "espanol": "Forzar renderizador GL2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force ANGLE2 Renderer", "espanol": "Forzar renderizador ANGLE2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Inspecting Styles of [displayable_name!q]", "espanol": "Inspeccionando estilos de [displayable_name!q]", "contexto": "oficial_renpy_ui"}
+{"ingles": "Force GLES2 Renderer", "espanol": "Forzar renderizador GLES2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Gamepad", "espanol": "Controlador", "contexto": "oficial_renpy_ui"}
+{"ingles": "Enable (No Blocklist)", "espanol": "Habilitar (sin Blocklist)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Font Override", "espanol": "Cambiar Fuente", "contexto": "oficial_renpy_ui"}
+{"ingles": "displayable:", "espanol": "visualizable:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Default", "espanol": "por Defecto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Nothing to inspect.", "espanol": "Nada para inspeccionar.", "contexto": "oficial_renpy_ui"}
+{"ingles": "(no properties affect the displayable)", "espanol": "(no hay propiedades que afecten la visualización)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(default properties omitted)", "espanol": "(propiedades por defecto omitidas)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Calibrate", "espanol": "Calibrar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Text Size Scaling", "espanol": "Escala del tamaño del texto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Powersave", "espanol": "Ahorro de energía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Reset", "espanol": "Reiniciar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Line Spacing Scaling", "espanol": "Escala del espacio de línea", "contexto": "oficial_renpy_ui"}
+{"ingles": "Framerate", "espanol": "Cuadros por s.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Screen", "espanol": "Pantalla", "contexto": "oficial_renpy_ui"}
+{"ingles": "q", "espanol": "r", "contexto": "oficial_renpy_ui"}
+{"ingles": "High Contrast Text", "espanol": "Texto de Alto Contraste", "contexto": "oficial_renpy_ui"}
+{"ingles": "Enable", "espanol": "Activar", "contexto": "oficial_renpy_ui"}
+{"ingles": "<repr() failed>", "espanol": "<repr() fallido>", "contexto": "oficial_renpy_ui"}
+{"ingles": "Disable", "espanol": "Desactivar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-Voicing", "espanol": "Voz-automática", "contexto": "oficial_renpy_ui"}
+{"ingles": "Off", "espanol": "Apagado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Empty Slot.", "espanol": "Vacío.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Text-to-speech", "espanol": "Texto a voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Clipboard", "espanol": "Portapapeles", "contexto": "oficial_renpy_ui"}
+{"ingles": "Changes will take effect the next time this program is run.", "espanol": "Los cambios se aplicarán la próxima vez que el programa se ejecute.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Debug", "espanol": "Depurar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-Voicing Volume Drop", "espanol": "Caída de Volumen de Voz Automática", "contexto": "oficial_renpy_ui"}
+{"ingles": "Contacting App Store\\nPlease Wait...", "espanol": "Contactando App Store\\nPor favor, espera...", "contexto": "oficial_renpy_ui"}
+{"ingles": "The options on this menu are intended to improve accessibility. They may not work with all games, and some combinations of options may render the game unplayable. This is not an issue with the game or engine. For the best results when changing fonts, try to keep the text size the same as it originally was.", "espanol": "Las opciones en este menú están destinadas a mejorar la accesibilidad. Es posible que no funcionen con todos los juegos, y algunas combinaciones de opciones pueden hacer que el juego no se pueda jugar. Esto no es un problema con el juego o el motor. Para obtener los mejores resultados al cambiar las fuentes, intente mantener el tamaño del texto igual al original.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Return", "espanol": "Volver", "contexto": "oficial_renpy_ui"}
+{"ingles": "Skip Mode", "espanol": "Modo salto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Performance Warning", "espanol": "Aviso de funcionamiento", "contexto": "oficial_renpy_ui"}
+{"ingles": "This computer is using software rendering.", "espanol": "Este ordenador usa 'software rendering'.", "contexto": "oficial_renpy_ui"}
+{"ingles": "This game requires use of GL2 that can't be initialised.", "espanol": "Este juego requiere el uso de GL2 que no se puede inicializar.", "contexto": "oficial_renpy_ui"}
+{"ingles": "%b %d, %H:%M", "espanol": "%d de %b, %H:%M", "contexto": "oficial_renpy_ui"}
+{"ingles": "This computer has a problem displaying graphics: [problem].", "espanol": "Este ordenador tiene un problema mostrando los gráficos: [problem].", "contexto": "oficial_renpy_ui"}
+{"ingles": "Its graphics drivers may be out of date or not operating correctly. This can lead to slow or incorrect graphics display.", "espanol": "Los controladores gráficos pueden estar obsoletos o no funcionar adecuadamente. Esto puede conllevar que los gráficos se muestren lenta o incorrectamente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "display", "espanol": "pantalla", "contexto": "oficial_renpy_ui"}
+{"ingles": "The {a=edit:1:log.txt}log.txt{/a} file may contain information to help you determine what is wrong with your computer.", "espanol": "El archivo {a=edit:1:log.txt}log.txt{/a} puede contener información para ayudarte a encontrar el problema en tu ordenador.", "contexto": "oficial_renpy_ui"}
+{"ingles": "More details on how to fix this can be found in the {a=[url]}documentation{/a}.", "espanol": "Puede encontrar más detalles sobre cómo solucionar este problema en la {a=[url]} documentación {/a}.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Continue, Show this warning again", "espanol": "Continuar. Mostrar este aviso de nuevo", "contexto": "oficial_renpy_ui"}
+{"ingles": "transitions", "espanol": "transiciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Continue, Don't show warning again", "espanol": "Continuar. No mostrar este aviso de nuevo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Return to the developer menu", "espanol": "Volver al menú de desarrollo", "contexto": "oficial_renpy_ui"}
+{"ingles": "skip transitions", "espanol": "salta transiciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Change render options", "espanol": "Cambiar las opciones de renderizado", "contexto": "oficial_renpy_ui"}
+{"ingles": "video sprites", "espanol": "sprites de vídeo", "contexto": "oficial_renpy_ui"}
+{"ingles": "show empty window", "espanol": "muestra ventana vacía", "contexto": "oficial_renpy_ui"}
+{"ingles": "text speed", "espanol": "velocidad de texto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Failed to save screenshot as %s.", "espanol": "No se pudo salvar la captura de pantalla como %s.", "contexto": "oficial_renpy_ui"}
+{"ingles": "skip", "espanol": "salta", "contexto": "oficial_renpy_ui"}
+{"ingles": "This program contains free software under a number of licenses, including the MIT License and GNU Lesser General Public License. A complete list of software, including links to full source code, can be found {a=https://www.renpy.org/l/license}here{/a}.", "espanol": "Este programa conta=https://www.renpy.org/l/licenseene software la=https://www.renpy.org/l/licensebre sujeto a da=https://www.renpy.org/l/licenseversas la=https://www.renpy.org/l/licensecenca=https://www.renpy.org/l/licenseas que a=https://www.renpy.org/l/licensencluyen la la=https://www.renpy.org/l/licensecenca=https://www.renpy.org/l/licensea MIT y la {a=https://www.renpy.org/l/license}GNU Lesser General Publa=https://www.renpy.org/l/licensec La=https://www.renpy.org/l/licensecense{/a} (La=https://www.renpy.org/l/licensecenca=https://www.renpy.org/l/licensea Públa=https://www.renpy.org/l/licenseca General Reduca=https://www.renpy.org/l/licenseda de GNU). Puedes encontrar la la=https://www.renpy.org/l/licensesta completa de software, con enlaces al códa=https://www.renpy.org/l/licensego fuente completo, {a=https://www.renpy.org/l/la=https://www.renpy.org/l/licensecense}aquí (en a=https://www.renpy.org/l/licensenglés){/a}.", "contexto": "oficial_renpy_ui"}
+{"ingles": "skip unseen [text]", "espanol": "salta no visto [text]", "contexto": "oficial_renpy_ui"}
+{"ingles": "Saved screenshot as %s.", "espanol": "Captura de pantalla guardada como %s.", "contexto": "oficial_renpy_ui"}
+{"ingles": "skip unseen text", "espanol": "salva texto no visto", "contexto": "oficial_renpy_ui"}
+{"ingles": "begin skipping", "espanol": "comienza salto", "contexto": "oficial_renpy_ui"}
+{"ingles": "after choices", "espanol": "tras las opciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "skip after choices", "espanol": "salta tras las opciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "auto-forward time", "espanol": "tiempo auto-avance", "contexto": "oficial_renpy_ui"}
+{"ingles": "auto-forward", "espanol": "auto-avance", "contexto": "oficial_renpy_ui"}
+{"ingles": "Previous", "espanol": "Anterior", "contexto": "oficial_renpy_ui"}
+{"ingles": "Auto forward", "espanol": "Auto avance", "contexto": "oficial_renpy_ui"}
+{"ingles": "auto-forward after click", "espanol": "auto-avance después del clic", "contexto": "oficial_renpy_ui"}
+{"ingles": "Next", "espanol": "Siguiente", "contexto": "oficial_renpy_ui"}
+{"ingles": "Save slot %s: [text]", "espanol": "Grabar partida %s: [text]", "contexto": "oficial_renpy_ui"}
+{"ingles": "automatic move", "espanol": "movimiento automático", "contexto": "oficial_renpy_ui"}
+{"ingles": "wait for voice", "espanol": "espera la voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Language [text]", "espanol": "Idioma [text]", "contexto": "oficial_renpy_ui"}
+{"ingles": "voice sustain", "espanol": "mantén voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "self voicing", "espanol": "auto voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "self voicing volume drop", "espanol": "caída de volumen de voz automática", "contexto": "oficial_renpy_ui"}
+{"ingles": "clipboard voicing", "espanol": "voz en clipboard", "contexto": "oficial_renpy_ui"}
+{"ingles": "The Ren'Py Updater is not supported on mobile devices.", "espanol": "El Actualizador de Ren'Py no es compatible con dispositivos móviles.", "contexto": "oficial_renpy_ui"}
+{"ingles": "debug voicing", "espanol": "debug voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Joystick Mapping", "espanol": "Mapeado del Joystick", "contexto": "oficial_renpy_ui"}
+{"ingles": "emphasize audio", "espanol": "enfatiza audio", "contexto": "oficial_renpy_ui"}
+{"ingles": "rollback side", "espanol": "lado retroceso", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rectangle: %r", "espanol": "Rectángulo: %r", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure?", "espanol": "¿Seguro?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to delete this save?", "espanol": "¿Seguro que quieres borrar esta partida?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to overwrite your save?", "espanol": "¿Seguro que quieres sobreescribir esta partida?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Loading will lose unsaved progress.\\nAre you sure you want to do this?", "espanol": "Al cargar se perderá el progreso no guardado.\\n¿Seguro que quieres hacer esto?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mouse position: %r", "espanol": "Posición del ratón: %r", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to quit?", "espanol": "¿Seguro que quieres salir?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to return to the main menu?\\nThis will lose unsaved progress.", "espanol": "¿Seguro que quieres volver al menú principal?\\nSe perderá el progreso no guardado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to end the replay?", "espanol": "¿Seguro que quieres finalizar la repetición?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to begin skipping?", "espanol": "¿Seguro que quieres empezar el modo salto?", "contexto": "oficial_renpy_ui"}
+{"ingles": "gl powersave", "espanol": "gl ahorro energía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to skip to the next choice?", "espanol": "¿Seguro que quieres saltar hasta la próxima elección?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Right-click or escape to quit.", "espanol": "Clic-derecho o escape para salir.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you sure you want to skip unseen dialogue to the next choice?", "espanol": "¿Seguro que quieres saltar el texto no visto hasta la próxima elección?", "contexto": "oficial_renpy_ui"}
+{"ingles": "gl framerate", "espanol": "gl cuadros por s.", "contexto": "oficial_renpy_ui"}
+{"ingles": "font transform", "espanol": "transformación de fuente", "contexto": "oficial_renpy_ui"}
+{"ingles": "font size", "espanol": "tamaño de fuente", "contexto": "oficial_renpy_ui"}
+{"ingles": "font line spacing", "espanol": "fuente de espacio de líneas", "contexto": "oficial_renpy_ui"}
+{"ingles": "system cursor", "espanol": "cursor del sistema", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rectangle copied to clipboard.", "espanol": "Rectángulo copiado al portapapeles.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Position copied to clipboard.", "espanol": "Posición copiada al portapapeles.", "contexto": "oficial_renpy_ui"}
+{"ingles": "renderer menu", "espanol": "menú de renderizado", "contexto": "oficial_renpy_ui"}
+{"ingles": "accessibility menu", "espanol": "menú de accesibilidad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Delete slot [text]", "espanol": "Borrar partida [text]", "contexto": "oficial_renpy_ui"}
+{"ingles": "high contrast text", "espanol": "texto de alto contraste", "contexto": "oficial_renpy_ui"}
+{"ingles": "Type to filter:", "espanol": "Tipo a filtrar:", "contexto": "oficial_renpy_ui"}
+{"ingles": "audio when minimized", "espanol": "audio cuando se minimiza", "contexto": "oficial_renpy_ui"}
+{"ingles": "main volume", "espanol": "volumen principal", "contexto": "oficial_renpy_ui"}
+{"ingles": "music volume", "espanol": "volumen música", "contexto": "oficial_renpy_ui"}
+{"ingles": "sound volume", "espanol": "volumen sonido", "contexto": "oficial_renpy_ui"}
+{"ingles": "voice volume", "espanol": "volumen voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "mute main", "espanol": "silenciar todo", "contexto": "oficial_renpy_ui"}
+{"ingles": "mute music", "espanol": "silencia música", "contexto": "oficial_renpy_ui"}
+{"ingles": "mute sound", "espanol": "silencia sonido", "contexto": "oficial_renpy_ui"}
+{"ingles": "mute voice", "espanol": "silencia voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "mute all", "espanol": "silencia todo", "contexto": "oficial_renpy_ui"}
+{"ingles": "An error is being simulated.", "espanol": "Se simula un error.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open", "espanol": "Abrir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Opens the traceback.txt file in a text editor.", "espanol": "Abre el archivo de rastreo 'traceback.txt' en un editor de texto.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Copy BBCode", "espanol": "Copiar BBCode", "contexto": "oficial_renpy_ui"}
+{"ingles": "Copies the traceback.txt file to the clipboard as BBcode for forums like https://lemmasoft.renai.us/.", "espanol": "Copia el archivo traceback.txt en el portapapeles como BBcode para foros como https://lemmasoft.renai.us/.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Copy Markdown", "espanol": "Copiar Markdown", "contexto": "oficial_renpy_ui"}
+{"ingles": "Copies the traceback.txt file to the clipboard as Markdown for Discord.", "espanol": "Copia el archivo traceback.txt al portapapeles como Markdown para Discord.", "contexto": "oficial_renpy_ui"}
+{"ingles": "File page auto", "espanol": "Página grabado automático", "contexto": "oficial_renpy_ui"}
+{"ingles": "File page quick", "espanol": "Página grabado rápido", "contexto": "oficial_renpy_ui"}
+{"ingles": "File page [text]", "espanol": "Página grabación [text]", "contexto": "oficial_renpy_ui"}
+{"ingles": "An exception has occurred.", "espanol": "Ha sucedido una excepción.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Clipboard voicing enabled. Press 'shift+C' to disable.", "espanol": "'Portapapeles a voz' activado. Pulsa 'Mayús.+C' para desactivarlo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rollback", "espanol": "Volver atrás", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-voicing would say \\\"[renpy.display.tts.last]\\\". Press 'alt+shift+V' to disable.", "espanol": "Voz automática dirà \\\"[renpy.display.tts.last]\\\". Pulsa 'alt+shift+V' para desactivar.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Attempts a roll back to a prior time, allowing you to save or choose a different choice.", "espanol": "Intenta volver a un momento anterior y permite guardar o escoger una opción diferente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Self-voicing enabled. Press 'v' to disable.", "espanol": "Voz automática activada. Presiona 'v' para desactivarla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ignore", "espanol": "Ignorar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ignores the exception, allowing you to continue.", "espanol": "Ignora la excepción y permite continuar.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Image [index] of [count] locked.", "espanol": "Imagen [index] de [count] bloqueada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ignores the exception, allowing you to continue. This often leads to additional errors.", "espanol": "Ignora la excepción y permite continuar. Suele conllevar más errores.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Reload", "espanol": "Recargar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Textures: [tex_count] ([tex_size_mb:.1f] MB)", "espanol": "Texturas: [tex_count] ([tex_size_mb:.1f] MB)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Reloads the game from disk, saving and restoring game state if possible.", "espanol": "Recarga el juego del disco, guardando y restaurando la partida si es posible.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Image cache: [cache_pct:.1f]% ([cache_size_mb:.1f] MB)", "espanol": "Caché de imagen: [cache_pct:.1f]% ([cache_size_mb:.1f] MB)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Console", "espanol": "Consola", "contexto": "oficial_renpy_ui"}
+{"ingles": "Page {}", "espanol": "Página {}", "contexto": "oficial_renpy_ui"}
+{"ingles": "Automatic saves", "espanol": "Guardados automáticos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quick saves", "espanol": "Guardados rápidos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Opens a console to allow debugging the problem.", "espanol": "Abre una consola y permite depurar el problema.", "contexto": "oficial_renpy_ui"}
+{"ingles": "prev", "espanol": "ant.", "contexto": "oficial_renpy_ui"}
+{"ingles": "next", "espanol": "sig.", "contexto": "oficial_renpy_ui"}
+{"ingles": "slideshow", "espanol": "presentación", "contexto": "oficial_renpy_ui"}
+{"ingles": "return", "espanol": "volver", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quits the game.", "espanol": "Sale del juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "\\n{color=#cfc}✔ predicted image (good){/color}\\n{color=#fcc}✘ unpredicted image (bad){/color}\\n{color=#fff}Drag to move.{/color}", "espanol": "\\n{color=#cfc}✔ imagen prevista (correcto){/color}\\n{color=#fcc}✘ imagen no prevista (fallido){/color}\\n{color=#fff}Arrastra para mover.{/color}", "contexto": "oficial_renpy_ui"}
+{"ingles": "Parsing the script failed.", "espanol": "Error en el análisis del código.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open [text] directory.", "espanol": "Abre el directorio [text] .", "contexto": "oficial_renpy_ui"}
+{"ingles": "The interactive director is not enabled here.", "espanol": "El director interactivo no está habilitado aquí.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Either this project does not support updating, or the update status file was deleted.", "espanol": "O bien este proyecto no es compatible con la actualización o el archivo de estado de la actualización se ha eliminado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "This account does not have permission to perform an update.", "espanol": "Esta cuenta no tiene permiso para realizar una actualización.", "contexto": "oficial_renpy_ui"}
+{"ingles": "This account does not have permission to write the update log.", "espanol": "Esta cuenta no tiene permiso para escribir en el registro de actualización.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Next file page.", "espanol": "Página siguiente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Could not verify update signature.", "espanol": "No se pudo verificar la actualización de firmas.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Previous file page.", "espanol": "Página anterior.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quick save complete.", "espanol": "Grabar rápido completo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quick save.", "espanol": "Grabado rápido.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quick load.", "espanol": "Carga rápida.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The update file was not downloaded.", "espanol": "El archivo de actualización no se ha descargado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The update file does not have the correct digest - it may have been corrupted.", "espanol": "El archivo de actualización no tiene el 'digest' correcto - es posible que esté dañado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "While unpacking {}, unknown type {}.", "espanol": "Tipo desconocido {} al desempaquetar {}.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Done", "espanol": "Hecho", "contexto": "oficial_renpy_ui"}
+{"ingles": "(statement)", "espanol": "(sentencia)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(tag)", "espanol": "(etiqueta)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(attributes)", "espanol": "(atributos)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(transform)", "espanol": "(transformación)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(transition)", "espanol": "(transición)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(channel)", "espanol": "(canal)", "contexto": "oficial_renpy_ui"}
+{"ingles": "(filename)", "espanol": "(archivo)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Updater", "espanol": "Actualizador", "contexto": "oficial_renpy_ui"}
+{"ingles": "Change", "espanol": "Cambiar", "contexto": "oficial_renpy_ui"}
+{"ingles": "An error has occured:", "espanol": "Ha sucedido un error:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Add", "espanol": "Añadir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Checking for updates.", "espanol": "Buscando actualizaciones.", "contexto": "oficial_renpy_ui"}
+{"ingles": "This program is up to date.", "espanol": "Este programa está actualizado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Cancel", "espanol": "Cancelar", "contexto": "oficial_renpy_ui"}
+{"ingles": "[u.version] is available. Do you want to install it?", "espanol": "[u.version] está disponible. ¿Quieres instalarla?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Remove", "espanol": "Eliminar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Preparing to download the updates.", "espanol": "Preparando para descargar la actualización.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Downloading the updates.", "espanol": "Descargando la actualización.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Unpacking the updates.", "espanol": "Desempaquetando la actualización.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Finishing up.", "espanol": "Finalizando.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The updates have been installed. The program will restart.", "espanol": "La actualización ha sido instalada. El programa se reiniciará.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The updates have been installed.", "espanol": "La actualización ha sido instalada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The updates were cancelled.", "espanol": "La actualización ha sido cancelada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Proceed", "espanol": "Continuar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Statement:", "espanol": "Sentencia:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tag:", "espanol": "Etiqueta:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Attributes:", "espanol": "Atributos:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Transforms:", "espanol": "Transformaciones:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Behind:", "espanol": "Detrás:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Transition:", "espanol": "Transición:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Channel:", "espanol": "Canal:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Audio Filename:", "espanol": "Archivo de audio:", "contexto": "oficial_renpy_ui"}
+{"ingles": "rewards.title", "espanol": "Recompensas", "contexto": "oficial_renpy_ui"}
+{"ingles": "rewards.subtitle", "espanol": "¡Contenido exclusivo para recompensar tu apoyo!", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode2.title", "espanol": "Un nuevo comienzo - Encuentros en bruto", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode2.subtitle", "espanol": "Episodio 1-2", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode2.description", "espanol": "Al desbloquear esta recompensa, recibirás los Episodios 1 y 2.", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode3.title", "espanol": "Novelas de espías", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode3.subtitle", "espanol": "Episodio 3", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode3.description", "espanol": "Al desbloquear esta recompensa, recibirás los Episodios 1, 2 y 3.", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode4.title", "espanol": "Actualiza", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode4.subtitle", "espanol": "Episodio 4", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode4.description", "espanol": "Al desbloquear esta recompensa, recibirás los Episodios 1, 2, 3 y 4.", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode5.title", "espanol": "Fiestas frescas", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode5.subtitle", "espanol": "Episodio 5", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode5.description", "espanol": "Al desbloquear esta recompensa, recibirás los Episodios 1, 2, 3, 4 y 5.", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode6.title", "espanol": "El retorno", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode6.subtitle", "espanol": "Episodio 6", "contexto": "oficial_renpy_ui"}
+{"ingles": "episodes.episode6.description", "espanol": "Al desbloquear esta recompensa, recibirás los Episodios 1 a 6.", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.to_unlock", "espanol": "Para recibir esta recompensa, debes cumplir estos requisitos:", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.signed_in", "espanol": "Inicia sesión;", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.active_patreon", "espanol": "Ser miembro activo del Patreon de Oppai-Man;", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.payment", "espanol": "Haber contribuido al menos con <b>{price}</b> al Patreon de Oppai-Man", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.payment_no_user", "espanol": "Tener contribuciones en Patreon.", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.claim", "espanol": "Reclamar recompensa", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.become_patron", "espanol": "Hazte mecenas", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.contribute", "espanol": "Actualiza tu afiliación", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.sign_in", "espanol": "Identifícate", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.error.title", "espanol": "Uy, ¡algo ha salido mal!", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.error.description", "espanol": "Si ves este error a menudo, puede ser que tu navegador esté bloqueando la petición. Intenta acceder con otro navegador.", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.error.try_again", "espanol": "¡Actualiza la página!", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.discount", "espanol": "Si ya has comprado la Temporada 1 de Freshwomen en Steam, ¡haz clic aquí para obtener un mega descuento!", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.card.discount", "espanol": "¡Descuento aplicado!", "contexto": "oficial_renpy_ui"}
+{"ingles": "reward.has_game", "espanol": "¡Gracias por comprar el juego en Steam! ¡Se ha aplicado un descuento para desbloquear Recompensas!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Woman", "espanol": "Mujer", "contexto": "oficial_renpy_ui"}
+{"ingles": "Girl", "espanol": "Chica", "contexto": "oficial_renpy_ui"}
+{"ingles": "Waitress", "espanol": "Camarera", "contexto": "oficial_renpy_ui"}
+{"ingles": "Man", "espanol": "Hombre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Neighbor", "espanol": "Vecina", "contexto": "oficial_renpy_ui"}
+{"ingles": "Father", "espanol": "Padre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Delivery Man", "espanol": "Repartidor", "contexto": "oficial_renpy_ui"}
+{"ingles": "Nurse", "espanol": "Enfermera", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mother", "espanol": "Madre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mr. Alderson", "espanol": "Sr. Alderson", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia's Mother", "espanol": "Madre de Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Female Professor", "espanol": "Profesora", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ms. Watson", "espanol": "Sra. Watson", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dean", "espanol": "Decano", "contexto": "oficial_renpy_ui"}
+{"ingles": "Clerk", "espanol": "Secretaria", "contexto": "oficial_renpy_ui"}
+{"ingles": "Secretary", "espanol": "Secretaria", "contexto": "oficial_renpy_ui"}
+{"ingles": "Boy", "espanol": "Chico", "contexto": "oficial_renpy_ui"}
+{"ingles": "Phone", "espanol": "Teléfono", "contexto": "oficial_renpy_ui"}
+{"ingles": "MACHINE", "espanol": "MÁQUINA", "contexto": "oficial_renpy_ui"}
+{"ingles": "Female voice at phone", "espanol": "Voz femenina al teléfono", "contexto": "oficial_renpy_ui"}
+{"ingles": "Janitor", "espanol": "Conserje", "contexto": "oficial_renpy_ui"}
+{"ingles": "Bear", "espanol": "Oso", "contexto": "oficial_renpy_ui"}
+{"ingles": "Cop", "espanol": "Policía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Policeman", "espanol": "Policía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Officer", "espanol": "Oficial", "contexto": "oficial_renpy_ui"}
+{"ingles": "Security", "espanol": "Seguridad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Male Student", "espanol": "Estudiante masculino", "contexto": "oficial_renpy_ui"}
+{"ingles": "Librarian", "espanol": "Bibliotecaria", "contexto": "oficial_renpy_ui"}
+{"ingles": "Female Student", "espanol": "Estudiante femenina", "contexto": "oficial_renpy_ui"}
+{"ingles": "Professor Nelson", "espanol": "Profesor Nelson", "contexto": "oficial_renpy_ui"}
+{"ingles": "News Reporter", "espanol": "Reportero de noticias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Unknown Sender", "espanol": "Remitente desconocido", "contexto": "oficial_renpy_ui"}
+{"ingles": "Male Professor", "espanol": "Profesor", "contexto": "oficial_renpy_ui"}
+{"ingles": "Girls", "espanol": "Chicas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Masked Student", "espanol": "Estudiante enmascarado", "contexto": "oficial_renpy_ui"}
+{"ingles": "News Anchor", "espanol": "Presentador de noticias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Boy 1", "espanol": "Niño 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "Boy 2", "espanol": "Niño 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Would you like to choose your character's name?", "espanol": "¿Quieres elegir el nombre de tu personaje?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, I'll choose my name", "espanol": "Sí, elegiré mi nombre", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, use the default name", "espanol": "No, utilizaré el nombre por defecto", "contexto": "oficial_renpy_ui"}
+{"ingles": "What is your name?", "espanol": "¿Cuál es tu nombre?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Use default name", "espanol": "Usar nombre predeterminado", "contexto": "oficial_renpy_ui"}
+{"ingles": "We strongly recommend that you download the native version for an optimal experience.", "espanol": "Te recomendamos encarecidamente que descargues la versión nativa para disfrutar de una experiencia óptima.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Download native version", "espanol": "Descargar versión nativa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Continue anyway", "espanol": "Continuar de todas maneras", "contexto": "oficial_renpy_ui"}
+{"ingles": "Nah, this is fine", "espanol": "No, esto está bien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Put on pants", "espanol": "Ponte los pantalones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask about her husband", "espanol": "Pregunta por su esposo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask her about her last name", "espanol": "Pregúntale por su apellido.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Better not ask", "espanol": "Mejor no preguntar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Call her Mrs. Alderson", "espanol": "Llámala Sra. Alderson", "contexto": "oficial_renpy_ui"}
+{"ingles": "Call her Lily", "espanol": "Llámala Lily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 1 - A Fresh Start", "espanol": "Episodio 1 - Un nuevo comienzo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Wait and talk to the girl", "espanol": "Espera y habla con la chica.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take the bus", "espanol": "Toma el autobús", "contexto": "oficial_renpy_ui"}
+{"ingles": "Grab the book", "espanol": "Toma el libro", "contexto": "oficial_renpy_ui"}
+{"ingles": "Let her get it", "espanol": "Deja que ella lo tome", "contexto": "oficial_renpy_ui"}
+{"ingles": "Of course", "espanol": "Por supuesto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Nah", "espanol": "No", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fiction", "espanol": "Ficción", "contexto": "oficial_renpy_ui"}
+{"ingles": "Non-fiction", "espanol": "No ficción", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sure", "espanol": "Claro", "contexto": "oficial_renpy_ui"}
+{"ingles": "Maybe", "espanol": "Tal vez", "contexto": "oficial_renpy_ui"}
+{"ingles": "Okay", "espanol": "De acuerdo", "contexto": "oficial_renpy_ui"}
+{"ingles": "I'm not sure...", "espanol": "No estoy seguro...", "contexto": "oficial_renpy_ui"}
+{"ingles": "See what?", "espanol": "¿Ver qué?", "contexto": "oficial_renpy_ui"}
+{"ingles": "You mean the dance routine?", "espanol": "¿Te refieres al baile?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Americano it is then", "espanol": "Americano entonces", "contexto": "oficial_renpy_ui"}
+{"ingles": "I'm good, thanks", "espanol": "Estoy bien, gracias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sorry for ruining your moment", "espanol": "Lo siento por arruinar tu momento.", "contexto": "oficial_renpy_ui"}
+{"ingles": "I'm glad I got a glimpse", "espanol": "Me alegra haber tenido un vistazo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Comment on her great shape", "espanol": "Comenta sobre su gran forma.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't say anything", "espanol": "No digas nada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Deal", "espanol": "Trato hecho", "contexto": "oficial_renpy_ui"}
+{"ingles": "I'll think about it", "espanol": "Lo pensaré", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fair game", "espanol": "Juego justo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Crush her", "espanol": "Aplástala", "contexto": "oficial_renpy_ui"}
+{"ingles": "Maybe I should just let her win", "espanol": "Tal vez debería dejarla ganar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask for a rematch", "espanol": "Pide una revancha", "contexto": "oficial_renpy_ui"}
+{"ingles": "Say hello", "espanol": "Saluda", "contexto": "oficial_renpy_ui"}
+{"ingles": "When do I start?", "espanol": "¿Cuando empiezo?", "contexto": "oficial_renpy_ui"}
+{"ingles": "So, this job is paying for my rent?", "espanol": "Entonces, ¿este trabajo me paga el alquiler?", "contexto": "oficial_renpy_ui"}
+{"ingles": "How do you know my mother?", "espanol": "¿Cómo conoces a mi madre?", "contexto": "oficial_renpy_ui"}
+{"ingles": "No more questions", "espanol": "No más preguntas", "contexto": "oficial_renpy_ui"}
+{"ingles": "She sure is fun", "espanol": "Seguro que es divertida", "contexto": "oficial_renpy_ui"}
+{"ingles": "She's hot", "espanol": "Está buena", "contexto": "oficial_renpy_ui"}
+{"ingles": "She's a bit too competitive", "espanol": "Es demasiado competitiva", "contexto": "oficial_renpy_ui"}
+{"ingles": "She seems smart", "espanol": "Parece inteligente", "contexto": "oficial_renpy_ui"}
+{"ingles": "She's a bit too nerdy", "espanol": "Es demasiado empollona", "contexto": "oficial_renpy_ui"}
+{"ingles": "She's so kind", "espanol": "Es tan amable", "contexto": "oficial_renpy_ui"}
+{"ingles": "She seems way too busy", "espanol": "Parece demasiado ocupada", "contexto": "oficial_renpy_ui"}
+{"ingles": "There's something interesting about her", "espanol": "Hay algo interesante en ella", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, she's too serious", "espanol": "No, es demasiado seria", "contexto": "oficial_renpy_ui"}
+{"ingles": "She's a total mystery", "espanol": "Es un misterio total", "contexto": "oficial_renpy_ui"}
+{"ingles": "She scares me", "espanol": "Ella me asusta", "contexto": "oficial_renpy_ui"}
+{"ingles": "Knock on the door", "espanol": "Llama a la puerta", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take a closer look", "espanol": "Mira más de cerca", "contexto": "oficial_renpy_ui"}
+{"ingles": "Peek", "espanol": "Echa un vistazo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Leave", "espanol": "Vete", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tea sounds nice", "espanol": "El té suena bien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not really into tea", "espanol": "No me gusta mucho el té", "contexto": "oficial_renpy_ui"}
+{"ingles": "Joke", "espanol": "Bromea", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't joke", "espanol": "No bromees", "contexto": "oficial_renpy_ui"}
+{"ingles": "Accept", "espanol": "Acepta", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't accept", "espanol": "No aceptes", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yep, that's right", "espanol": "Sí, así es", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not exactly", "espanol": "No exactamente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not even you?", "espanol": "¿Ni siquiera a ti?", "contexto": "oficial_renpy_ui"}
+{"ingles": "What are they about?", "espanol": "¿De qué se tratan?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Do it", "espanol": "Hazlo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't do it", "espanol": "No lo hagas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hi, Susan", "espanol": "Hola, Susan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hey, boss", "espanol": "Hola, jefa", "contexto": "oficial_renpy_ui"}
+{"ingles": "What am I delivering?", "espanol": "¿Qué estoy entregando?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Who's the customer?", "espanol": "¿Quién es el cliente?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Nope", "espanol": "No", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take the jeans off", "espanol": "Quítate los jeans", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't take them off", "espanol": "No te los quites", "contexto": "oficial_renpy_ui"}
+{"ingles": "Wave", "espanol": "Saluda", "contexto": "oficial_renpy_ui"}
+{"ingles": "Do nothing", "espanol": "No hagas nada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take shirt off", "espanol": "Quítate la camisa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't take it off", "espanol": "No te la quites", "contexto": "oficial_renpy_ui"}
+{"ingles": "Check Alyssa out", "espanol": "Echa un vistazo a Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't check her out", "espanol": "No le eches un vistazo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Who is it?", "espanol": "¿Quién es?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Shut up!", "espanol": "¡Cállate!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Make fun of her for saying 'auntie'", "espanol": "Ríete de ella por decir \\\"tía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ignore it", "espanol": "Ignóralo", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, you didn't", "espanol": "No, no lo hiciste", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, some other girl did", "espanol": "No, lo hizo otra chica", "contexto": "oficial_renpy_ui"}
+{"ingles": "Thanks", "espanol": "Gracias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Say nothing", "espanol": "No digas nada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell her about the magazine", "espanol": "Cuéntale sobre la revista.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't tell her", "espanol": "No le digas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, end free roam", "espanol": "Sí, finaliza la exploración libre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not yet", "espanol": "Aún no", "contexto": "oficial_renpy_ui"}
+{"ingles": "Check her out a little", "espanol": "Mírala un poco", "contexto": "oficial_renpy_ui"}
+{"ingles": "Compliment her", "espanol": "Hazle un cumplido", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't do anything", "espanol": "No hagas nada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fine, I'll keep an eye on her", "espanol": "Bien, la vigilaré", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, I won't", "espanol": "No, no lo haré", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sure {#ep1_27_julia_call}", "espanol": "Claro {#ep1_27_julia_call}", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tits", "espanol": "Tetas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ass", "espanol": "Culo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Pussy", "espanol": "Vagina", "contexto": "oficial_renpy_ui"}
+{"ingles": "Everything all right?", "espanol": "¿Está todo bien?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rough day?", "espanol": "¿Día difícil?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, thanks", "espanol": "Sí, gracias", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, thank you", "espanol": "No, gracias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Check her out for a moment", "espanol": "Mírala por un momento", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not now", "espanol": "Ahora no", "contexto": "oficial_renpy_ui"}
+{"ingles": "Drink wine", "espanol": "Bebe vino", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hold off for now", "espanol": "Por ahora no", "contexto": "oficial_renpy_ui"}
+{"ingles": "You put on pants before talking to Lily.", "espanol": "Te pones los pantalones antes de hablar con Lily.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't put on pants before talking to Lily.", "espanol": "No te pusiste pantalones antes de hablar con Lily.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You found out more about Lily's husband.", "espanol": "Has averiguado más cosas sobre el marido de Lily.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't ask about Lily's husband.", "espanol": "No has preguntado por el marido de Lily.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You called Lily by her first name.", "espanol": "Llamaste a Lily por su primer nombre.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You called Lily by her last name.", "espanol": "Llamaste a Lily por su apellido.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You discovered a connection between Susan and Mr. Alderson.", "espanol": "Descubriste una conexión entre Susan y el Sr. Alderson.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Lily got very close. Or was it just the wine?", "espanol": "Lily y tú intimasteis mucho. ¿O era sólo el vino?", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe you like fiction books.", "espanol": "Le dijiste a Chloe que te gustan los libros de ficción.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe you like non-fiction books.", "espanol": "Le dijiste a Chloe que te gustan los libros de no ficción.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe you don't like books.", "espanol": "Le has dicho a Chloe que no te gustan los libros.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided to join the book club.", "espanol": "Decidiste unirte al club de lectura.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't give an answer about the book club.", "espanol": "No has dado una respuesta sobre el club de lectura.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You asked Chloe to investigate your boss.", "espanol": "Le pediste a Chloe que investigara a tu jefe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't ask Chloe to investigate your boss.", "espanol": "No le pediste a Chloe que investigara a tu jefe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You accepted Dylan's help with Chloe.", "espanol": "Aceptaste la ayuda de Dylan con Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You refused Dylan's help with Chloe.", "espanol": "Rechazaste la ayuda de Dylan con Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe will call you about her findings.", "espanol": "Chloe te llamará para informarte de sus hallazgos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had an americano.", "espanol": "Te tomaste un americano.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't have any coffee.", "espanol": "No tomaste café.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You agreed to try out the dance lessons.", "espanol": "Aceptaste probar las clases de baile.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't give an answer about the dance lessons.", "espanol": "No has dado una respuesta sobre las clases de baile.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You showed Alyssa the scars on your back.", "espanol": "Le enseñaste a Alyssa las cicatrices de tu espalda.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't show Alyssa your scars.", "espanol": "No le enseñaste a Alyssa tus cicatrices.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa's dance lessons are tomorrow.", "espanol": "Las clases de baile de Alyssa son mañana.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You played Dance Dance Supreme with Julia at the arcade.", "espanol": "Jugaste a Dance Dance Supreme con Julia en la sala de juegos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You beat Julia at Dance Dance Supreme.", "espanol": "Has vencido a Julia en Danza Danza Suprema.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You lost to Julia at Dance Dance Supreme.", "espanol": "Perdiste contra Julia en Dance Dance Supreme.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided it's fine to hang out with Julia, despite her busy schedule.", "espanol": "Has decidido que está bien salir con Julia, a pesar de su apretada agenda.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You're not sure how you feel about Julia being so busy.", "espanol": "No estás seguro de cómo te sientes de que Julia esté tan ocupada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia wants to meet again for a rematch.", "espanol": "Julia quiere volver a encontrarse para la revancha.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You tried to say hi to Sue.", "espanol": "Intentaste saludar a Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't try to talk to Sue.", "espanol": "No intentaste hablar con Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Sue about the magazine with Susan on it.", "espanol": "Le hablaste a Sue de la revista en la que aparecía Susan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't tell Sue about the magazine with Susan on it.", "espanol": "No le contaste a Sue lo de la revista en la que salía Susan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You agreed to help Sue investigate Susan.", "espanol": "Aceptaste ayudar a Sue a investigar a Susan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't give Sue an answer about investigating Susan.", "espanol": "No le has dado a Sue una respuesta sobre la investigación de Susan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You discovered Sue's sweeter side.", "espanol": "Has descubierto el lado más dulce de Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 2 - Raw Encounters", "espanol": "Episodio 2 - Encuentros cercanos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Blue", "espanol": "Azul", "contexto": "oficial_renpy_ui"}
+{"ingles": "Red", "espanol": "Roja", "contexto": "oficial_renpy_ui"}
+{"ingles": "Get mad", "espanol": "Enójate", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell her", "espanol": "Cuéntale", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lean in for a kiss", "espanol": "Acércate y bésala", "contexto": "oficial_renpy_ui"}
+{"ingles": "Join them", "espanol": "Únete a ellos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Not sure", "espanol": "No estoy seguro", "contexto": "oficial_renpy_ui"}
+{"ingles": "Exploit the glitch in the controller", "espanol": "Aprovecha el fallo del mando", "contexto": "oficial_renpy_ui"}
+{"ingles": "Play fair", "espanol": "Juega limpio", "contexto": "oficial_renpy_ui"}
+{"ingles": "Use the glitch again", "espanol": "Usa el fallo otra vez", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't use it a second time", "espanol": "No lo uses por segunda vez", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sneak a peek", "espanol": "Echa un vistazo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't look", "espanol": "No mires", "contexto": "oficial_renpy_ui"}
+{"ingles": "Kiss her", "espanol": "Bésala", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't kiss her", "espanol": "No la beses", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask her to stay", "espanol": "Pídele que se quede", "contexto": "oficial_renpy_ui"}
+{"ingles": "Let her go", "espanol": "Déjala ir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Best friends", "espanol": "Mejores amigos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Friends with benefits", "espanol": "Amigos con beneficios", "contexto": "oficial_renpy_ui"}
+{"ingles": "Maybe a long-term relationship", "espanol": "Tal vez una relación duradera", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help Sue", "espanol": "Ayuda a Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, I'm sure", "espanol": "Sí, estoy seguro", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hold her", "espanol": "Sujétala", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stay how you are", "espanol": "Quédate como estás", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want to see where this goes", "espanol": "Quiero ver a dónde va esto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell her to stop", "espanol": "Dile que se detenga", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take it easy, Sue", "espanol": "Tómatelo con calma, Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "How about you in the palm of my hand?", "espanol": "¿Qué tal tú en la palma de mi mano?", "contexto": "oficial_renpy_ui"}
+{"ingles": "You complimented Chloe on her good detective work.", "espanol": "Has felicitado a Chloe por su buen trabajo de detective.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't say anything to Chloe about her detective work.", "espanol": "No le dijiste nada a Chloe sobre su trabajo de detective.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Chloe shared a nice moment talking about superpowers.", "espanol": "Chloe y tú compartieron un bonito momento hablando de superpoderes.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You got mad at Chloe for joking about your accident.", "espanol": "Te enfadaste con Chloe por bromear sobre tu accidente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe now suspects that Susan had something to do with her husband's death.", "espanol": "Chloe ahora sospecha que Susan tuvo algo que ver con la muerte de su esposo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to tell Chloe about your suspicions of Susan's involvement in Charlie's death.", "espanol": "Decidiste no contarle a Chloe tus sospechas sobre la implicación de Susan en la muerte de Charlie.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Chloe decided to meet up later this week to talk more.", "espanol": "Chloe y tú decidieron verse esta semana para seguir hablando.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You took the red drink. Devilla will remember that.", "espanol": "Tomaste la bebida roja. Devilla lo recordará.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You took the blue drink. Angela will remember that.", "espanol": "Tomaste la bebida azul. Angela lo recordará.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You don't know Dylan's whereabouts.", "espanol": "No conoces el paradero de Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Despite Tyler's injury, you saw how much Alyssa cares about her students and decided to join the team.", "espanol": "A pesar de la lesión de Tyler, viste lo mucho que Alyssa se preocupa por sus alumnos y decidiste unirte al equipo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "After taking part in a dance lesson with Alyssa, you decided you weren't ready to join up just yet.", "espanol": "Tras participar en una clase de baile con Alyssa, decidiste que aún no estabas listo para unirte.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Alyssa shared a nice improvised date at her favorite place. You two are closer now.", "espanol": "Alyssa y tú compartisteis una agradable cita improvisada en su lugar favorito. Ahora estáis más unidos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided a kiss would be taking things too fast with Alyssa and didn't go through with it.", "espanol": "Decidiste que un beso sería tomar las cosas demasiado rápido con Alyssa y no lo hiciste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned Alyssa has an important dance event next week.", "espanol": "Te has enterado de que Alyssa tiene un importante evento de baile la semana que viene.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You took advantage of the controller glitch when playing with Julia.", "espanol": "Aprovechaste el fallo del mando al jugar con Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't take advantage of the controller glitch when playing with Julia.", "espanol": "No aprovechaste el fallo del mando al jugar con Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She ended up figuring out you were cheating.", "espanol": "Acabó descubriendo que la engañabas.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You kissed Julia and shared a hot moment with her. Too bad it had to be cut short.", "espanol": "Besaste a Julia y compartiste un momento caliente con ella. Lástima que tuviera que acortarse.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to take things too far with Julia. She seemed disappointed.", "espanol": "Decidiste no llevar las cosas demasiado lejos con Julia. Ella parecía decepcionada.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia's mom seems very controlling. It might be awhile before the two of you can see each other again.", "espanol": "La madre de Julia parece muy controladora. Puede que pase un tiempo antes de que podáis volver a veros.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You helped keep Sue warm.", "espanol": "Ayudaste a Sue a mantener el calor.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue asked you to hold her and keep her warm.", "espanol": "Sue te pidió que la abrazaras y la mantuvieras caliente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stopped Sue's advances.", "espanol": "Detuviste los avances de Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had sex with Sue.", "espanol": "Tuviste sexo con Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Sue to take it easy though.", "espanol": "Pero le dijiste a Sue que se lo tomara con calma.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Then, you showed her who's in control.", "espanol": "Entonces, le enseñaste quién tiene el control.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned that you've met Charlie before. You may have even had something to do with his accident.", "espanol": "Te has enterado de que ya conocías a Charlie. Puede que incluso hayas tenido algo que ver con su accidente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell her the truth", "espanol": "Dile la verdad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lie", "espanol": "Miéntele", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 3 - Spy Novels", "espanol": "Episodio 3 - Novelas de espías", "contexto": "oficial_renpy_ui"}
+{"ingles": "Defend Dylan", "espanol": "Defender a Dylan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Blame Dylan", "espanol": "Culpa a Dylan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Surrender to Devilla.", "espanol": "Ríndete a Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Resist.", "espanol": "Resiste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Surrender to Angela.", "espanol": "Ríndete a Ángela.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hold on a little longer.", "espanol": "Aguanta un poco más.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stay", "espanol": "Quédate.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Refuse", "espanol": "Rechazar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell the truth", "espanol": "Di la verdad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Make up a story", "espanol": "Imagina una historia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Agree to help", "espanol": "Acepta ayudar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't help", "espanol": "No ayudes", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hug her tighter", "espanol": "Abrázala más fuerte.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Leave it at that", "espanol": "Déjalo así", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sounds good to me", "espanol": "Me parece bien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Bad idea", "espanol": "Mala idea", "contexto": "oficial_renpy_ui"}
+{"ingles": "I hope so.", "espanol": "Eso espero.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Probably not.", "espanol": "Probablemente no.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open the lid", "espanol": "Abre la tapa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Close the lid", "espanol": "Cerrar la tapa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Let her keep going", "espanol": "Déjala seguir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stop her", "espanol": "Detenerla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Remove clothes", "espanol": "Quítate la ropa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stop that", "espanol": "Deja de hacer eso", "contexto": "oficial_renpy_ui"}
+{"ingles": "I don't think so", "espanol": "No lo creo", "contexto": "oficial_renpy_ui"}
+{"ingles": "A little", "espanol": "Un poco", "contexto": "oficial_renpy_ui"}
+{"ingles": "Maybe about the lying part", "espanol": "Tal vez sobre la parte de la mentira", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stood by Dylan and tried defending him.", "espanol": "Apoyaste a Dylan y trataste de defenderlo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You blamed Dylan for the whole situation with the bear.", "espanol": "Culpaste a Dylan por toda la situación con el oso.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't complete Angela and Devilla's challenge.", "espanol": "No has completado el reto de Angela y Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You completed Angela and Devilla's challenge and had a threesome with them.", "espanol": "Has completado el reto de Angela y Devilla y has hecho un trío con ellas.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You completed Angela and Devilla's challenge.", "espanol": "Has completado el desafío de Angela y Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dylan saved the day and returned the bear to Angela and Devilla.", "espanol": "Dylan salvó el día y le devolvió el oso a Angela y Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You agreed to hang out with Chloe and Alyssa.", "espanol": "Aceptaste salir con Chloe y Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You're not sure if you like the idea of hanging out with Chloe and Alyssa at the same time.", "espanol": "No estás seguro de si te gusta la idea de salir con Chloe y Alyssa al mismo tiempo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You agreed to take Tyler's place in Alyssa's dance performance.", "espanol": "Aceptaste ocupar el lugar de Tyler en el espectáculo de danza de Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to dance with Alyssa's group.", "espanol": "Decidiste no bailar con el grupo de Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa's dance performance is set for next week.", "espanol": "La actuación de danza de Alyssa está fijada para la semana que viene.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe the truth about you being late to the café.", "espanol": "Le dijiste a Chloe la verdad sobre que llegaste tarde al café.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You did not tell Chloe the truth about you being late to the café.", "espanol": "No le dijiste a Chloe la verdad sobre que llegaste tarde al café.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe that she could become a great writer.", "espanol": "Le dijiste a Chloe que podría convertirse en una gran escritora.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe you don't think becoming a writer is such a good idea.", "espanol": "Le has dicho a Chloe que no crees que convertirse en escritor sea una buena idea.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Chloe kept watching while Susan and Lily talked about dildos.", "espanol": "Chloe y tú continuaron mirando mientras Susan y Lily hablaban de consoladores.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Chloe to leave Susan and Lily alone to talk about their personal preferences in dildos.", "espanol": "Le dijiste a Chloe que dejara a Susan y a Lily solas para hablar de sus preferencias personales en materia de consoladores.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Chloe had sex for the first time.", "espanol": "Tú y Chloe tuvieron sexo por primera vez.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to take things too far with Chloe.", "espanol": "Decidiste no llevar las cosas demasiado lejos con Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned that Chloe is interested in men and women.", "espanol": "Te has enterado de que a Chloe le interesan los hombres y las mujeres.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You tried telling Susan that you know about Charlie, but she didn't seem to believe you.", "espanol": "Intentaste decirle a Susan que sabías lo de Charlie, pero no pareció creerte.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to tell Susan that you met Charlie before.", "espanol": "Decidiste no decirle a Susan que habías conocido a Charlie.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned some details about Susan and Lily's private lives during their college days.", "espanol": "Aprendiste algunos detalles sobre la vida privada de Susan y Lily durante sus días de universidad.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided to confront Lily about your father going missing.", "espanol": "Decidiste confrontar a Lily por la desaparición de tu padre.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You met Sam.", "espanol": "Conociste a Sam.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 4 - Refresh", "espanol": "Episodio 4 - Actualizar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Shake his hand", "espanol": "Dale la mano", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't shake his hand", "espanol": "No le des la mano", "contexto": "oficial_renpy_ui"}
+{"ingles": "I fucked your wife", "espanol": "Me follé a tu esposa", "contexto": "oficial_renpy_ui"}
+{"ingles": "It's you she doesn't give a shit about", "espanol": "Eres tú lo que le importa una mierda", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, but...", "espanol": "Sí, pero...", "contexto": "oficial_renpy_ui"}
+{"ingles": "Honestly, no", "espanol": "Sinceramente, no", "contexto": "oficial_renpy_ui"}
+{"ingles": "Kiss Julia", "espanol": "Besa a Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hug Julia", "espanol": "Abrazo Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Agree with Emily", "espanol": "De acuerdo con Emily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Disagree with Emily", "espanol": "No estoy de acuerdo con Emily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Continue", "espanol": "Continuar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Deepthroat", "espanol": "Garganta profunda", "contexto": "oficial_renpy_ui"}
+{"ingles": "Creampie", "espanol": "Córrete dentro de ella", "contexto": "oficial_renpy_ui"}
+{"ingles": "Cum", "espanol": "Córrete", "contexto": "oficial_renpy_ui"}
+{"ingles": "Agree with her", "espanol": "De acuerdo con ella", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, it was with me", "espanol": "Sí, fue conmigo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lie and say no", "espanol": "Miente y di que no", "contexto": "oficial_renpy_ui"}
+{"ingles": "I have been spying on you", "espanol": "Te he estado espiando", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue sent me to spy on you", "espanol": "Sue me envió a espiarte", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, I acted alone", "espanol": "No, actué solo", "contexto": "oficial_renpy_ui"}
+{"ingles": "She knew all about it!", "espanol": "¡Ella lo sabía todo!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tell her what happened", "espanol": "Cuéntale lo que ha pasado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take the job", "espanol": "Toma el trabajo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't take the job", "espanol": "No tomes el trabajo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Drive", "espanol": "Conducir", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't drive", "espanol": "No conduzcas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask to stay at her place", "espanol": "Pide quedarte en su casa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't ask", "espanol": "No preguntes", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yeah", "espanol": "Sí", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, sorry", "espanol": "No, lo siento", "contexto": "oficial_renpy_ui"}
+{"ingles": "The ninety percent (Sex)", "espanol": "El noventa por ciento (Sexo)", "contexto": "oficial_renpy_ui"}
+{"ingles": "The ten percent (Other matters)", "espanol": "El diez por ciento (Otros asuntos)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Get up, Sue", "espanol": "Levántate, Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tease her", "espanol": "Provocarla", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want you on top", "espanol": "Te quiero arriba", "contexto": "oficial_renpy_ui"}
+{"ingles": "Slap her ass", "espanol": "Dale nalgadas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't slap her ass", "espanol": "No le des nalgadas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Try the key", "espanol": "Prueba la llave", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't try it", "espanol": "No lo intentes", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want style", "espanol": "Quiero estilo", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want normalcy", "espanol": "Quiero normalidad", "contexto": "oficial_renpy_ui"}
+{"ingles": "It was too much", "espanol": "Fue demasiado", "contexto": "oficial_renpy_ui"}
+{"ingles": "It's fine", "espanol": "Está bien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to continue", "espanol": "Haz clic para continuar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Take the step", "espanol": "Dar el paso", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't take the step", "espanol": "No des el paso", "contexto": "oficial_renpy_ui"}
+{"ingles": "Handjob", "espanol": "Masturbación con la mano", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tit sucking", "espanol": "Chupar tetas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Tease her a little more", "espanol": "Provocarla un poco más", "contexto": "oficial_renpy_ui"}
+{"ingles": "Make her cum", "espanol": "Haz que se corra", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fuck her from the front", "espanol": "Fóllala por delante", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fuck her from behind", "espanol": "Fóllala por detrás", "contexto": "oficial_renpy_ui"}
+{"ingles": "Here", "espanol": "Aquí", "contexto": "oficial_renpy_ui"}
+{"ingles": "You finally met Sam.", "espanol": "Finalmente conociste a Sam.", "contexto": "oficial_renpy_ui"}
+{"ingles": "And you shook his hand.", "espanol": "Y le diste la mano.", "contexto": "oficial_renpy_ui"}
+{"ingles": "And you didn't shake his hand.", "espanol": "Y no le diste la mano.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Sam that you had sex with Lily. He wasn't very happy about it.", "espanol": "Le dijiste a Sam que tuviste sexo con Lily. No estaba muy feliz por eso.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You took the moral high ground by letting Sam know that Lily's upset with him.", "espanol": "Te tomaste la moraleja al hacerle saber a Sam que Lily está molesta con él.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You got kicked out of the apartment.", "espanol": "Te echaron del apartamento.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had lunch with Julia.", "espanol": "Almorzaste con Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You kissed Julia when you saw her.", "espanol": "Besaste a Julia cuando la viste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to kiss Julia in public.", "espanol": "Decidiste no besar a Julia en público.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia seemed a bit jealous when she saw you and Chloe together.", "espanol": "Julia parecía un poco celosa cuando te vio a ti y a Chloe juntos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia invited you to stay at her house.", "espanol": "Julia te invitó a quedarte en su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Julia's.", "espanol": "Te quedaste en casa de Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "But you stayed somewhere else.", "espanol": "Pero te quedaste en otro lugar.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You met Susan at The Beach House.", "espanol": "Conociste a Susan en The Beach House.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You tried to hide information from Susan, but things didn't turn out well.", "espanol": "Intentaste ocultar información a Susan, pero las cosas no salieron bien.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Susan the truth about your memories of the accident.", "espanol": "Le dijiste a Susan la verdad sobre tus recuerdos del accidente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Susan that you were spying on her.", "espanol": "Le dijiste a Susan que la estabas espiando.", "contexto": "oficial_renpy_ui"}
+{"ingles": "And you said you did it by yourself, even though it was Sue's idea.", "espanol": "Y dijiste que lo hiciste tú solo, aunque fue idea de Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You mentioned that Sue was in on the spying, and you explained how Charlie died.", "espanol": "Mencionaste que Sue estaba involucrada en el espionaje y explicaste cómo murió Charlie.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You mentioned that Sue was in on the spying, but you decided not to mention anything else about the accident.", "espanol": "Mencionaste que Sue estaba involucrada en el espionaje, pero decidiste no mencionar nada más sobre el accidente.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Susan that Sue was spying on her.", "espanol": "Le dijiste a Susan que Sue la estaba espiando.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned more about your father, and you accepted the job at the ball.", "espanol": "Aprendiste más sobre tu padre y aceptaste el trabajo en el baile.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned more about your father, but you refused the job at the ball.", "espanol": "Aprendiste más sobre tu padre, pero rechazaste el trabajo en el baile.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You learned more about your father.", "espanol": "Aprendiste más sobre tu padre.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue overheard you talking to Susan.", "espanol": "Sue te escuchó hablando con Susan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You told Susan that Sue sent you to spy on her.", "espanol": "Le dijiste a Susan que Sue te envió a espiarla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue tried to run you over with her car.", "espanol": "Sue intentó atropellarte con su coche.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She seemed very mad at you.", "espanol": "Parecía muy enfadada contigo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't tell Susan that Sue sent you to spy on her.", "espanol": "No le dijiste a Susan que Sue te envió a espiarla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue invited you to stay at her place.", "espanol": "Sue te invitó a quedarte en su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Sue's.", "espanol": "Te quedaste en casa de Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't have sex with Sue.", "espanol": "No tuviste sexo con Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You met Chloe on campus.", "espanol": "Conociste a Chloe en el campus.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe didn't seem to mind the fact that Julia got jealous.", "espanol": "A Chloe no parecía importarle el hecho de que Julia se pusiera celosa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe thanked you for accepting her.", "espanol": "Chloe te agradeció por aceptarla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "When Chloe apologized, you told her she went too far.", "espanol": "Cuando Chloe se disculpó, le dijiste que fue demasiado lejos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You accepted Chloe's apology.", "espanol": "Aceptaste la disculpa de Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe invited you to stay at her place.", "espanol": "Chloe te invitó a quedarte en su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Chloe's", "espanol": "Te quedaste en lo de Chloe", "contexto": "oficial_renpy_ui"}
+{"ingles": "You practiced your dance moves with Alyssa.", "espanol": "Practicaste tus pasos de baile con Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had sex with Alyssa.", "espanol": "Tuviste sexo con Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't have sex with Alyssa.", "espanol": "No tuviste sexo con Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa invited you to stay at her place.", "espanol": "Alyssa te invitó a quedarte en su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Alyssa's", "espanol": "Te quedaste en lo de Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "You went to college with Dylan.", "espanol": "Fuiste a la universidad con Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided to ride in style and got noticed by a girl.", "espanol": "Decidiste montar con estilo y una chica se fijó en ti.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided to take it easy and not call too much attention to yourself.", "espanol": "Decidiste tomártelo con calma y no llamar demasiado la atención.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dylan invited you to stay at his place.", "espanol": "Dylan te invitó a quedarte en su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Dylan's.", "espanol": "Te quedaste en casa de Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Emily visited you.", "espanol": "Emily te visitó.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had sex with her.", "espanol": "Tuviste sexo con ella.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't have sex with her.", "espanol": "No tuviste sexo con ella.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She gave you a key to her apartment.", "espanol": "Ella te dio una llave de su apartamento.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You found the other half of the picture of Susan with you and Emily on it.", "espanol": "Encontraste la otra mitad de la foto de Susan en la que aparecíais Emily y tú.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 5 - Fresh Parties", "espanol": "Episodio 5 - Fiestas frescas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Use the window", "espanol": "Utiliza la ventana", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hide under the bed", "espanol": "Escóndete debajo de la cama", "contexto": "oficial_renpy_ui"}
+{"ingles": "The stock market", "espanol": "El mercado de valores", "contexto": "oficial_renpy_ui"}
+{"ingles": "International politics", "espanol": "Politica internacional", "contexto": "oficial_renpy_ui"}
+{"ingles": "World economics", "espanol": "Economía mundial", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask Dylan", "espanol": "Pregúntale a Dylan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Apologize", "espanol": "Disculparse", "contexto": "oficial_renpy_ui"}
+{"ingles": "Talk to Gabby", "espanol": "Habla con Gabby", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't talk to her", "espanol": "No hables con ella", "contexto": "oficial_renpy_ui"}
+{"ingles": "I'm ready", "espanol": "Estoy listo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Assjob", "espanol": "Trabajo de culo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Blowjob", "espanol": "Mamada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Over the table", "espanol": "Sobre la mesa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Doggy Style", "espanol": "Estilo perrito", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mouth", "espanol": "Boca", "contexto": "oficial_renpy_ui"}
+{"ingles": "Breasts", "espanol": "Pechos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Butt", "espanol": "Culo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Ask Devilla for help", "espanol": "Pide ayuda a Devilla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't ask Devilla for help", "espanol": "No pidas ayuda a Devilla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Accept Devilla's job", "espanol": "Acepta el trabajo de Devilla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't accept the job", "espanol": "No aceptes el trabajo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Put on some upbeat music", "espanol": "Pon música alegre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Put on some calm music", "espanol": "Pon música tranquila", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want you", "espanol": "Te deseo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Missionary", "espanol": "Misionario", "contexto": "oficial_renpy_ui"}
+{"ingles": "Miss on purpose", "espanol": "Fallar a propósito", "contexto": "oficial_renpy_ui"}
+{"ingles": "Try to win", "espanol": "Intenta ganar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Let's", "espanol": "Vamos a", "contexto": "oficial_renpy_ui"}
+{"ingles": "Better not", "espanol": "Mejor no", "contexto": "oficial_renpy_ui"}
+{"ingles": "Face", "espanol": "Cara", "contexto": "oficial_renpy_ui"}
+{"ingles": "Belly", "espanol": "Vientre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Go with Mae", "espanol": "Ir con Mae", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't go with her", "espanol": "No vayas con ella", "contexto": "oficial_renpy_ui"}
+{"ingles": "Interrogate Sam", "espanol": "Interroga a Sam", "contexto": "oficial_renpy_ui"}
+{"ingles": "Release Sam", "espanol": "Libera a Sam", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lily called you, asking you to come to her house.", "espanol": "Lily te llamó para pedirte que fueras a su casa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had a conversation, then you decided to stay and have a party.", "espanol": "Habéis mantenido una conversación y luego habéis decidido quedaros a celebrar una fiesta.", "contexto": "oficial_renpy_ui"}
+{"ingles": "After your party, you had sex.", "espanol": "Después de tu fiesta, tuviste sexo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You talked.", "espanol": "Tú hablaste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Then you left.", "espanol": "Entonces te fuiste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You returned your apartment key.", "espanol": "Has devuelto la llave de tu apartamento.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You jumped out of Julia's window, completely unnoticed.", "espanol": "Saltaste por la ventana de Julia, completamente desapercibido.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You tried to hide under the bed, but her mother saw you.", "espanol": "Intentaste esconderte bajo la cama, pero su madre te vio.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't stay at Julia's.", "espanol": "No te quedaste en casa de Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You had sex with Julia.", "espanol": "Te acostaste con Julia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Julia talked on the balcony during the party.", "espanol": "Julia y tú hablasteis en el balcón durante la fiesta.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't stay at Sue's.", "espanol": "No te quedaste en casa de Sue.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue was at the frat party.", "espanol": "Sue estaba en la fiesta de la fraternidad.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She refereed the beer pong game.", "espanol": "Arbitró la partida de beer pong.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She was still mad at you.", "espanol": "Todavía estaba enfadada contigo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She made sure the game was fair.", "espanol": "Se aseguró de que el juego fuera limpio.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Chloe's.", "espanol": "Te quedaste con Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe helped you do some more research before the ball.", "espanol": "Chloe te ayudó a investigar más antes del baile.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't stay at Chloe's.", "espanol": "No te quedaste en casa de Chloe.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe helped you find a bathing suit.", "espanol": "Chloe te ayudó a encontrar un traje de baño.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You won at beer pong, but she refused to kiss Dylan.", "espanol": "Ganaste en el beer pong, pero ella se negó a besar a Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You lost the beer pong game on purpose, and Chloe stood up for Alyssa.", "espanol": "Perdiste la partida de beer pong a propósito, y Chloe defendió a Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stayed at Alyssa's.", "espanol": "Te quedaste con Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't stay at Alyssa's.", "espanol": "No te quedaste en casa de Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa was your partner for beer pong.", "espanol": "Alyssa era tu pareja para el beer pong.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You won at beer pong.", "espanol": "Ganaste en el beer pong.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You lost the beer pong game on purpose, and Alyssa was very uncomfortable with the punishment.", "espanol": "Perdiste la partida de beer pong a propósito, y Alyssa se sintió muy incómoda con el castigo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You danced with Alyssa's group, and the dance went well.", "espanol": "Bailaste con el grupo de Alyssa, y el baile fue bien.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't dance with Alyssa's group.", "espanol": "No bailaste con el grupo de Alyssa.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't stay at Dylan's.", "espanol": "No te quedaste en casa de Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You stood up for Dylan when the professor held you back for a word after class.", "espanol": "Defendiste a Dylan cuando el profesor te retuvo unas palabras después de clase.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You agreed with what the professor had to say about Dylan.", "espanol": "Estabas de acuerdo con lo que decía el profesor sobre Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You won at beer pong, fueling Dylan's rage even further.", "espanol": "Ganaste en el beer pong, alimentando aún más la rabia de Dylan.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You lost the beer pong game on purpose, feeling like Dylan needed the win more than you.", "espanol": "Perdiste la partida de beer pong a propósito, sintiendo que Dylan necesitaba la victoria más que tú.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You and Dylan had a misunderstanding and are not talking to one another.", "espanol": "Dylan y tú habéis tenido un malentendido y no os habláis.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You met Gabby.", "espanol": "Conociste a Gabby.", "contexto": "oficial_renpy_ui"}
+{"ingles": "She noticed you before because of the hats you and Dylan were wearing.", "espanol": "Antes se fijó en ti por los sombreros que llevabais Dylan y tú.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided to talk to Gabby about what was on your mind.", "espanol": "Decidiste hablar con Gabby sobre lo que te rondaba por la cabeza.", "contexto": "oficial_renpy_ui"}
+{"ingles": "That led to the two of you having sex.", "espanol": "Eso os llevó a los dos a tener relaciones sexuales.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Which then led to you running naked through campus.", "espanol": "Lo que luego te llevó a correr desnuda por el campus.", "contexto": "oficial_renpy_ui"}
+{"ingles": "But you decided that doing anything more in that room would be too much of a risk.", "espanol": "Pero decidiste que hacer algo más en esa habitación sería demasiado arriesgado.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You decided not to talk to Gabby about what was bothering you.", "espanol": "Decidiste no hablar con Gabby sobre lo que te preocupaba.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You asked Devilla for help.", "espanol": "Pediste ayuda a Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You accepted Devilla's job offer.", "espanol": "Has aceptado la oferta de trabajo de Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't accept Devilla's job offer.", "espanol": "No aceptaste la oferta de trabajo de Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You didn't ask Devilla for help.", "espanol": "No le pediste ayuda a Devilla.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Gallery Content Unlocked!", "espanol": "¡Contenido de la galería desbloqueado!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa's Gallery", "espanol": "Galería de Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hidden memories remaining:", "espanol": "Recuerdos ocultos restantes:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Landlady", "espanol": "Casera", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Lily", "espanol": "Conoce a Lily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Scarred Memories", "espanol": "Recuerdos cicatrizados", "contexto": "oficial_renpy_ui"}
+{"ingles": "Remember your past trauma", "espanol": "Recuerda tus traumas pasados", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dictionary Girl", "espanol": "Chica Diccionario", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Chloe", "espanol": "Conoce a Chloe", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Alyssa", "espanol": "Conoce a Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Julia", "espanol": "Conoce a Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "BusinessWoman", "espanol": "Mujer de negocios", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Susan", "espanol": "Conoce a Susan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Towel", "espanol": "Toalla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Emily", "espanol": "Conoce a Emily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't close Emily's door", "espanol": "No cierres la puerta de Emily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hot Bath", "espanol": "Baño caliente", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dream about Lily (Ep 1)", "espanol": "Sueña con Lily (Ep 1)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sleep Well", "espanol": "Duerme bien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Emily (Ep 1)", "espanol": "Hazlo con Emily (Ep 1)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Package Delivered", "espanol": "Paquete entregado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Mae (Ep 1)", "espanol": "Hazlo con Mae (Ep 1)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dipshit", "espanol": "Idiota", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hear Sue's voice", "espanol": "Escucha la voz de Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "Susan's Secret", "espanol": "El secreto de Susan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Find Susan's mask", "espanol": "Encuentra la máscara de Susan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Broken Sink", "espanol": "Fregadero roto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Break the Sink", "espanol": "Rompe el fregadero", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sink Fixed", "espanol": "Fregadero arreglado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Lily (Ep 1)", "espanol": "Hazlo con Lily (Ep 1)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rise and Shine", "espanol": "A levantarse", "contexto": "oficial_renpy_ui"}
+{"ingles": "Answer Chloe's call (Ep 2)", "espanol": "Contéstale de Chloe (Ep 2)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hangover", "espanol": "Resaca", "contexto": "oficial_renpy_ui"}
+{"ingles": "Drink too much", "espanol": "Bebe demasiado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stretch", "espanol": "Estiramiento", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stretch with Alyssa", "espanol": "Haz estiramiento con Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Second Date", "espanol": "Segunda cita", "contexto": "oficial_renpy_ui"}
+{"ingles": "Kiss Alyssa", "espanol": "Besa a Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Loser", "espanol": "Perdedor", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lose to Julia (Ep 2)", "espanol": "Pierde contra Julia (Ep 2)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Winner", "espanol": "Ganador", "contexto": "oficial_renpy_ui"}
+{"ingles": "Beat Julia in the game (Ep2)", "espanol": "Vence jugando a Julia (Ep2)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Movie Night", "espanol": "Noche de cine", "contexto": "oficial_renpy_ui"}
+{"ingles": "You can see", "espanol": "Puedes ver", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Sue (Ep 2)", "espanol": "Hazlo con Sue (Ep 2)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Learn more about Charlie", "espanol": "Aprende más acerca de Charlie", "contexto": "oficial_renpy_ui"}
+{"ingles": "As she planned", "espanol": "Tal y como ella planeó", "contexto": "oficial_renpy_ui"}
+{"ingles": "Get rescued by Susan", "espanol": "Fuiste rescatado por Susan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hell Girls", "espanol": "Diablitas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Hell Girls (Ep 3)", "espanol": "Hazlo con las Diablitas (Ep 3)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Miss South America", "espanol": "Miss América del Sur", "contexto": "oficial_renpy_ui"}
+{"ingles": "Complete Devilla's trial", "espanol": "Completa la prueba de Devilla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dream Cafe", "espanol": "Café de los Sueños", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dream about Chloe and Alyssa", "espanol": "Sueña con Chloe y Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alcoholic Bear", "espanol": "Oso alcohólico", "contexto": "oficial_renpy_ui"}
+{"ingles": "Survive the bear attack", "espanol": "Sobrevive al ataque del oso", "contexto": "oficial_renpy_ui"}
+{"ingles": "College Days", "espanol": "Días de la universidad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Spy on Susan and Lily", "espanol": "Espía a Susan y Lily", "contexto": "oficial_renpy_ui"}
+{"ingles": "Drone Owner", "espanol": "Dueño de un dron", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Chloe (Ep 3)", "espanol": "Hazlo con Chloe (Ep 3)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Worst Lunch Ever", "espanol": "El peor almuerzo de todos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Face Sam (Ep 4)", "espanol": "Enfréntate a Sam (Ep 4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dessert", "espanol": "Postre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lunch with Julia (Ep 4)", "espanol": "Almuerza con Julia (Ep 4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Crazy Heart", "espanol": "Corazón loco", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Emily (Ep 4)", "espanol": "Hazlo con Emily (Ep 4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Two Keys", "espanol": "Dos llaves", "contexto": "oficial_renpy_ui"}
+{"ingles": "Receive two mysterious keys", "espanol": "Recibe dos llaves misteriosas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hell and Back", "espanol": "Al infierno y de vuelta", "contexto": "oficial_renpy_ui"}
+{"ingles": "Have a bad dream", "espanol": "Ten un mal sueño", "contexto": "oficial_renpy_ui"}
+{"ingles": "My Father", "espanol": "Mi padre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Learn about your father's fate", "espanol": "Conoce el destino de tu padre", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sue's Invitation", "espanol": "Invitación de Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "Receive Sue's invitation", "espanol": "Recibe la invitación de Sue", "contexto": "oficial_renpy_ui"}
+{"ingles": "Wild Ride", "espanol": "Paseo salvaje", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Sue (Ep 4)", "espanol": "Hazlo con Sue (Ep 4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Alyssa's Invitation", "espanol": "Invitación de Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Receive Alyssa's invitation", "espanol": "Recibe la invitación de Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Chloe's Invitation", "espanol": "Invitación de Chloe", "contexto": "oficial_renpy_ui"}
+{"ingles": "Receive Chloe's invitation", "espanol": "Recibe la invitación de Chloe", "contexto": "oficial_renpy_ui"}
+{"ingles": "Julia's Invitation", "espanol": "Invitación de Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Receive Julias's invitation", "espanol": "Recibe la invitación de Julias", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dance", "espanol": "Danza", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dance with Alyssa", "espanol": "Baila con Alyssa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Third Date", "espanol": "Tercera cita", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Alyssa (Ep 4)", "espanol": "Hazlo con Alyssa (Ep 4)", "contexto": "oficial_renpy_ui"}
+{"ingles": "No home tonight", "espanol": "Sin casa esta noche", "contexto": "oficial_renpy_ui"}
+{"ingles": "See the rest of the picture", "espanol": "Mira el resto de la foto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Dylan's Secret", "espanol": "El secreto de Dylan", "contexto": "oficial_renpy_ui"}
+{"ingles": "See Dylan's Closet", "espanol": "Mira el armario de Dylan", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fire Exit", "espanol": "Salida de incendios", "contexto": "oficial_renpy_ui"}
+{"ingles": "Escape Julia's mom", "espanol": "Escapa de la mamá de Julia", "contexto": "oficial_renpy_ui"}
+{"ingles": "World Economy", "espanol": "Economía mundial", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Professor", "espanol": "Conoce a la profesora", "contexto": "oficial_renpy_ui"}
+{"ingles": "Relaxed Student", "espanol": "Estudiante relajado", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Gabby (Ep 5)", "espanol": "Hazlo con Gabby (Ep 5)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Repeated Mistakes", "espanol": "Errores repetidos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Lily (Ep 5)", "espanol": "Hazlo con Lily (Ep 5)", "contexto": "oficial_renpy_ui"}
+{"ingles": "First Time", "espanol": "Primera vez", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Julia (Ep 5)", "espanol": "Hazlo con Julia (Ep 5)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Childhood memories", "espanol": "Recuerdos de infancia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Remember your childhood", "espanol": "Recuerda tu infancia", "contexto": "oficial_renpy_ui"}
+{"ingles": "Puppy Pizza", "espanol": "Pizza para cachorros", "contexto": "oficial_renpy_ui"}
+{"ingles": "Have a slice of pizza with Fred", "espanol": "Come una porción de pizza con Fred", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Carolyne", "espanol": "Conoce a Carolyne", "contexto": "oficial_renpy_ui"}
+{"ingles": "Don't miss your appointment", "espanol": "No faltes a tu cita", "contexto": "oficial_renpy_ui"}
+{"ingles": "Treatment", "espanol": "Tratamiento", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Carolyne (S2E01)", "espanol": "Ama a Carolyne (S2E01)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Old West", "espanol": "Viejo Oeste", "contexto": "oficial_renpy_ui"}
+{"ingles": "Meet Chloe at the diner", "espanol": "Conoce a Chloe en el restaurante", "contexto": "oficial_renpy_ui"}
+{"ingles": "Cowboy", "espanol": "Vaquero", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Chloe (S2E01)", "espanol": "Ama a Chloe (S2E01)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Pizza Time!", "espanol": "Hora de la pizza", "contexto": "oficial_renpy_ui"}
+{"ingles": "Have a pizza party with friends", "espanol": "Tener una fiesta de pizza con amigos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Another happy delivery", "espanol": "Otra entrega feliz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help Sue with the boxes", "espanol": "Ayuda a Sue con las cajas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Drinking games", "espanol": "Juegos de beber", "contexto": "oficial_renpy_ui"}
+{"ingles": "Challenge Gabby to kiss someone", "espanol": "Reta a Gabby a besar a alguien", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, sir", "espanol": "Sí, señor", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Gabby (S2E02)", "espanol": "Ama a Gabby (S2E02)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Skinny dipping", "espanol": "Inmersión delgada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help Dylan meet girls", "espanol": "Ayuda a Dylan a conocer chicas", "contexto": "oficial_renpy_ui"}
+{"ingles": "Under the desk", "espanol": "Bajo el escritorio", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Julia (S2E02)", "espanol": "Amar a Julia (S2E02)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Create chaos at College", "espanol": "Crea el caos en la Universidad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Frat Challenge", "espanol": "Desafío Fraternidad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Celebrate freedom", "espanol": "Celebra la libertad", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Lily (S2E03)", "espanol": "Amor Lily (S2E03)", "contexto": "oficial_renpy_ui"}
+{"ingles": "On the Bar", "espanol": "En el bar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Love Devilla (S2E03)", "espanol": "Amor Devilla (S2E03)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Created by", "espanol": "Creado por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Story by", "espanol": "Historia por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Renders by", "espanol": "Renders por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Animations by", "espanol": "Animaciones por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Programmed by", "espanol": "Programado por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Discord Staff", "espanol": "Personal de Discord", "contexto": "oficial_renpy_ui"}
+{"ingles": "Beta Testers", "espanol": "Beta Tester", "contexto": "oficial_renpy_ui"}
+{"ingles": "Itch.io Supporters", "espanol": "Partidarios de Itch.io", "contexto": "oficial_renpy_ui"}
+{"ingles": "Special Thanks", "espanol": "Agradecimiento especial", "contexto": "oficial_renpy_ui"}
+{"ingles": "Music", "espanol": "Música", "contexto": "oficial_renpy_ui"}
+{"ingles": "Lookdev by", "espanol": "Lookdev por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Voice Acting by", "espanol": "Actuación de voz de", "contexto": "oficial_renpy_ui"}
+{"ingles": "Translation by", "espanol": "Traducción de", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click here to write your feedback", "espanol": "Haz clic aquí para escribir tu opinión", "contexto": "oficial_renpy_ui"}
+{"ingles": "Loading translation...", "espanol": "Cargando la traducción...", "contexto": "oficial_renpy_ui"}
+{"ingles": "Proofread system could not find string. Just skip this one.", "espanol": "El sistema de corrección no pudo encontrar la línea. Omite esta.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Suggest better translation", "espanol": "Sugiere una traducción mejor", "contexto": "oficial_renpy_ui"}
+{"ingles": "Join our translation community", "espanol": "Únete a nuestra comunidad de traductores", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help us proofread the game to your language.", "espanol": "Ayúdanos a corregir el juego a tu idioma.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You'll now see the english text and a suggestion button.", "espanol": "Ahora verás el texto en inglés y un botón de sugerencia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You must create a crowdin account to make a suggestion.", "espanol": "Debes crear una cuenta de Crowdin para hacer una sugerencia.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Create an account", "espanol": "Crear una cuenta", "contexto": "oficial_renpy_ui"}
+{"ingles": "I already have an account", "espanol": "Ya tengo una cuenta", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, I want to give feedback", "espanol": "Sí, haré una reseña", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, thanks.", "espanol": "No, gracias.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Are you enjoying this game so far?", "espanol": "¿Estás disfrutando el juego hasta ahora?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes!", "espanol": "¡Sí!", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, I'm not", "espanol": "No, no lo estoy", "contexto": "oficial_renpy_ui"}
+{"ingles": "Do you want to buy the game?", "espanol": "¿Quieres comprar el juego?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Buy Full Game", "espanol": "Comprar el juego completo", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, Continue free demo", "espanol": "No, Continúa con la demostración gratuita", "contexto": "oficial_renpy_ui"}
+{"ingles": "Do you want to review this game?", "espanol": "¿Quieres reseñar este juego?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes, I want to review this game", "espanol": "Sí, quiero reseñar este juego", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, I don't want to review this game", "espanol": "No, no quiero reseñar este juego", "contexto": "oficial_renpy_ui"}
+{"ingles": "Where did you download this game?", "espanol": "¿Dónde descargaste este juego?", "contexto": "oficial_renpy_ui"}
+{"ingles": "St", "espanol": "San", "contexto": "oficial_renpy_ui"}
+{"ingles": "Other place", "espanol": "Otro lugar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to buy the full game", "espanol": "Haz clic para comprar el juego completo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click on the top right  button to buy the full game.", "espanol": "Haz clic en el botón superior derecho para comprar el juego completo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "This game is only possible thanks to the generous donations and support from hundreds of thousands of Supporters.", "espanol": "Este juego sólo es posible gracias a las generosas donaciones y al apoyo de cientos de miles de simpatizantes.", "contexto": "oficial_renpy_ui"}
+{"ingles": "A huge thanks to all my Supporters that had faith in me.", "espanol": "Un enorme agradecimiento a todos mis seguidores que han confiado en mí.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Thank you for believing in this game.", "espanol": "Gracias por creer en este juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Thank you for playing!", "espanol": "¡Gracias por jugar!", "contexto": "oficial_renpy_ui"}
+{"ingles": "You have reached the end of the demo.", "espanol": "Has llegado al final de la demo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Please support the development of FreshWomen:", "espanol": "Por favor, apoya el desarrollo de FreshWomen:", "contexto": "oficial_renpy_ui"}
+{"ingles": "As a supporter you get access to the latest episodes and previews.", "espanol": "Como simpatizante tienes acceso a los últimos episodios y avances.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Thank you very much for playing!", "espanol": "¡Muchas gracias por jugar!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Continue the story with 8 more hours of content", "espanol": "Continúa la historia con 8 horas más de contenido", "contexto": "oficial_renpy_ui"}
+{"ingles": "You have reached the end of this version.", "espanol": "Has llegado al final de esta versión.", "contexto": "oficial_renpy_ui"}
+{"ingles": "As a supporter you get access to the latest news and previews.", "espanol": "Al apoyarnos, tienes acceso a las últimas noticias y avances.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Get notified when the NEXT EPISODE comes out", "espanol": "Recibe una notificación cuando salga el PRÓXIMO EPISODIO", "contexto": "oficial_renpy_ui"}
+{"ingles": "BONUS: Get 4K images of the girls in your inbox", "espanol": "BONUS: Recibe imágenes 4K de las chicas en tu bandeja de entrada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click here to subscribe (English Only)", "espanol": "Haz clic aquí para suscribirte (solo en inglés)", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to support the game development on Patreon", "espanol": "Haz clic para apoyar el desarrollo del juego en Patreon", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to support the game development on Steam", "espanol": "Haz clic para apoyar el desarrollo del juego en Steam", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to support the game development on Itch.io", "espanol": "Haz clic para apoyar el desarrollo del juego en Itch.io", "contexto": "oficial_renpy_ui"}
+{"ingles": "FreshWomen will return in [next_episode_name]", "espanol": "Las FreshWomen volverán en [next_episode_name]", "contexto": "oficial_renpy_ui"}
+{"ingles": "This game is only possible thanks to the generous donations and support from thousands of Supporters.", "espanol": "Este juego sólo es posible gracias a las generosas donaciones y al apoyo de miles de seguidores.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Stay tuned for the next episode.", "espanol": "Permanece atento al próximo episodio.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Reward Unlocked!", "espanol": "¡Recompensa desbloqueada!", "contexto": "oficial_renpy_ui"}
+{"ingles": "You've found a reward!", "espanol": "¡Has encontrado una recompensa!", "contexto": "oficial_renpy_ui"}
+{"ingles": "Rewards are special renders hidden in certain areas when you have free roam.", "espanol": "Las recompensas son renders especiales ocultos en ciertas zonas cuando tienes libertad de movimiento.", "contexto": "oficial_renpy_ui"}
+{"ingles": "You can check them out on your phone's gallery app.", "espanol": "Puedes consultarlas en la aplicación Galería de tu teléfono.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Walkthrough Mod", "espanol": "Guía", "contexto": "oficial_renpy_ui"}
+{"ingles": "In-game Walkthrough", "espanol": "Guía dentro del juego", "contexto": "oficial_renpy_ui"}
+{"ingles": "Best choices are green", "espanol": "Las mejores opciones son verdes", "contexto": "oficial_renpy_ui"}
+{"ingles": "On", "espanol": "Activar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Walkthrough PDF", "espanol": "Guía en PDF", "contexto": "oficial_renpy_ui"}
+{"ingles": "English only", "espanol": "Sólo en inglés", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open Full Guide", "espanol": "Abrir la guía completa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open Walkthrough PDF in another window?", "espanol": "¿Abrir la guía en PDF en otra ventana?", "contexto": "oficial_renpy_ui"}
+{"ingles": "START SEASON 1", "espanol": "INICIO TEMPORADA 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "START SEASON 2", "espanol": "INICIO TEMPORADA 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "BACK", "espanol": "VOLVER", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 1", "espanol": "Episodio 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 2", "espanol": "Episodio 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 3", "espanol": "Episodio 3", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 4", "espanol": "Episodio 4", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 5", "espanol": "Episodio 5", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 2 - Part 1", "espanol": "Episodio 2 - Parte 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 2 - Part 2", "espanol": "Episodio 2 - Parte 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 2 - Part 3", "espanol": "Episodio 2 - Parte 3", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 3 - Part 1", "espanol": "Episodio 3 - Parte 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "Episode 3 - Part 2", "espanol": "Episodio 3 - Parte 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Select who you're in good terms with", "espanol": "Selecciona con quién tienes buena relación", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sexual Interest in:", "espanol": "Interés sexual en:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Friendship with:", "espanol": "Amistad con:", "contexto": "oficial_renpy_ui"}
+{"ingles": "START", "espanol": "COMENZAR", "contexto": "oficial_renpy_ui"}
+{"ingles": "End of Season [marketing_season] Episode [marketing_episode] Part [part]", "espanol": "Final de temporada [marketing_season] Episodio [marketing_episode] Parte [part]", "contexto": "oficial_renpy_ui"}
+{"ingles": "Save your game now.", "espanol": "Guarda tu partida ahora.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help", "espanol": "Ayuda", "contexto": "oficial_renpy_ui"}
+{"ingles": "Go to our Discord Server and send your request on the #help-and-bug-reports channel.", "espanol": "Ve a nuestro servidor de Discord y envía tu solicitud en el canal #help-and-bug-reports.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Our community will be happy to help you out!", "espanol": "¡Nuestra comunidad estará encantada de ayudarte!", "contexto": "oficial_renpy_ui"}
+{"ingles": "English-Only", "espanol": "Sólo en inglés", "contexto": "oficial_renpy_ui"}
+{"ingles": ">>>> Click here to Ask for help on Discord <<<<", "espanol": ">>>> Haz clic aquí para pedir ayuda en Discord <<<<", "contexto": "oficial_renpy_ui"}
+{"ingles": "Start", "espanol": "Comenzar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Save", "espanol": "Guardar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Load", "espanol": "Cargar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Options", "espanol": "Opciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Gallery", "espanol": "Galería", "contexto": "oficial_renpy_ui"}
+{"ingles": "End Replay", "espanol": "Terminar repetición", "contexto": "oficial_renpy_ui"}
+{"ingles": "Main Menu", "espanol": "Menú principal", "contexto": "oficial_renpy_ui"}
+{"ingles": "Quit", "espanol": "Salir", "contexto": "oficial_renpy_ui"}
+{"ingles": "empty slot", "espanol": "Ranura vacía", "contexto": "oficial_renpy_ui"}
+{"ingles": "Yes", "espanol": "Sí", "contexto": "oficial_renpy_ui"}
+{"ingles": "Hey! You're in Developer Mode!", "espanol": "¡Oye! ¡Estás en el modo desarrollador!", "contexto": "oficial_renpy_ui"}
+{"ingles": "CLICK TO DISABLE DEBUG MODE", "espanol": "HAZ CLIC PARA DESACTIVAR EL MODO DE DEPURACIÓN", "contexto": "oficial_renpy_ui"}
+{"ingles": "DISABLE DEBUG MODE", "espanol": "DESACTIVAR EL MODO DE DEPURACIÓN", "contexto": "oficial_renpy_ui"}
+{"ingles": "You are using a mod that is known for being full of bugs that will crash your game.", "espanol": "Estás utilizando un mod que es conocido por estar lleno de errores que harán crashear tu juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Remove any mods and restart the game.", "espanol": "Elimina los mods y reinicia el juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "If you want to support the 10-people team making this game:", "espanol": "Si quieres apoyar al equipo de 10 personas que hace este juego:", "contexto": "oficial_renpy_ui"}
+{"ingles": "(Optional) Get the OFFICIAL version because all money is invested back into more content.", "espanol": "(Opcional) Consigue la versión OFICIAL porque todo el dinero se invierte en más contenido.", "contexto": "oficial_renpy_ui"}
+{"ingles": "WARNING!", "espanol": "¡ADVERTENCIA!", "contexto": "oficial_renpy_ui"}
+{"ingles": "This game contains adult material and is reserved for an adult public.", "espanol": "Este juego contiene material para adultos y está reservado a un público adulto.", "contexto": "oficial_renpy_ui"}
+{"ingles": "All characters in this game are fictional and over the legal age of 18 years old.", "espanol": "Todos los personajes de este juego son ficticios y mayores de 18 años.", "contexto": "oficial_renpy_ui"}
+{"ingles": "If you are easily offended or in a tough period of your life, this game is not for you.", "espanol": "Si te ofendes con facilidad o estás en un periodo difícil de tu vida, este juego no es para ti.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Character Voices", "espanol": "Voces de los personajes", "contexto": "oficial_renpy_ui"}
+{"ingles": "Voices", "espanol": "Voces", "contexto": "oficial_renpy_ui"}
+{"ingles": "This can happen if you're using mods, altered the game in any way, or are a part of the dev-team.", "espanol": "Esto puede ocurrir si utilizas mods, alteras el juego de alguna manera o formas parte del equipo de desarrollo.", "contexto": "oficial_renpy_ui"}
+{"ingles": "NEW GAME", "espanol": "JUEGO NUEVO", "contexto": "oficial_renpy_ui"}
+{"ingles": "CONTINUE", "espanol": "CONTINUAR", "contexto": "oficial_renpy_ui"}
+{"ingles": "OPTIONS", "espanol": "OPCIONES", "contexto": "oficial_renpy_ui"}
+{"ingles": "Next Episode Notification", "espanol": "Notificación del próximo episodio", "contexto": "oficial_renpy_ui"}
+{"ingles": "Get Season 2 Preview Images for FREE", "espanol": "Consigue GRATIS las imágenes del avance de la 2ª temporada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Download FREE Adult Games", "espanol": "Descargar juegos para adultos GRATIS", "contexto": "oficial_renpy_ui"}
+{"ingles": "Performance and Resolution", "espanol": "Rendimiento y resolución", "contexto": "oficial_renpy_ui"}
+{"ingles": "Animation", "espanol": "Animación", "contexto": "oficial_renpy_ui"}
+{"ingles": "Image", "espanol": "Imagen", "contexto": "oficial_renpy_ui"}
+{"ingles": "Restart the game to change resolution", "espanol": "Reinicia el juego para cambiar la resolución", "contexto": "oficial_renpy_ui"}
+{"ingles": "1440p and 2160p are only available from Season 2 onward.", "espanol": "1440p y 2160p sólo están disponibles a partir de la Temporada 2.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Display", "espanol": "Pantalla", "contexto": "oficial_renpy_ui"}
+{"ingles": "Performance", "espanol": "Rendimiento", "contexto": "oficial_renpy_ui"}
+{"ingles": "Window", "espanol": "Ventana", "contexto": "oficial_renpy_ui"}
+{"ingles": "Fullscreen", "espanol": "Pantalla completa", "contexto": "oficial_renpy_ui"}
+{"ingles": "Skip", "espanol": "Saltar", "contexto": "oficial_renpy_ui"}
+{"ingles": "Unseen Text", "espanol": "Texto aún no visto", "contexto": "oficial_renpy_ui"}
+{"ingles": "After Choices", "espanol": "Después de las decisiones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Transitions", "espanol": "Transiciones", "contexto": "oficial_renpy_ui"}
+{"ingles": "Language", "espanol": "Lenguaje", "contexto": "oficial_renpy_ui"}
+{"ingles": "Select Language", "espanol": "Seleccionar idioma", "contexto": "oficial_renpy_ui"}
+{"ingles": "Voice", "espanol": "Voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mute/Unmute a Character", "espanol": "Silenciar/activar un personaje", "contexto": "oficial_renpy_ui"}
+{"ingles": "Auto-Forward Delay", "espanol": "Retraso en el avance automático", "contexto": "oficial_renpy_ui"}
+{"ingles": "Enable Auto", "espanol": "Activar Auto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Music Volume", "espanol": "Volumen de la música", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sound Volume", "espanol": "Volumen del sonido", "contexto": "oficial_renpy_ui"}
+{"ingles": "Voice Volume", "espanol": "Volumen de voz", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mute All", "espanol": "Silenciar todo", "contexto": "oficial_renpy_ui"}
+{"ingles": "Q.Save", "espanol": "Guardado Rápido", "contexto": "oficial_renpy_ui"}
+{"ingles": "Q.Load", "espanol": "Carga Rápida", "contexto": "oficial_renpy_ui"}
+{"ingles": "Prefs", "espanol": "Menú", "contexto": "oficial_renpy_ui"}
+{"ingles": "Help us proofread the game", "espanol": "Ayúdanos a corregir el juego", "contexto": "oficial_renpy_ui"}
+{"ingles": "Disable proofreader mode", "espanol": "Desactivar el modo corrector", "contexto": "oficial_renpy_ui"}
+{"ingles": "Switch to English", "espanol": "Cambiar a inglés", "contexto": "oficial_renpy_ui"}
+{"ingles": "Switch to [config.default_language]", "espanol": "Cambiar a [config.default_language]", "contexto": "oficial_renpy_ui"}
+{"ingles": "Back", "espanol": "Atrás", "contexto": "oficial_renpy_ui"}
+{"ingles": "BUY FULL GAME", "espanol": "COMPRAR EL JUEGO COMPLETO", "contexto": "oficial_renpy_ui"}
+{"ingles": "Menu", "espanol": "Menú", "contexto": "oficial_renpy_ui"}
+{"ingles": "Translated by", "espanol": "Traducido por", "contexto": "oficial_renpy_ui"}
+{"ingles": "Other Male", "espanol": "Otro varón", "contexto": "oficial_renpy_ui"}
+{"ingles": "Other Female", "espanol": "Otra mujer", "contexto": "oficial_renpy_ui"}
+{"ingles": "Você quer ver os CTAs e fechar o jogo ou continuar o jogo?", "espanol": "¿Quieres ver los CTAs y dejar el juego o continuar el juego?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Would you like to buy this game?", "espanol": "¿Quieres comprar este juego?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Buy the full game", "espanol": "Comprar el juego completo", "contexto": "oficial_renpy_ui"}
+{"ingles": "No, continue with the free demo", "espanol": "No, continúa con la demo gratuita", "contexto": "oficial_renpy_ui"}
+{"ingles": "Please support the development of Forbidden Fantasy:", "espanol": "Por favor, apoya el desarrollo de Fantasía Prohibida:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Sign up & Get a FREE Game", "espanol": "Regístrate y consigue un juego GRATIS", "contexto": "oficial_renpy_ui"}
+{"ingles": "Play FreshWomen", "espanol": "Juega a FreshWomen", "contexto": "oficial_renpy_ui"}
+{"ingles": "Please support the development of [config.name]:", "espanol": "Por favor, apoya el desarrollo de [config.name]:", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to support the game development on OppaiMan.com", "espanol": "Haz clic para apoyar el desarrollo del juego en OppaiMan.com", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click to subscribe to our newsletter", "espanol": "Haz clic para suscribirte a nuestro boletín", "contexto": "oficial_renpy_ui"}
+{"ingles": "Forbidden Fantasy will return in [next_episode_name]", "espanol": "Fantasía Prohibida volverá en [next_episode_name]", "contexto": "oficial_renpy_ui"}
+{"ingles": "Wishlist Season 2 on Steam", "espanol": "Lista de deseos Temporada 2 en Steam", "contexto": "oficial_renpy_ui"}
+{"ingles": "SEASON 1", "espanol": "TEMPORADA 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 1", "espanol": "EMPEZAR EPISODIO 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 2", "espanol": "COMIENZA EL EPISODIO 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 3", "espanol": "COMIENZA EL EPISODIO 3", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 4", "espanol": "COMIENZA EL EPISODIO 4", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 5", "espanol": "COMIENZA EL EPISODIO 5", "contexto": "oficial_renpy_ui"}
+{"ingles": "SEASON 2", "espanol": "TEMPORADA 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 2 PART 1", "espanol": "EMPIEZA EL EPISODIO 2 PARTE 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 2 PART 2", "espanol": "COMIENZA EL EPISODIO 2 PARTE 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 2 PART 3", "espanol": "EMPIEZA EL EPISODIO 2 PARTE 3", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 3 PART 1", "espanol": "EMPIEZA EL EPISODIO 3 PARTE 1", "contexto": "oficial_renpy_ui"}
+{"ingles": "START EPISODE 3 PART 2", "espanol": "COMIENZA EL EPISODIO 3 PARTE 2", "contexto": "oficial_renpy_ui"}
+{"ingles": "Subscribe", "espanol": "Suscríbete", "contexto": "oficial_renpy_ui"}
+{"ingles": "Season 2 Preview", "espanol": "Avance de la 2ª temporada", "contexto": "oficial_renpy_ui"}
+{"ingles": "Free Adult Games", "espanol": "Juegos gratis para adultos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Credits", "espanol": "Créditos", "contexto": "oficial_renpy_ui"}
+{"ingles": "Having problems with the game? Read this", "espanol": "¿Tienes problemas con el juego? Lee esto", "contexto": "oficial_renpy_ui"}
+{"ingles": "Please read through the post to find help with the most common issues.", "espanol": "Por favor, lea el post para encontrar ayuda con los problemas más comunes.", "contexto": "oficial_renpy_ui"}
+{"ingles": "If your issue isn’t listed here, please post a report in the bug reports forum.", "espanol": "Si tu problema no aparece aquí, publica un informe en el foro de informes de errores.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click the black squares to reveal the answer.", "espanol": "Haz clic en los cuadrados negros para revelar la respuesta.", "contexto": "oficial_renpy_ui"}
+{"ingles": "If you run into any error, the first thing you should try is to verify the game cache.\\nTry the following steps:\\n\\n1. Right-click the game in your library\\n2. Select Properties > Local files > Verify integrity of game files\\n\\nSteam will download any missing files.\\n\\nRelaunch the game and see if the problem persists.", "espanol": "Si te encuentras con algún error, lo primero que debes intentar es verificar la caché del juego.\\nPrueba los siguientes pasos:\\n\\n1. Haz clic con el botón derecho en el juego de tu biblioteca\\n2. Selecciona Propiedades > Archivos locales > Verificar la integridad de los archivos del juego\\n\\nSteam descargará los archivos que falten.\\n\\n3. Vuelve a lanzar el juego y comprueba si el problema persiste.", "contexto": "oficial_renpy_ui"}
+{"ingles": "I don’t see any animations when I play the game. I only see a black screen.", "espanol": "No veo ninguna animación cuando juego. Sólo veo una pantalla negra.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The game needs an audio device enabled to play animations. Enable output for sound and try playing the game again.", "espanol": "El juego necesita un dispositivo de audio habilitado para reproducir las animaciones. Habilita la salida para el sonido e intenta volver a jugar el juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "I tried to mod/cheat, and now my game doesn’t work.", "espanol": "He intentado hacer un mod/cheat y ahora mi juego no funciona.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Mods and cheats aren’t supported and will break your game. Delete everything in the installation folder and install the game from scratch to fix it. Your save files may break from modifying the game as well.", "espanol": "Los mods y los trucos no son compatibles y romperán tu juego. Borra todo lo que haya en la carpeta de instalación e instala el juego desde cero para solucionarlo. Tus archivos de guardado también pueden romperse por modificar el juego.", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want to delete my save files; how do I do it?", "espanol": "Quiero eliminar mis archivos guardados; ¿cómo lo hago?", "contexto": "oficial_renpy_ui"}
+{"ingles": "When playing, open the save menu, hover any save, and press the delete key to delete saves.", "espanol": "Cuando estés jugando, abre el menú de guardado, pasa por encima de cualquier guardado y pulsa la tecla de borrar para eliminar los guardados.", "contexto": "oficial_renpy_ui"}
+{"ingles": "My game is stuttering/lagging; how can I fix it?", "espanol": "Mi juego sufre tartamudeo(stuttering) y retrasos(lagging); ¿cómo puedo solucionarlo?", "contexto": "oficial_renpy_ui"}
+{"ingles": "There are several ways to fix this. Try the following and see if anything works for you.\\n1. Make sure that G-sync is turned off. If you have an NVIDIA GPU, you can turn it off in the NVIDIA control panel. Make sure that your monitor’s refresh rate is set correctly from here as well.\\n2. While playing, press Shift+G and test the different render options to see if the stuttering is reduced. If it fails, revert the setting to \\\"Choose automatically\\\".\\n3. Try playing the game in windowed mode and reduce the window size. If the stutter disappears, your device specifications might be too low to get rid of the stuttering.", "espanol": "Hay varias formas de solucionarlo. Prueba lo siguiente y comprueba si algo te funciona.\\n1. Asegúrate de que el G-sync este desactivada. Si tienes una GPU NVIDIA, puedes desactivarla en el panel de control de NVIDIA. Asegúrate también de que la frecuencia de refresco de tu monitor está configurada correctamente desde aquí.\\n2. Mientras juegas, pulsa Shift+G y prueba las diferentes opciones de renderizado para ver si se reduce el tartamudeo(stuttering). Si no lo consigue, vuelva a poner la configuración en \\\"Elegir automáticamente\\\".\\n3. Prueba a jugar en modo ventana y reduce el tamaño de la ventana. Si el tartamudeo(stuttering) desaparece, puede que las especificaciones de tu dispositivo sean demasiado bajas para eliminar el tartamudeo(stuttering).", "contexto": "oficial_renpy_ui"}
+{"ingles": "My game is crashing due to memory errors; how can I fix it?", "espanol": "Mi juego se bloquea debido a errores de memoria; ¿cómo puedo solucionarlo?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Try playing the game in windowed mode and reduce the window size. If the game doesn’t crash, your PC specifications might be too low to play fullscreen. If it still crashes, post a bug report with the error code in the bug reports forum.", "espanol": "Intenta jugar el juego en modo ventana y reduce el tamaño de la ventana. Si el juego no se bloquea, puede que las especificaciones de tu PC sean demasiado bajas para jugar a pantalla completa. Si sigue fallando, publica un informe de error con el código de error en el foro de informes de error.", "contexto": "oficial_renpy_ui"}
+{"ingles": "The upper left corner displays a text message that says “NO DC”. How do I remove it?", "espanol": "En la esquina superior izquierda aparece un mensaje que dice \\\"NO DC\\\". ¿Cómo puedo eliminarlo?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Open NVIDIA control panel. Go to Manage 3d settings and change \\\"Threaded Optimization\\\" to \\\"Auto\\\".", "espanol": "Abre el Panel de control de NVIDIA. Ve a \\\"Controlar la configuración 3D\\\" y cambia \\\"Optimización enlazada\\\" a \\\"Automático\\\".", "contexto": "oficial_renpy_ui"}
+{"ingles": "I’m having issues saving/loading the game, getting errors like \\\"NameError: name 'some name' is not defined\\\".", "espanol": "Tengo problemas para guardar/cargar el juego, obteniendo errores como \\\"NameError: name 'some name' is not defined\\\".", "contexto": "oficial_renpy_ui"}
+{"ingles": "We’ve seen this issue happen for players with an excessive amount of saves (>50 pages of saves, and maybe even less).\\nAt some point, Ren’Py struggles to handle saving/loading depending on CPU. The solution is to delete save files until the issue goes away.\\nHover saves in the save/load menu and press the Delete button to remove them.", "espanol": "Hemos visto que este problema se produce en jugadores con una cantidad excesiva de guardados (>50 páginas de guardados, e incluso menos).\\nEn algún momento, Ren'Py tiene dificultades para gestionar el guardado/carga en función de la CPU. La solución es eliminar los archivos de guardado hasta que el problema desaparezca.\\nPasa por encima de los guardados en el menú de guardar/cargar y pulsa el botón de Borrar para eliminarlos.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Where are my saves located?", "espanol": "¿Dónde están mis archivos de guardado?", "contexto": "oficial_renpy_ui"}
+{"ingles": "I can't install the APK or ZIP", "espanol": "No puedo instalar el APK o el ZIP", "contexto": "oficial_renpy_ui"}
+{"ingles": "Try unzipping the file with ZArchiver", "espanol": "Prueba a descomprimir el archivo con ZArchiver", "contexto": "oficial_renpy_ui"}
+{"ingles": "My question isn't listed here; what do I do?", "espanol": "Mi pregunta no aparece aquí, ¿qué hago?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Post your question in our Steam Forum", "espanol": "Publica tu pregunta en nuestro Foro de Steam", "contexto": "oficial_renpy_ui"}
+{"ingles": "Post your question in our Discord Server (English Only)", "espanol": "Publica tu pregunta en nuestro servidor de Discord (sólo en inglés)", "contexto": "oficial_renpy_ui"}
+{"ingles": "I want my money back; how to I request a refund?", "espanol": "Quiero que me devuelvan el dinero; ¿cómo puedo solicitar un reembolso?", "contexto": "oficial_renpy_ui"}
+{"ingles": "Click this link to request a refund:", "espanol": "Haz clic en este enlace para solicitar un reembolso:", "contexto": "oficial_renpy_ui"}
+{"ingles": "If you want a refund, click here.", "espanol": "Si quieres un reembolso, haz clic aquí.", "contexto": "oficial_renpy_ui"}
+{"ingles": "Cheers,\\nOppai-Man", "espanol": "Saludos,\\nOppai-Man", "contexto": "oficial_renpy_ui"}
