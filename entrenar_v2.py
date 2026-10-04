@@ -47,6 +47,7 @@ from transformers import TrainingArguments
 MODELO_BASE = "modelo_exportado_v2"   # Modelo actual (entreno de 18h + mini glosario)
 SALIDA = "traductor_juegos_v2"
 REPETIR_GLOSARIO = 3
+REPETIR_CORPUS = 2
 MUESTRA_GENERAL = 4000
 
 # Debe coincidir con OllamaTranslator.translate() en auto_inyector.py
@@ -65,12 +66,19 @@ def leer_jsonl(ruta):
         return [json.loads(l) for l in f if l.strip()]
 
 glosario = leer_jsonl("glosario_v2.jsonl")
+
+corpus_extra = []
+corpus_path = Path("corpus_videojuegos")
+if corpus_path.exists():
+    for archivo in corpus_path.glob("*.jsonl"):
+        corpus_extra.extend(leer_jsonl(archivo))
+
 general = leer_jsonl("dataset_base_general.jsonl")
 general = random.sample(general, min(MUESTRA_GENERAL, len(general)))
 
-ejemplos = glosario * REPETIR_GLOSARIO + general
+ejemplos = (glosario * REPETIR_GLOSARIO) + (corpus_extra * REPETIR_CORPUS) + general
 random.shuffle(ejemplos)
-print(f"Ejemplos: {len(glosario)} de glosario x{REPETIR_GLOSARIO} + {len(general)} generales = {len(ejemplos)}")
+print(f"Ejemplos: {len(glosario)} glosario(x{REPETIR_GLOSARIO}) + {len(corpus_extra)} corpus(x{REPETIR_CORPUS}) + {len(general)} gen = {len(ejemplos)}")
 
 # ---------------------------------------------------------------- Modelo
 max_seq_length = 2048
