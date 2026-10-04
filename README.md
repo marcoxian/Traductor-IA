@@ -155,7 +155,7 @@ Para conseguir una traducción con calidad nativa y que no cometa errores con lo
 * **Ollama:** Instalado y en ejecución en `http://localhost:11434`.
 
 ### Instalación rápida (Windows):
-Ejecuta el archivo [setup.bat](file:///j:/PythonAI/Traductor%20IA/setup.bat) en la consola:
+Ejecuta el archivo [setup.bat](setup.bat) en la consola:
 ```bat
 setup.bat
 ```
@@ -170,6 +170,6 @@ pip install lzstring
 
 ## 📄 Licencia y Buenas Prácticas
 
-Este proyecto está bajo la licencia incluida en [LICENSE](file:///j:/PythonAI/Traductor%20IA/LICENSE).
+Este proyecto está bajo la licencia incluida en [LICENSE](LICENSE).
 
-> **Aviso de Propiedad Intelectual:** Este repositorio únicamente distribuye herramientas de software libre, código fuente y glosarios neutrales. No aloja ni distribuye textos con derechos de autor de juegos comerciales. Todo volcado de datos, dataset o partida guardada debe mantenerse localmente dentro de las carpetas `workspace/` o `datasets/`, las cuales están excluidas de Git mediante [.gitignore](file:///j:/PythonAI/Traductor%20IA/.gitignore).
+> **Aviso de Propiedad Intelectual:** Este repositorio únicamente distribuye herramientas de software libre, código fuente y glosarios neutrales. No aloja ni distribuye textos con derechos de autor de juegos comerciales. Todo volcado de datos, dataset o partida guardada debe mantenerse localmente dentro de las carpetas `workspace/` o `datasets/`, las cuales están excluidas de Git mediante [.gitignore](.gitignore).
