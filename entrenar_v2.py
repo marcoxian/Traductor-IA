@@ -44,8 +44,10 @@ from datasets import Dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments
 
-MODELO_BASE = "modelo_exportado_v2"   # Modelo actual (entreno de 18h + mini glosario)
-SALIDA = "traductor_juegos_v2"
+modelo_candidato = Path("modelos/modelo_exportado_v2")
+MODELO_BASE = str(modelo_candidato) if modelo_candidato.exists() else "modelo_exportado_v2"
+salida_dir = Path("modelos") if Path("modelos").exists() else Path(".")
+SALIDA = str(salida_dir / "traductor_juegos_v2")
 REPETIR_GLOSARIO = 3
 REPETIR_CORPUS = 2
 MUESTRA_GENERAL = 4000
@@ -58,23 +60,33 @@ PLANTILLA = "### Instruction:\n{}\n\n### Input:\n{}\n\n### Response:\n{}"
 random.seed(3407)
 
 # ---------------------------------------------------------------- Datos
-if not Path("glosario_v2.jsonl").exists():
-    sys.exit("Falta glosario_v2.jsonl. Ejecuta antes: python crear_glosario_v2.py")
+def buscar_archivo(nombre):
+    p_data = Path("datasets") / nombre
+    if p_data.exists(): return p_data
+    p_root = Path(nombre)
+    if p_root.exists(): return p_root
+    return p_data
+
+ruta_glosario = buscar_archivo("glosario_v2.jsonl")
+if not ruta_glosario.exists():
+    sys.exit(f"Falta glosario_v2.jsonl (buscado en datasets/ y raíz). Ejecuta antes: python preparar_datos_v2.py")
 
 def leer_jsonl(ruta):
     with open(ruta, encoding="utf-8") as f:
         return [json.loads(l) for l in f if l.strip()]
 
-glosario = leer_jsonl("glosario_v2.jsonl")
+glosario = leer_jsonl(ruta_glosario)
 
 corpus_extra = []
-corpus_path = Path("corpus_videojuegos")
+corpus_path = Path("datasets/corpus_videojuegos") if Path("datasets/corpus_videojuegos").exists() else Path("corpus_videojuegos")
 if corpus_path.exists():
     for archivo in corpus_path.glob("*.jsonl"):
         corpus_extra.extend(leer_jsonl(archivo))
 
-general = leer_jsonl("dataset_base_general.jsonl")
-general = random.sample(general, min(MUESTRA_GENERAL, len(general)))
+ruta_general = buscar_archivo("dataset_base_general.jsonl")
+general = leer_jsonl(ruta_general) if ruta_general.exists() else []
+if general:
+    general = random.sample(general, min(MUESTRA_GENERAL, len(general)))
 
 ejemplos = (glosario * REPETIR_GLOSARIO) + (corpus_extra * REPETIR_CORPUS) + general
 random.shuffle(ejemplos)

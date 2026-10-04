@@ -189,14 +189,23 @@ def con_codigos():
 def correcciones_manuales():
     """Lee correcciones_*.csv / revision_*.csv con la columna 'correccion' rellenada."""
     pares = []
-    for ruta in glob.glob("correcciones_*.csv") + glob.glob("revision_*.csv"):
-        with open(ruta, encoding="utf-8-sig", newline="") as f:
-            for fila in csv.DictReader(f, delimiter=";"):
-                en = (fila.get("ingles") or "").strip()
-                es = (fila.get("correccion") or "").strip()
-                if en and es:
-                    pares.append((en, es))
-        print(f"  Correcciones leídas de {ruta}")
+    rutas_candidatas = (
+        glob.glob("workspace/**/*.csv", recursive=True) +
+        glob.glob("workspace/*.csv") +
+        glob.glob("correcciones_*.csv") +
+        glob.glob("revision_*.csv")
+    )
+    for ruta in set(rutas_candidatas):
+        try:
+            with open(ruta, encoding="utf-8-sig", newline="") as f:
+                for fila in csv.DictReader(f, delimiter=";"):
+                    en = (fila.get("ingles") or "").strip()
+                    es = (fila.get("correccion") or "").strip()
+                    if en and es:
+                        pares.append((en, es))
+            print(f"  Correcciones leídas de {ruta}")
+        except Exception:
+            pass
     return pares
 
 
@@ -205,6 +214,7 @@ def entrada(en, es):
 
 
 def main():
+    import os
     datos = []
     datos += [entrada(en, es) for en, es in TERMINOS.items()]
     datos += [entrada(en, es) for en, es in MENSAJES.items()]
@@ -215,11 +225,13 @@ def main():
     datos += [entrada(en, es) for en, es in manuales] * 2
 
     random.shuffle(datos)
-    with open("glosario_v2.jsonl", "w", encoding="utf-8") as f:
+    salida_dir = "datasets" if os.path.exists("datasets") else "."
+    salida_archivo = os.path.join(salida_dir, "glosario_v2.jsonl")
+    with open(salida_archivo, "w", encoding="utf-8") as f:
         for d in datos:
             f.write(json.dumps(d, ensure_ascii=False) + "\n")
 
-    print(f"Glosario v2 creado: {len(datos)} ejemplos en 'glosario_v2.jsonl'")
+    print(f"Glosario v2 creado: {len(datos)} ejemplos en '{salida_archivo}'")
     print(f"  Términos: {len(TERMINOS)} | Mensajes: {len(MENSAJES)} | "
           f"Con códigos: {len(con_codigos())} | Correcciones manuales: {len(manuales)}")
 

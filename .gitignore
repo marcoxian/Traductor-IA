@@ -1,52 +1,35 @@
 # Entornos virtuales
-venv/
+venv*/
 .venv/
 env/
-venv_traductor/
 
 # Python
 __pycache__/
-*.pyc
-*.pyo
-*.pyd
+*.py[cod]
 .env
 
 # Entornos e IDEs
 .vscode/
 .idea/
 
-# Modelos, cachés y dependencias de IA
-unsloth_compiled_cache/
-modelo_exportado_v2/
-modelo_exportado_v2_gguf/
-*.gguf
+# Carpetas locales de datos, modelos pesados y partidas (no se suben a GitHub)
+workspace/*
+!workspace/.gitkeep
 
-# Resultados y salidas
-checkpoints_entrenamiento_v2/
-*.log
+datasets/*
+!datasets/.gitkeep
 
-# Datasets y volcados de texto (Protección DMCA / Copyright y límite de tamaño)
-*.zip
-*.jsonl
-KDE4.en-es.xml
-corpus_videojuegos/
-dataset_base_general.jsonl
-glosario_v2.jsonl
+modelos/*
+!modelos/.gitkeep
 
-# Archivos específicos de juegos / volcados locales
-revision_*.csv
-nombres_hablantes_*.csv
-correcciones_*_*.csv
-datos_juegos/
-proyectos/
+scratch/
+
+# Herramientas externas con submódulo propio
+herramientas_extra/unrpyc/
 
 # Backups y temporales
 *.bak
 *.tmp
-scratch/
-
-# Herramientas externas
-herramientas_extra/unrpyc/
 
 # SO
 .DS_Store
