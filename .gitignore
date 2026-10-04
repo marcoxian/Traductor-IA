@@ -25,10 +25,20 @@ modelo_exportado_v2_gguf/
 checkpoints_entrenamiento_v2/
 *.log
 
-# Datasets y archivos descargados/grandes
+# Datasets y volcados de texto (Protección DMCA / Copyright y límite de tamaño)
 *.zip
 *.jsonl
 KDE4.en-es.xml
+corpus_videojuegos/
+dataset_base_general.jsonl
+glosario_v2.jsonl
+
+# Archivos específicos de juegos / volcados locales
+revision_*.csv
+nombres_hablantes_*.csv
+correcciones_*_*.csv
+datos_juegos/
+proyectos/
 
 # Backups y temporales
 *.bak

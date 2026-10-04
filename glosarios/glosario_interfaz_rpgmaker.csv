@@ -1,0 +1,582 @@
+﻿ingles;correccion
+Language;Idioma
+Level;Nivel
+Max HP;PV máx.
+Max MP;PM máx.
+ATK;ATQ
+DEF;DEF
+Magic ATK;ATQ mágico
+Magic DEF;DEF mágica
+SPD;VEL
+LUCK;SUERTE
+CRI;CRÍ
+Hit Rate;Precisión
+Dodge;Evasión
+Battle;Luchar
+Retreat;Huir
+Attack;Atacar
+Defend;Defender
+Item;Objetos
+Skills;Habilidades
+Equipment;Equipo
+Status;Estado
+Formation;Formación
+Options;Opciones
+Save;Guardar
+Load;Cargar
+Exit;Salir
+Weapons;Armas
+Armor;Armaduras
+Key Items;Objetos clave
+Equip;Equipar
+Best Gear;Equipo óptimo
+Unequip All;Quitar todo
+Buy;Comprar
+Sell;Vender
+New Game;Nueva partida
+Continue;Continuar
+Return to Title;Volver al título
+Cancel;Cancelar
+Toggle Sprint;Correr siempre
+Remember Commands;Recordar comandos
+BGM Volume;Volumen de música
+BGS Volume;Volumen de ambiente
+ME Volume;Volumen de melodías
+SE Volume;Volumen de efectos
+Owned;En posesión
+Current %1;%1 actual
+Until Next %1;Para el siguiente %1
+Save Files;Partidas guardadas
+%1 's Party;Grupo de %1
+Save Count;Veces guardado
+Current Location;Ubicación actual
+Play Time;Tiempo de juego
+Money;Dinero
+Days;Días
+Quests;Misiones
+Main Quest;Misión principal
+Sub Quests;Misiones secundarias
+Hills;Hills
+Ult Skill;Habilidad definitiva
+All Enemies;Todos los enemigos
+All Allies;Todos los aliados
+Random Enemy;Enemigo aleatorio
+%1 appears!;¡Aparece %1!
+%1 is ambushed!;¡%1 cae en una emboscada!
+%1 runs away!;¡%1 huye!
+%1 is victorious!;¡%1 se alza con la victoria!
+%1 is defeated!;¡%1 ha sido derrotado!
+Obtained %1 %2!;¡Has obtenido %1 %2!
+Obtained %1!;¡Has obtenido %1!
+Learned %1!;¡Has aprendido %1!
+%1 uses %2!;¡%1 usa %2!
+Critical Hit!!;¡¡Golpe crítico!!
+Crit taken!;¡Has recibido un crítico!
+%1 takes %2 DMG!;¡%1 recibe %2 de daño!
+%1's %2 recovers %3!;¡%1 recupera %3 de %2!
+%1's %2 lost %3!;¡%1 pierde %3 de %2!
+%1 takes no DMG!;¡%1 no recibe daño!
+%1 dodges the attack!;¡%1 esquiva el ataque!
+%1 resists the spell!;¡%1 resiste el hechizo!
+%1 reflects the spell!;¡%1 refleja el hechizo!
+%1 counters!;¡%1 contraataca!
+%1's %2 increases!;¡Aumenta el %2 de %1!
+%1's %2 decreases!;¡Disminuye el %2 de %1!
+Action failed!;¡La acción ha fallado!
+PHY;FÍS
+Fire;Fuego
+Ice;Hielo
+Thunder;Rayo
+Water;Agua
+Earth;Tierra
+Wind;Viento
+Light;Luz
+Dark;Oscuridad
+Dagger;Daga
+Longsword;Espada larga
+Club;Maza
+Axe;Hacha
+Whip;Látigo
+Staff;Bastón
+Bow;Arco
+Crossbow;Ballesta
+Gun;Arma de fuego
+Claw;Garra
+Gauntlet;Guantelete
+Lance;Lanza
+Normal Armor;Armadura normal
+Magic Armor;Armadura mágica
+Light Armor;Armadura ligera
+Heavy Armor;Armadura pesada
+Small Shield;Escudo pequeño
+Large Shield;Escudo grande
+Finger;Dedo
+Hands;Manos
+Clothing;Ropa
+Accessory;Accesorio
+Knocked Out;Fuera de combate
+is defeated!;cae derrotado!
+Unable to act.;No puede actuar.
+Undying;Inmortal
+Poison;Veneno
+is poisoned!;sufre envenenamiento!
+Blind;Ceguera
+is blinded! Accuracy decreases!;se queda ciego! ¡Baja la precisión!
+Silence;Silencio
+Rage;Furia
+ATK increases by 100%.;El ATQ aumenta un 100 %.
+Frenzy;Frenesí
+enters a frenzied state!;entra en frenesí!
+Confusion;Confusión
+Charm;Encanto
+Sleep;Sueño
+Block;Bloqueo
+Cover;Cubrir
+Stun;Aturdimiento
+Paralysis;Parálisis
+is paralyzed!;sufre parálisis!
+Steal;Robar
+Empty;Vacío
+ATK Down;ATQ abajo
+gained ATK Down!;sufre ATQ abajo!
+ATK decreases by 25%.;El ATQ disminuye un 25 %.
+Burn;Quemadura
+Protective Ward;Égida protectora
+Mana Conduction;Conducción de maná
+gained Mana Conduction!;obtiene Conducción de maná!
+Indomitable Will;Voluntad indomable
+Safe Fall;Caída segura
+ATK Up;ATQ arriba
+gained ATK Up!;obtiene ATQ arriba!
+s ATK increases!;ve aumentado su ATQ!
+ATK increases by 25%.;El ATQ aumenta un 25 %.
+ATK increases by 50%.;El ATQ aumenta un 50 %.
+DEF Down;DEF abajo
+DEF decreases by 25%.;La DEF disminuye un 25 %.
+Fighting Spirit;Espíritu de lucha
+gained Fighting Spirit!;obtiene Espíritu de lucha!
+Crit Up;Crítico arriba
+gained Crit Up!;obtiene Crítico arriba!
+Energy Up;Energía arriba
+Dodge Up;Evasión arriba
+gained Dodge Up!;obtiene Evasión arriba!
+DEF Up;DEF arriba
+gained DEF Up!;obtiene DEF arriba!
+DEF increases by 25%.;La DEF aumenta un 25 %.
+Endurance Up;Aguante arriba
+Vitality Up;Vitalidad arriba
+Bleed;Sangrado
+Stealth;Sigilo
+Enters Stealth!;¡Entra en sigilo!
+Fear;Miedo
+Primordial Potential;Potencial primordial
+gained Primordial Potential!;obtiene Potencial primordial!
+Follow-Through;Remate
+Action Count +1;Acciones +1
+Silver Will;Voluntad de plata
+DEF Down (Large);DEF abajo (grande)
+DEF decreases by 50%.;La DEF disminuye un 50 %.
+Morale Boost;Subidón de moral
+shouts to boost morale!;grita para subir la moral!
+Defense Stance;Postura defensiva
+Tentacle Bind;Atadura de tentáculos
+Adversity Combat I;Lucha en la adversidad I
+gained Adversity Combat I;obtiene Lucha en la adversidad I
+Adversity Combat II;Lucha en la adversidad II
+gained Adversity Combat II;obtiene Lucha en la adversidad II
+Adversity Combat III;Lucha en la adversidad III
+gained Adversity Combat III;obtiene Lucha en la adversidad III
+Adversity Combat IV;Lucha en la adversidad IV
+gained Adversity Combat IV;obtiene Lucha en la adversidad IV
+Adversity Combat V;Lucha en la adversidad V
+gained Adversity Combat V;obtiene Lucha en la adversidad V
+DEF Down (Tiny);DEF abajo (mínima)
+DEF Down (Small);DEF abajo (pequeña)
+DEF Down (Medium);DEF abajo (media)
+DEF Down (Huge);DEF abajo (enorme)
+DEF Down (Massive);DEF abajo (masiva)
+Dawn Flash;Destello del alba
+Prism Shield;Escudo prismático
+Primordial Potential+;Potencial primordial+
+gained Primordial Potential+!;obtiene Potencial primordial+!
+Pain Endure;Aguantar el dolor
+Dodge Down;Evasión abajo
+gained Dodge Down!;sufre Evasión abajo!
+Warped Barrier;Barrera distorsionada
+Fatigue Curse;Maldición de fatiga
+TP gained decreases 100%.;Los PT obtenidos disminuyen un 100 %.
+Anti-Magic Ward;Égida antimagia
+Crystallization;Cristalización
+gained Crystallization!;obtiene Cristalización!
+Mana Burn;Quemadura de maná
+gained Mana Burn!;sufre Quemadura de maná!
+Wheel of Death;Rueda de la muerte
+War Will;Voluntad de guerra
+Unsteady;Tambaleante
+SPD decreases by 90%.;La VEL disminuye un 90 %.
+Hangover;Resaca
+Do-or-Die;Todo o nada
+Agile Footwork;Juego de pies ágil
+Expose Weakness;Exponer debilidad
+Thunder Resistance;Resistencia al rayo
+Dark Resistance;Resistencia a la oscuridad
+Wind Resistance;Resistencia al viento
+gained Thunder Resistance!;obtiene Resistencia al rayo!
+gained Dark Resistance!;obtiene Resistencia a la oscuridad!
+gained Wind Resistance!;obtiene Resistencia al viento!
+Thunder Resistance has dispersed.;La Resistencia al rayo se ha disipado.
+Dark Resistance has dispersed.;La Resistencia a la oscuridad se ha disipado.
+Wind Resistance has dispersed.;La Resistencia al viento se ha disipado.
+Indomitable Will+;Voluntad indomable+
+Reckless;Temerario
+has gone berserk!;se ha vuelto loco de furia!
+Perfect Position;Posición perfecta
+takes a favorable position!;toma una posición ventajosa!
+Big Bang;Big Bang
+All stats are enhanced.;Todos los atributos aumentan.
+Rat;Rata
+Blue Rat;Rata azul
+Shirtless Man;Hombre sin camiseta
+❤ Homeless Man;❤ Vagabundo
+Homeless Man;Vagabundo
+❤ Vagrant Leader;❤ Líder de los vagabundos
+Vagrant Leader;Líder de los vagabundos
+❤ Slaver;❤ Esclavista
+Slaver;Esclavista
+❤ Albert;❤ Albert
+❤ Goblin;❤ Goblin
+Berserk Goblin;Goblin enloquecido
+Berserk Goblin King;Rey goblin enloquecido
+❤ Shirtless Man;❤ Hombre sin camiseta
+❤ Man in Black;❤ Hombre de negro
+❤ Green-Haired Man;❤ Hombre de pelo verde
+Big Pumpkin;Calabaza gigante
+Training Dummy Lv.1;Muñeco de entrenamiento Nv. 1
+Training Dummy Lv.2;Muñeco de entrenamiento Nv. 2
+Training Dummy Lv.3;Muñeco de entrenamiento Nv. 3
+Training Dummy Lv.4;Muñeco de entrenamiento Nv. 4
+❤ Mansion Guard;❤ Guardia de la mansión
+Dune;Dune
+Testing Post;Poste de pruebas
+Mansion Guard;Guardia de la mansión
+Guard;Guardia
+Guard Captain;Capitán de la guardia
+❤ Mutant Tentacle (Pink);❤ Tentáculo mutante (rosa)
+❤ Mutant Tentacle (Purple);❤ Tentáculo mutante (morado)
+❤ Mutant Tentacle (Yellow);❤ Tentáculo mutante (amarillo)
+❤ Alpha Tentacle;❤ Tentáculo alfa
+Mutant Tentacle (Pink);Tentáculo mutante (rosa)
+Mutant Tentacle (Purple);Tentáculo mutante (morado)
+Mutant Tentacle (Yellow);Tentáculo mutante (amarillo)
+Alpha Tentacle;Tentáculo alfa
+❤ Cove;❤ Cove
+Cove - Calamity Incarnate;Cove - Calamidad encarnada
+❤ Spike;❤ Spike
+Spike;Spike
+Albert;Albert
+❤ Laborer;❤ Peón
+Laborer;Peón
+Aldora;Aldora
+❤ Turban Gang Member;❤ Miembro de la banda del turbante
+Richard;Richard
+Mysterious Merchant;Mercader misterioso
+Thug;Matón
+Slaver Boss;Jefe esclavista
+Iron Armor;Armadura de hierro
+Round Shield;Escudo redondo
+White Dress;Vestido blanco
+Hills' everyday garb.;La ropa de diario de Hills.
+Training Ring;Anillo de entrenamiento
+Fang Talisman;Talismán de colmillo
+Warlock Robe;Túnica de brujo
+Manastone Ring;Anillo de piedra de maná
+Spiritwood Bracelet;Brazalete de madera espiritual
+Maid Uniform;Uniforme de criada
+Bunny Suit;Traje de conejita
+Power Band;Cinta de poder
+White Bikini;Bikini blanco
+Leather Bracer;Brazal de cuero
+Copper Ring;Anillo de cobre
+Cat Hair Clip;Horquilla de gato
+Ruby Ring;Anillo de rubí
+Burgundy Coat;Abrigo burdeos
+Black Leather Gloves;Guantes de cuero negro
+Goggles;Gafas protectoras
+Diamond Ring;Anillo de diamante
+Friend of the Guild;Amiga del gremio
+Canvas Gloves;Guantes de lona
+Youth Armor;Armadura juvenil
+Silver Ring;Anillo de plata
+Steel Gauntlets;Guanteletes de acero
+Adventurer's Outfit;Atuendo de aventurera
+Mercenary Bracers;Brazales de mercenario
+Pure Silver Cuirass;Coraza de plata pura
+Silver Gauntlets;Guanteletes de plata
+Pendant of Endurance;Colgante de aguante
+Pendant of Happiness;Colgante de la felicidad
+Vanguard Gauntlets;Guanteletes de vanguardia
+Snakebone Necklace;Collar de hueso de serpiente
+Tattered Clothes;Ropa andrajosa
+Green Cloak;Capa verde
+Obedience Collar;Collar de obediencia
+Worn Dagger;Daga desgastada
+Adventurer Longsword;Espada larga de aventurero
+Rusty Shortsword;Espada corta oxidada
+Thief's Scimitar;Cimitarra de ladrón
+Grimoire;Grimorio
+Silver Dagger;Daga de plata
+Serrated Longsword;Espada larga dentada
+Iron Shortsword;Espada corta de hierro
+Adventurer's Dagger;Daga de aventurero
+Sacred Sword;Espada sagrada
+Mithril Sword;Espada de mithril
+The Blue Sparrow;El Gorrión Azul
+Runeblade;Hoja rúnica
+Miya's Letter;Carta de Miya
+Charbel's Breakfast;Desayuno de Charbel
+Job Posting 01;Anuncio de trabajo 01
+Rat Corpse;Cadáver de rata
+Bagged sewer rat corpses.;Cadáveres de ratas de alcantarilla en una bolsa.
+Filthy Collar;Collar mugriento
+Rough Copper Coin;Moneda de cobre tosca
+Blue Herb;Hierba azul
+Healing Potion;Poción curativa
+Vitality Mushroom;Seta de vitalidad
+Vitality Mushroom (?);Seta de vitalidad (?)
+Tattered Cloth;Trapo andrajoso
+Poisonous Mushroom;Seta venenosa
+Charbel's Bag;Bolsa de Charbel
+Fresh Grilled Fish;Pescado fresco a la brasa
+Cheese Sandwich;Sándwich de queso
+Boiled Egg;Huevo cocido
+Whole-Wheat Bread;Pan integral
+Apple Juice;Zumo de manzana
+Fast Travel;Viaje rápido
+Apple;Manzana
+Grapes;Uvas
+Blueberries;Arándanos
+Cherries;Cerezas
+Tomato;Tomate
+Royal Potatoes;Patatas reales
+Carrot;Zanahoria
+Onion;Cebolla
+Potato;Patata
+Beast Meat;Carne de bestia
+Mushroom;Seta
+Greens;Verduras
+Candied Pumpkin;Calabaza confitada
+Small Amethyst;Amatista pequeña
+Entry Permit (Temporary);Permiso de entrada (temporal)
+Brightly Colored Candy;Caramelo de colores chillones
+Pink Punk Hash Browns;Patatas rösti rosa punk
+Smoked Beast Meat;Carne de bestia ahumada
+Rich Meat Stew;Estofado de carne contundente
+Fruit Bread;Pan de frutas
+Bread Shroom Tower;Torre de pan y setas
+Tomato Salad;Ensalada de tomate
+Fruit Mash;Puré de frutas
+Shroom Party;Fiesta de setas
+Dark Spud Stars;Estrellas de patata oscuras
+Bye-Bye Pumpkin Pie;Tarta de calabaza Adiós
+Medicinal Meat Soup;Sopa de carne medicinal
+Casino Chip;Ficha de casino
+Golden Chip;Ficha dorada
+Magic Die;Dado mágico
+Golden Voucher;Vale dorado
+Job Posting 02;Anuncio de trabajo 02
+Job Posting 03;Anuncio de trabajo 03
+Job Posting 04;Anuncio de trabajo 04
+Milk Sandwich;Sándwich de leche
+Instruction Manual;Manual de instrucciones
+Sample Bottle;Frasco de muestra
+Sunset Liquor;Licor del ocaso
+Bag of Treasure;Bolsa de tesoros
+Gang Emblem;Emblema de la banda
+Silverleaf;Hoja de plata
+Red Crown;Corona roja
+Wild Vine;Enredadera silvestre
+Medium Healing Potion;Poción curativa media
+Supreme Healing Potion;Poción curativa suprema
+Cracked Crystal;Cristal agrietado
+Cracked Red Crystal;Cristal rojo agrietado
+Entry Permit (Forged);Permiso de entrada (falsificado)
+Letter for Misty;Carta para Misty
+Poison-Tipped Dart;Dardo envenenado
+Throwing Star;Estrella arrojadiza
+Video Crystal;Cristal de vídeo
+Volatile Explosive;Explosivo inestable
+Burly Man's Testimony;Testimonio del hombre fornido
+Blonde Woman's Testimony;Testimonio de la mujer rubia
+Old Man's Testimony;Testimonio del anciano
+Shop Ornament (Alarm Crystal);Adorno de la tienda (cristal de alarma)
+Bookstore Owner's Testimony;Testimonio del librero
+Shop Ornament (Placard);Adorno de la tienda (letrero)
+Tangled Thread;Hilo enredado
+Thick Rope;Cuerda gruesa
+Black Magnet;Imán negro
+Wolf-Head Charm;Amuleto de cabeza de lobo
+Old Coin;Moneda antigua
+Prolonged Vitality Elixir;Elixir de vitalidad prolongada
+Prolonged Strength Elixir;Elixir de fuerza prolongada
+Prolonged Ward Elixir;Elixir de protección prolongada
+Strange Package;Paquete extraño
+Mutant Tentacle Notebook;Cuaderno del tentáculo mutante
+Tattered Journal;Diario andrajoso
+Strange Elixir;Elixir extraño
+Handwritten Note;Nota manuscrita
+Cove's Formula;Fórmula de Cove
+Alchemy Ingredients;Ingredientes de alquimia
+Promotional Posters;Carteles promocionales
+Bag of Supplies;Bolsa de provisiones
+Bag of Medicine;Bolsa de medicinas
+Clearheart Powder;Polvo de corazón claro
+Gold Medallion;Medallón de oro
+Sleeve Blade;Hoja de manga
+Disguise Cloak;Capa de disfraz
+Amplification Crystal;Cristal de amplificación
+Spark of Inspiration;Chispa de inspiración
+Heart of Nourishment;Corazón nutritivo
+Heart of Longing;Corazón anhelante
+Roll of Recipes;Rollo de recetas
+Round Rolls;Panecillos redondos
+Moon Reunion;Reencuentro lunar
+Old Key;Llave antigua
+Bottle of Beer;Botella de cerveza
+Paralysis Potion;Poción paralizante
+Amorphous Construct;Constructo amorfo
+Fang Sigil;Sello del colmillo
+Adventurer Sigil;Sello del aventurero
+Endurance Sigil;Sello del aguante
+Sooth Sigil;Sello del alivio
+Serpent Sigil;Sello de la serpiente
+Electric Ward Potion;Poción de protección eléctrica
+Dark Ward Potion;Poción de protección oscura
+Wind Ward Potion;Poción de protección del viento
+Rebel Sigil;Sello rebelde
+Justin's Token;Ficha de Justin
+Rainbow Jelly;Gelatina arcoíris
+The Septa Aether;El Éter Septa
+Big Bang Rainbow Jelly;Gelatina arcoíris Big Bang
+Phantasm Crystal;Cristal fantasmal
+Hills’ Notes;Notas de Hills
+Ingredient Pack (Vegetable Dishes);Lote de ingredientes (platos de verdura)
+Downtown;Centro
+Port District;Distrito portuario
+City Forest;Bosque de la ciudad
+Joy Street;Calle del Placer
+Noble District;Distrito noble
+Slums;Barrios bajos
+Farmlands;Tierras de cultivo
+cast %1!;lanza %1!
+launches an attack!;lanza un ataque!
+takes a defensive stance!;adopta una postura defensiva!
+Bite;Mordisco
+Cleave;Hendidura
+Escape;Escapar
+Shield Bash;Golpe de escudo
+Shield Strike;Impacto de escudo
+Smash;Machaque
+Cleave+;Hendidura+
+Paralysis Bottle;Frasco paralizante
+Sticky Fingers;Manos largas
+Slash;Tajo
+Vile Strike;Golpe vil
+Wind Cutter;Cortaviento
+Handle Strike;Golpe de empuñadura
+Lightning Call;Llamada del rayo
+Heal;Curar
+Mighty Blow;Golpe poderoso
+Phantom Blade;Hoja fantasma
+Whirlwind Slash;Tajo torbellino
+Fist Flurry;Ráfaga de puños
+Creamy Soup (Food Effect);Sopa cremosa (efecto de comida)
+Cassoulet (Food Effect);Cassoulet (efecto de comida)
+Claw Strike;Zarpazo
+Berserker Slash;Tajo berserker
+Battle Roar;Rugido de batalla
+Charge;Embestida
+Throw Stone;Lanzar piedra
+Single Mind;Mente única
+Strong Luck;Gran suerte
+Unshakable;Inquebrantable
+stood unmoving.;se queda inmóvil.
+Radiant Blade;Hoja radiante
+Silverflash Quadslash;Cuádruple tajo de plata
+Holy Flash;Destello sagrado
+Battle Dominion;Dominio del combate
+Piercing Flurry;Ráfaga perforante
+Phantom Step;Paso fantasma
+Triple Slash;Tajo triple
+V Strike;Golpe en V
+Divine Arrow;Flecha divina
+Rain of Death;Lluvia de muerte
+Fierce Presence;Presencia feroz
+Shred;Desgarro
+Ultimate: Endless Rampage;Definitiva: Arrasamiento sin fin
+Passive: Fighting Spirit;Pasiva: Espíritu de lucha
+Silverfang Dance;Danza del colmillo de plata
+One Mind;Una sola mente
+Cleave Strike;Golpe hendiente
+Axe Smash;Hachazo
+War Cry;Grito de guerra
+Raise Shield;Alzar escudo
+Command;Ordenar
+Test: Self-Sacrifice;Prueba: Autosacrificio
+Tentacle Lash;Latigazo de tentáculo
+Struggle;Forcejear
+Charge Up;Cargar energía
+Desperate Struggle;Forcejeo desesperado
+Icy Judgement;Juicio helado
+Misty Iceblade;Hoja de hielo de Misty
+Twin Frost;Escarcha gemela
+Frost Cross;Cruz de escarcha
+Triple Whiplash;Triple latigazo
+Thunderstrike;Impacto de rayo
+Vital Flow;Flujo vital
+Passive: Adversity Combat;Pasiva: Lucha en la adversidad
+Mutant Body;Cuerpo mutante
+Tentacle Crush;Aplastamiento de tentáculo
+Sacred Word;Palabra sagrada
+Raging Fury;Furia desatada
+Squirter;Chorro
+Life Drain;Drenar vida
+Roar!;¡Rugido!
+delivers a menacing roar!;suelta un rugido amenazador!
+Debuff Cleanse;Purificar debilitaciones
+Passive: Primordial Potential+;Pasiva: Potencial primordial+
+Whirling Blade;Hoja giratoria
+Howl;Aullido
+Twin Windcutter;Cortaviento doble
+Heaven's Thunder;Rayo celestial
+Shadow Bind;Atadura de sombras
+Dark Orb;Orbe oscuro
+Healing Light;Luz curativa
+Cracked Barrier;Barrera agrietada
+Intimidated;Intimidado
+Rolling Thunder;Trueno ondulante
+Gale Dart;Dardo vendaval
+Brute Force;Fuerza bruta
+Heavy Blow;Golpe pesado
+Quick Reflexes;Reflejos rápidos
+Vengeance;Venganza
+Passive: War Will;Pasiva: Voluntad de guerra
+Passive: Do-or-Die;Pasiva: Todo o nada
+Battle Insight I;Visión de combate I
+Battle Insight II;Visión de combate II
+Battle Insight III;Visión de combate III
+Battle Insight IV;Visión de combate IV
+Battle Insight V;Visión de combate V
+Do Nothing;No hacer nada
+Energy;Energía
+Blade Flurry;Ráfaga de cuchillas
+Swift Cleave;Hendidura veloz
+Fist of the Tiger;Puño del tigre
+Eradicate;Erradicar
+Fearless;Intrépida
+Shotgun a Potion;Beberse una poción de golpe
+Shadow Annihilation;Aniquilación sombría
+Staff Strike;Golpe de bastón
+Double Strike;Golpe doble
+Rend;Desgarrar
+Triple Strike;Golpe triple
+Armor Tear;Rasgar armadura
