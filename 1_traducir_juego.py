@@ -27,10 +27,20 @@ def sanitize_text(text):
     cleaned = re.sub(r' {2,}', ' ', cleaned)
     return cleaned.strip()
 
-# Nombres propios que la IA tiende a traducir literalmente -> formas incorrectas a deshacer
-NOMBRES_PROTEGIDOS = {
+import json
+def cargar_json_seguro(ruta, default):
+    try:
+        with open(ruta, 'r', encoding='utf-8') as f:
+            return json.load(f)
+    except Exception:
+        return default
+
+# Nombres propios y glosarios cargados automáticamente desde archivos externos
+NOMBRES_PROTEGIDOS = cargar_json_seguro("glosarios/nombres_protegidos.json", {
     "Hills": r"\b(?:[Ll]as\s+)?[Cc]olinas\b",
-}
+})
+
+GLOSARIO_ACTIVO = cargar_json_seguro("glosarios/glosario_activo.json", {})
 
 def restore_names(source, translated):
     """Si el original contiene un nombre protegido y la traducción lo ha perdido, lo restaura."""
@@ -83,7 +93,20 @@ class OllamaTranslator:
         if text in self.cache:
             return self.cache[text]
             
-        formatted_prompt = f"### Instruction:\nTraduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE la traducción directa, sin números de lista, sin comillas y sin notas.\n\n### Input:\n{text}\n\n### Response:\n"
+        # Inyección dinámica de glosario (RAG)
+        instruccion = "Traduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE la traducción directa, sin números de lista, sin comillas y sin notas."
+        
+        terminos_encontrados = []
+        texto_lower = text.lower()
+        for eng, esp in GLOSARIO_ACTIVO.items():
+            if eng.lower() in texto_lower:
+                terminos_encontrados.append(f"'{eng}' = '{esp}'")
+                
+        if terminos_encontrados:
+            inyeccion = " REGLAS ESTRICTAS DE GLOSARIO: " + ", ".join(terminos_encontrados) + "."
+            instruccion += inyeccion
+
+        formatted_prompt = f"### Instruction:\n{instruccion}\n\n### Input:\n{text}\n\n### Response:\n"
         
         payload = {
             "model": self.model_name,

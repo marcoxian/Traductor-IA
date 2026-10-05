@@ -58,6 +58,8 @@ La tubería de traducción está organizada en pasos numerados para garantizar c
 
 ### 1. `1_traducir_juego.py`
 Envía los textos del juego a la IA local (vía Ollama).
+* **Inyección Dinámica de Glosario (RAG):** Lee `glosarios/glosario_activo.json` e inyecta reglas estrictas en el prompt al vuelo si detecta palabras clave en el texto original, garantizando 100% de consistencia.
+* **Protección de Nombres:** Carga automáticamente `glosarios/nombres_protegidos.json` para evitar traducción literal de nombres propios.
 * Soporta reanudación automática si se detiene la ejecución.
 * Genera copias de seguridad automáticas (`.bak`) de los archivos del juego.
 * Respeta variables de formato y códigos de escape del motor.
