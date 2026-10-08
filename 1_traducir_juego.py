@@ -42,6 +42,11 @@ NOMBRES_PROTEGIDOS = cargar_json_seguro("glosarios/nombres_protegidos.json", {
 
 GLOSARIO_ACTIVO = cargar_json_seguro("glosarios/glosario_activo.json", {})
 
+try:
+    with open("glosarios/contexto.txt", "r", encoding="utf-8") as f:
+        CONTEXTO_JUEGO = f.read().strip()
+except Exception:
+    CONTEXTO_JUEGO = ""
 def restore_names(source, translated):
     """Si el original contiene un nombre protegido y la traducción lo ha perdido, lo restaura."""
     for name, wrong in NOMBRES_PROTEGIDOS.items():
@@ -94,7 +99,15 @@ class OllamaTranslator:
             return self.cache[text]
             
         # Inyección dinámica de glosario (RAG)
-        instruccion = "Traduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE la traducción directa, sin números de lista, sin comillas y sin notas."
+        instruccion = "Traduce este texto al español de España de forma MUY natural y contextual. NO traduzcas literalmente. Interpreta frases hechas, insultos y expresiones a sus equivalentes naturales. Usa sentido común para los géneros y no traduzcas nombres propios de personajes. Devuelve ÚNICAMENTE la traducción directa, sin números de lista, sin comillas y sin notas."
+        
+        if CONTEXTO_JUEGO:
+            instruccion += " CONTEXTO OBLIGATORIO: " + CONTEXTO_JUEGO + "."
+            
+        # Historial de contexto rodante (Rolling context window)
+        if hasattr(self, "history") and self.history:
+            hist_str = " | ".join(self.history)
+            instruccion += f" (TEXTOS ANTERIORES para contexto: {hist_str}. RECUERDA: Traduce SOLO el texto del Input, NO el contexto)."
         
         terminos_encontrados = []
         texto_lower = text.lower()
@@ -136,6 +149,8 @@ class OllamaTranslator:
                 # Filtro agresivo para alucinaciones con el prompt
                 if "Texto de videojuego" in resp and ":" in resp:
                     resp = resp.split(":", 1)[-1].strip()
+                if "Tu respuesta de videojuego RPG" in resp and ":" in resp:
+                    resp = resp.split(":", 1)[-1].strip()
                 if "Texto original:" in resp and "Tu traducción:" in resp:
                     resp = resp.split("Tu traducción:", 1)[-1].strip()
                 
@@ -143,6 +158,15 @@ class OllamaTranslator:
                 if "<|im_start|>" in resp: resp = resp.split("<|im_start|>")[0].strip()
                 
                 final_resp = resp if resp else text
+                
+                if not hasattr(self, "history"):
+                    self.history = []
+                # Evitar llenar el historial con frases cortas irrelevantes (menús)
+                if len(text) > 8:
+                    self.history.append(f"[{text} = {final_resp}]")
+                    if len(self.history) > 3:
+                        self.history.pop(0)
+                
                 self.cache[text] = final_resp
                 return final_resp
             except requests.exceptions.RequestException as e:
@@ -378,10 +402,23 @@ class GameEngineInjector:
                     if len(c_parts) == len(o_parts) and c_parts[col] != original_text:
                         continue
 
-                    sanitized = sanitize_text(original_text)
-                    m = prefix_re.match(sanitized)
+                    m = prefix_re.match(original_text)
                     prefix = m.group(0) if m else ""
-                    body = sanitized[len(prefix):]
+                    
+                    if prefix:
+                        def repl_name(m_name):
+                            c_in = m_name.group(1) or ""
+                            name_str = m_name.group(2)
+                            c_out = m_name.group(3) or ""
+                            for en, es in GLOSARIO_ACTIVO.items():
+                                if name_str.lower() == en.lower():
+                                    return f"\\N<{c_in}{es}{c_out}>"
+                            return m_name.group(0)
+                        prefix = re.sub(r'\\N<(\\C\[\d+\])?([^>\\]+)(\\C\[\d+\])?>', repl_name, prefix)
+                        
+                    body_raw = original_text[len(m.group(0)) if m else 0:]
+                    sanitized = sanitize_text(body_raw)
+                    body = sanitized
                     if not any(c.isalpha() for c in tag_strip.sub("", body)):
                         continue
 
@@ -518,9 +555,22 @@ class GameEngineInjector:
                                 logging.info(f"-> Traduciendo tipo ({array_key}): {item[:30]}...")
                                 data[array_key][idx] = self.translator.translate(item)
                 
-                # Traducir opciones de diálogo (code 402)
+                # Traducir opciones de diálogo mostradas al jugador (code 102)
                 if "code" in data and "parameters" in data:
-                    if data["code"] == 402 and len(data["parameters"]) > 1 and isinstance(data["parameters"][1], str):
+                    if data["code"] == 102 and len(data["parameters"]) > 0 and isinstance(data["parameters"][0], list):
+                        opciones = data["parameters"][0]
+                        for idx, original in enumerate(opciones):
+                            if isinstance(original, str) and original.strip() and any(c.isalpha() for c in original):
+                                logging.info(f"-> Traduciendo (Opción): {original[:30]}...")
+                                translated = self.translator.translate(original)
+                                is_valid, orig_tags, trans_tags = self.translator.validate_format_tags(original, translated)
+                                if not is_valid:
+                                    reason = f"Faltan etiquetas: {set(orig_tags)-set(trans_tags)}" if set(orig_tags)-set(trans_tags) else f"Sobrantes: {set(trans_tags)-set(orig_tags)}"
+                                    translated = self.translator.autocorrect(original, translated, reason)
+                                opciones[idx] = translated
+                                
+                    # Traducir ramificación condicional del editor (code 402)
+                    elif data["code"] == 402 and len(data["parameters"]) > 1 and isinstance(data["parameters"][1], str):
                         original = data["parameters"][1]
                         if original.strip() and any(c.isalpha() for c in original):
                             logging.info(f"-> Traduciendo (Opción): {original[:30]}...")
@@ -530,6 +580,28 @@ class GameEngineInjector:
                                 reason = f"Faltan etiquetas: {set(orig_tags)-set(trans_tags)}" if set(orig_tags)-set(trans_tags) else f"Sobrantes: {set(trans_tags)-set(orig_tags)}"
                                 translated = self.translator.autocorrect(original, translated, reason)
                             data["parameters"][1] = translated
+                            
+                    # Traducir diálogos inyectados por script (code 355)
+                    elif data["code"] == 355 and len(data["parameters"]) > 0 and isinstance(data["parameters"][0], str):
+                        script = data["parameters"][0]
+                        if 'setValue(21,' in script:
+                            match = re.search(r'setValue\(\s*21\s*,\s*"([^"]+)"\s*\)', script)
+                            if match:
+                                full_str = match.group(1)
+                                if '.' in full_str:
+                                    prefix, text = full_str.split('.', 1)
+                                    prefix += '.'
+                                else:
+                                    prefix = ''
+                                    text = full_str
+                                
+                                if text.strip() and any(c.isalpha() for c in text):
+                                    logging.info(f"-> Traduciendo (Script): {text[:30]}...")
+                                    translated = self.translator.translate(text)
+                                    if translated and translated != text:
+                                        translated = translated.replace('"', "'").replace('\\', '')
+                                        nuevo_script = re.sub(r'(setValue\(\s*21\s*,\s*")[^"]+("\s*\))', r'\g<1>' + prefix + translated + r'\g<2>', script)
+                                        data["parameters"][0] = nuevo_script
 
                 # Recursión para bucear en el JSON
                 for k, v in data.items():

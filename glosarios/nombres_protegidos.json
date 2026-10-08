@@ -1,5 +1,5 @@
 {
-    "Hills": "\\b(?:[Ll]as\\s+)?[Cc]olinas\\b",
+    "Hills": "\\b(?:[Ll]as\\s+)?[Cc]olinas|[Mm]ontes|[Mm]onta\\xc3\\xb1as\\b",
     "Slime": "\\b[Ll]imo\\b",
     "Hero": "\\b[Hh][eé]roe\\b"
 }

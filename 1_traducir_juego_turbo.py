@@ -42,6 +42,11 @@ NOMBRES_PROTEGIDOS = cargar_json_seguro("glosarios/nombres_protegidos.json", {
 
 GLOSARIO_ACTIVO = cargar_json_seguro("glosarios/glosario_activo.json", {})
 
+try:
+    with open("glosarios/contexto.txt", "r", encoding="utf-8") as f:
+        CONTEXTO_JUEGO = f.read().strip()
+except Exception:
+    CONTEXTO_JUEGO = ""
 def restore_names(source, translated):
     """Si el original contiene un nombre protegido y la traducción lo ha perdido, lo restaura."""
     for name, wrong in NOMBRES_PROTEGIDOS.items():
@@ -114,6 +119,8 @@ class OllamaTranslator:
                 "MANTÉN LA MISMA NUMERACIÓN EXACTA (ej: '1. traducción\\n2. traducción'). "
                 "No unas frases ni te saltes ninguna. No añadas comillas extra."
             )
+            if CONTEXTO_JUEGO:
+                instruccion += " CONTEXTO OBLIGATORIO: " + CONTEXTO_JUEGO + "."
             
             # Buscar términos
             terminos_encontrados = []
@@ -174,7 +181,72 @@ class OllamaTranslator:
         return results
 
     def translate(self, text):
+        if not text.strip():
+            return text
+            
+        if text in self.cache:
+            return self.cache[text]
+            
+        # Inyección dinámica de glosario (RAG)
+        instruccion = "Traduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE la traducción directa, sin números de lista, sin comillas y sin notas."
+        
+        if CONTEXTO_JUEGO:
+            instruccion += " CONTEXTO OBLIGATORIO: " + CONTEXTO_JUEGO + "."
+        
+        terminos_encontrados = []
+        texto_lower = text.lower()
+        for eng, esp in GLOSARIO_ACTIVO.items():
+            if eng.lower() in texto_lower:
+                terminos_encontrados.append(f"'{eng}' = '{esp}'")
+                
+        if terminos_encontrados:
+            inyeccion = " REGLAS ESTRICTAS DE GLOSARIO: " + ", ".join(terminos_encontrados) + "."
+            instruccion += inyeccion
 
+        formatted_prompt = f"### Instruction:\n{instruccion}\n\n### Input:\n{text}\n\n### Response:\n"
+        
+        payload = {
+            "model": self.model_name,
+            "prompt": formatted_prompt,
+            "stream": False,
+            "options": {
+                "num_predict": 250,
+                "temperature": 0.1
+            }
+        }
+        
+        max_retries = 3
+        for attempt in range(max_retries):
+            try:
+                response = requests.post(self.endpoint, json=payload, timeout=60)
+                response.raise_for_status()
+                data = response.json()
+                resp = data.get("response", "").strip()
+                
+                # Limpieza de alucinaciones
+                resp = resp.replace("Respuesta:", "").replace("### Response:", "").strip()
+                if resp.startswith("1. "): resp = resp[3:]
+                if resp.startswith("- "): resp = resp[2:]
+                if resp.startswith('"') and resp.endswith('"'): resp = resp[1:-1]
+                if resp.startswith("'") and resp.endswith("'"): resp = resp[1:-1]
+                
+                # Filtro agresivo para alucinaciones con el prompt
+                if "Texto de videojuego" in resp and ":" in resp:
+                    resp = resp.split(":", 1)[-1].strip()
+                if "Texto original:" in resp and "Tu traducción:" in resp:
+                    resp = resp.split("Tu traducción:", 1)[-1].strip()
+                
+                # Si se coló alguna etiqueta residual
+                if "<|im_start|>" in resp: resp = resp.split("<|im_start|>")[0].strip()
+                
+                final_resp = resp if resp else text
+                self.cache[text] = final_resp
+                return final_resp
+            except requests.exceptions.RequestException as e:
+                logging.warning(f"{YELLOW}Error de red (Intento {attempt + 1}/{max_retries}): {e}{RESET}")
+                if attempt == max_retries - 1:
+                    logging.error(f"{RED}Saltando texto tras {max_retries} intentos fallidos.{RESET}")
+                    return text
     def extract_format_tags(self, text):
         """Extrae todas las variables y etiquetas de formato de un texto."""
         # Captura %s, %d, %f, %1, {0}, {name}, \n, BBCode [tag], [/tag], RPGMaker \C[3], \F[name], etc.
@@ -540,6 +612,20 @@ class GameEngineInjector:
                         full_text = " ".join(fragments)
                         if any(c.isalpha() for c in full_text):
                             queue.append(sanitize_text(full_text))
+                    elif (isinstance(data[i], dict) and data[i].get("code") == 355 and
+                          len(data[i].get("parameters", [])) > 0 and isinstance(data[i]["parameters"][0], str) and
+                          "setValue(21" in data[i]["parameters"][0]):
+                        param = data[i]["parameters"][0]
+                        try:
+                            match = re.search(r'setValue\(21,\s*["\'](.*?)["\']\)', param)
+                            if match:
+                                quote_content = match.group(1)
+                                text_part = quote_content.split(".", 1)[1] if "." in quote_content else quote_content
+                                if any(c.isalpha() for c in text_part):
+                                    queue.append(sanitize_text(text_part))
+                        except Exception:
+                            pass
+                        i += 1
                     else:
                         extract_strings(data[i], queue)
                         i += 1
@@ -652,6 +738,38 @@ class GameEngineInjector:
                             
                         data[group_start:i] = new_commands
                         i = group_start + len(new_commands)
+                    elif (isinstance(data[i], dict) and data[i].get("code") == 355 and
+                          len(data[i].get("parameters", [])) > 0 and isinstance(data[i]["parameters"][0], str) and
+                          "setValue(21" in data[i]["parameters"][0]):
+                        param = data[i]["parameters"][0]
+                        try:
+                            match = re.search(r'(setValue\(21,\s*["\'])(.*?)(["\']\))', param)
+                            if match:
+                                prefix_quote = match.group(1)
+                                quote_content = match.group(2)
+                                suffix_quote = match.group(3)
+                                
+                                if "." in quote_content:
+                                    prefix_part, text_part = quote_content.split(".", 1)
+                                    prefix_part += "."
+                                else:
+                                    prefix_part = ""
+                                    text_part = quote_content
+                                    
+                                if any(c.isalpha() for c in text_part):
+                                    sanitized = sanitize_text(text_part)
+                                    translated = next(results_iter)
+                                    
+                                    is_valid, orig_tags, trans_tags = self.translator.validate_format_tags(sanitized, translated)
+                                    if not is_valid:
+                                        reason = f"Faltan etiquetas: {set(orig_tags)-set(trans_tags)}" if set(orig_tags)-set(trans_tags) else f"Sobrantes: {set(trans_tags)-set(orig_tags)}"
+                                        translated = self.translator.autocorrect(sanitized, translated, reason)
+                                        
+                                    new_param = param[:match.start()] + prefix_quote + prefix_part + translated + suffix_quote + param[match.end():]
+                                    data[i]["parameters"][0] = new_param
+                        except Exception:
+                            pass
+                        i += 1
                     else:
                         inject_strings(data[i], results_iter)
                         i += 1

@@ -1,0 +1,15 @@
+# Aquí puedes escribir reglas generales para toda la traducción.
+# Por ejemplo: el género del protagonista, el tono, o cualquier contexto que necesite la IA.
+
+# GÉNEROS Y NOMBRES (MUY IMPORTANTE)
+- Hills es una chica. Dirígete a ella usando pronombres femeninos y adjetivos femeninos (ej: ingenua, aventurera, lista, hambrienta).
+- NUNCA traduzcas el nombre "Hills" como "Montañas" o "Lomas". Déjalo siempre como "Hills".
+- Miya también es una chica. Mantén los adjetivos y pronombres en femenino.
+
+# LUGARES
+- "Nightingale" es el nombre de una taberna/club. Tradúcelo como "El Ruiseñor". NUNCA lo traduzcas como "La Gallina de las Siete Cimas" ni nada parecido.
+
+# EXPRESIONES Y TONO
+- Cuando un personaje responde "Right" o "R-right" para confirmar algo, tradúcelo como "Cierto", "Vale" o "Entendido". NUNCA lo traduzcas como "Derecha" o "R-derecha".
+- Evita traducciones literales y robóticas (por ejemplo, "escape room" puede quedarse como "escape room", y frases hechas como "Staff only beyond this point" deben ser "Solo personal autorizado").
+- Los diálogos deben sonar naturales y conversacionales.

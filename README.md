@@ -17,7 +17,8 @@ Traductor IA/
 │   └── <nombre_juego>/        # CSVs de revisión, partidas guardadas, parches locales
 │
 ├── 📁 glosarios/               # [En Git] Diccionarios de términos universales
-│   └── glosario_interfaz_rpgmaker.csv   # Términos comunes (Atacar, PV, Objeto, Guardar...)
+│   ├── glosario_interfaz_rpgmaker.csv   # Términos comunes (Atacar, PV, Objeto, Guardar...)
+│   └── contexto.txt            # Documento inyectable para dar sinopsis/contexto general a la IA
 │
 ├── 📁 datasets/                # [Ignorado en Git] Datos y corpus bilingües de entrenamiento
 │   ├── corpus_videojuegos/    # Volcados bilingües extraídos de otros juegos
@@ -37,6 +38,7 @@ Traductor IA/
 │
 ├── 🐍 1_traducir_juego.py       # Paso 1: Traducción automática con Ollama (Modo Seguro)
 ├── 🐍 1_traducir_juego_turbo.py # Paso 1: Traducción automática con Ollama (Modo Batch Turbo)
+├── 🐍 ollama_proxy.py           # Proxy interceptor anti-timeouts para conexiones lentas a Ollama
 ├── 🐍 2_generar_revision.py     # Paso 2: Generación de hoja CSV para revisión
 ├── 🐍 3_reparar_etiquetas_ia.py # Paso 3: Validación y reparación de sintaxis/códigos
 ├── 🐍 4_aplicar_parches.py      # Paso 4: Inyección de correcciones manuales y diccionarios

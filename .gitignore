@@ -34,3 +34,15 @@ herramientas_extra/unrpyc/
 # SO
 .DS_Store
 Thumbs.db
+# Scripts de un solo uso y pruebas
+test
+test.txt
+count_scripts.py
+clean_all_hallucinations.py
+clean_last_3.py
+traducir_nombres_npc.py
+traducir_opciones.py
+traducir_restantes_hills.py
+traducir_scripts.py
+traducir_scripts_lento.py
+
