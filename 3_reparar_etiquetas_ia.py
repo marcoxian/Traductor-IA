@@ -1,111 +1,105 @@
-import csv
-import json
-import requests
-import re
-import sys
-from collections import Counter
+"""3_reparar_etiquetas_ia.py — Reparación asistida por IA de etiquetas y formato.
 
-sys.stdout.reconfigure(encoding='utf-8')
-
-def extraer_etiquetas(texto):
-    pattern = r'(%[sdfSDF]|%\d+|\\n|\\r|\{[^}]+\}|\[[^\]]+\]|\\[A-Za-z]+\[[^\]]*\]|\\[A-Za-z{}<>|.!^$]|<[^>]*>)'
-    return re.findall(pattern, texto)
-
-def etiquetas_coinciden(original, traducido):
-    etiquetas_orig = sorted(extraer_etiquetas(original))
-    etiquetas_trad = sorted(extraer_etiquetas(traducido))
-    return etiquetas_orig == etiquetas_trad
-
-def corregir_con_ia(texto_ingles, traduccion_con_errores):
-    prompt = f"""You are a precise technical translator for an RPG game.
-Your task is to fix a Spanish translation that has broken or missing formatting tags.
-
-Original English text (contains correct tags):
-{texto_ingles}
-
-Bad Spanish translation (tags are broken/missing):
-{traduccion_con_errores}
-
-Instructions:
-1. Keep the Spanish translation natural.
-2. You MUST include ALL the tags from the English text (like \\C[4], \\n, \\N<...>, \\SK[...], etc.) in their exact corresponding positions in the Spanish text.
-3. DO NOT add any extra text, quotes, or explanations. Just output the corrected Spanish text.
+Lee una hoja de revisión (revision_<juego>.csv) generada en el paso 2, detecta
+filas con códigos rotos o longitud truncada y solicita a Ollama que las repare
+conservando exactamente las etiquetas de formato.
 """
-    try:
-        response = requests.post("http://localhost:11434/api/generate", json={
-            "model": "llama3.1:latest",
-            "prompt": prompt,
-            "stream": False,
-            "options": {"temperature": 0.1, "num_predict": 500}
-        }, timeout=60)
-        response.raise_for_status()
-        resp = response.json().get("response", "").strip()
-        
-        # Cleanup
-        if resp.startswith('"') and resp.endswith('"'): resp = resp[1:-1]
-        return resp
-    except Exception as e:
-        print(f"Error calling llama3.1: {e}")
-        return traduccion_con_errores
+from __future__ import annotations
+
+import argparse
+import csv
+import sys
+from pathlib import Path
+
+from traductor import config
+from traductor.ollama import OllamaTranslator
+from traductor.registro import configurar_logging
+from traductor.texto import comparar_etiquetas, forzar_etiquetas
+
+
+def buscar_archivo_revision() -> Path | None:
+    candidatos = list(Path(".").glob("revision_*.csv")) + list(config.DIR_WORKSPACE.glob("*/revision_*.csv"))
+    return candidatos[0] if candidatos else None
+
 
 def main():
-    archivo = "revision_The_Adventures_of_HILLS.csv"
+    parser = argparse.ArgumentParser(description="Reparar etiquetas de formato usando Ollama.")
+    parser.add_argument("--archivo", help="Ruta al archivo CSV de revisión (por defecto busca revision_*.csv)")
+    parser.add_argument("--modelo", default=config.MODELO_POR_DEFECTO, help="Modelo de Ollama a usar")
+    parser.add_argument("--endpoint", default=config.OLLAMA_URL, help="URL del endpoint de Ollama")
+    args = parser.parse_args()
+
+    configurar_logging()
+
+    if args.archivo:
+        archivo_path = Path(args.archivo)
+    else:
+        archivo_path = buscar_archivo_revision()
+
+    if not archivo_path or not archivo_path.exists():
+        print("Error: No se encontró ningún archivo de revisión. Especifica uno con --archivo <ruta.csv>")
+        sys.exit(1)
+
+    print(f"Cargando archivo de revisión: {archivo_path}")
     filas = []
-    
-    with open(archivo, "r", encoding="utf-8-sig") as f:
+    with open(archivo_path, "r", encoding="utf-8-sig") as f:
         reader = csv.DictReader(f, delimiter=";")
-        for row in reader:
-            filas.append(row)
-            
-    print(f"Procesando {len(filas)} filas con llama3.1...")
-    
+        filas = list(reader)
+
+    if not filas:
+        print("El archivo de revisión está vacío.")
+        return
+
+    translator = OllamaTranslator(model_name=args.modelo, endpoint=args.endpoint)
+    try:
+        translator.comprobar_conexion()
+    except Exception as e:
+        print(f"Aviso al comprobar conexión con Ollama: {e}")
+
     corregidas = 0
-    for i, row in enumerate(filas):
-        if row["correccion"].strip():
+    total = len(filas)
+    print(f"Procesando {total} filas con el modelo {args.modelo}...")
+
+    for i, row in enumerate(filas, 1):
+        if row.get("correccion", "").strip():
             continue
-            
-        texto_ingles = row["ingles"]
-        texto_traduccion_mala = row["traduccion_ia"]
-        
-        # If it's a long text truncation issue
-        if "LONGITUD" in row["problema"]:
-            print(f"[{i+1}/{len(filas)}] Refaciendo longitud truncada...")
-            traduccion_reparada = corregir_con_ia(texto_ingles, "")
+
+        texto_ingles = row.get("ingles", "")
+        texto_traduccion_mala = row.get("traduccion_ia", "")
+        problema = row.get("problema", "")
+
+        if "LONGITUD" in problema:
+            print(f"[{i}/{total}] Retraduciendo longitud truncada...")
+            traduccion_reparada = translator.translate(texto_ingles)
         else:
-            print(f"[{i+1}/{len(filas)}] Arreglando etiquetas/orden...")
-            traduccion_reparada = corregir_con_ia(texto_ingles, texto_traduccion_mala)
-            
-        # Verify
-        if etiquetas_coinciden(texto_ingles, traduccion_reparada) or "LONGITUD" in row["problema"]:
+            print(f"[{i}/{total}] Arreglando etiquetas/orden...")
+            traduccion_reparada = translator.autocorrect(texto_ingles, texto_traduccion_mala)
+
+        ok, _, _ = comparar_etiquetas(texto_ingles, traduccion_reparada)
+        if ok or "LONGITUD" in problema:
             row["correccion"] = traduccion_reparada
             corregidas += 1
-            print(f"  -> OK: {traduccion_reparada[:50]}...")
+            print(f"  ✔ OK: {traduccion_reparada[:50]}...")
         else:
-            print(f"  -> FALLO: Las etiquetas siguen sin coincidir. Usando fallback básico.")
-            # Basic fallback: prepend missing tags
-            etiquetas_orig = extraer_etiquetas(texto_ingles)
-            etiquetas_trad = extraer_etiquetas(traduccion_reparada)
-            etiquetas_faltantes = [t for t in etiquetas_orig if t not in etiquetas_trad]
-            if etiquetas_faltantes:
-                row["correccion"] = "".join(etiquetas_faltantes) + " " + traduccion_reparada
-            else:
-                row["correccion"] = traduccion_reparada
+            print("  ⚠ Fallback: forzando etiquetas faltantes.")
+            row["correccion"] = forzar_etiquetas(texto_ingles, traduccion_reparada)
             corregidas += 1
-            
-        # Save incrementally
+
+        # Guardado incremental cada 10 filas para no perder progreso
         if i % 10 == 0:
-            with open(archivo, "w", encoding="utf-8-sig", newline="") as f:
+            with open(archivo_path, "w", encoding="utf-8-sig", newline="") as f:
                 writer = csv.DictWriter(f, fieldnames=filas[0].keys(), delimiter=";")
                 writer.writeheader()
                 writer.writerows(filas)
-                
-    # Final save
-    with open(archivo, "w", encoding="utf-8-sig", newline="") as f:
+
+    # Guardado final
+    with open(archivo_path, "w", encoding="utf-8-sig", newline="") as f:
         writer = csv.DictWriter(f, fieldnames=filas[0].keys(), delimiter=";")
         writer.writeheader()
         writer.writerows(filas)
-        
-    print(f"¡Proceso completado! {corregidas} líneas corregidas automáticamente.")
+
+    print(f"¡Proceso completado! {corregidas} líneas corregidas guardadas en {archivo_path}.")
+
 
 if __name__ == "__main__":
     main()

@@ -52,10 +52,7 @@ REPETIR_GLOSARIO = 3
 REPETIR_CORPUS = 2
 MUESTRA_GENERAL = 4000
 
-# Debe coincidir con OllamaTranslator.translate() en auto_inyector.py
-INSTRUCCION = ("Traduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE "
-               "la traducción directa, sin números de lista, sin comillas y sin notas.")
-PLANTILLA = "### Instruction:\n{}\n\n### Input:\n{}\n\n### Response:\n{}"
+from traductor.prompts import INSTRUCCION, PLANTILLA
 
 random.seed(3407)
 

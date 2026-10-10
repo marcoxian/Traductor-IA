@@ -22,9 +22,7 @@ import random
 
 random.seed(3407)
 
-# Debe coincidir carácter a carácter con el prompt de OllamaTranslator.translate()
-INSTRUCCION = ("Traduce este texto al español de España de forma natural. Devuelve ÚNICAMENTE "
-               "la traducción directa, sin números de lista, sin comillas y sin notas.")
+from traductor.prompts import INSTRUCCION
 
 # ---------------------------------------------------------------------------
 # 1. Términos de interfaz, estadísticas, estados y equipo
