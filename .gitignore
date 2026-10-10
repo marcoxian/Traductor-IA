@@ -3,10 +3,12 @@ venv*/
 .venv/
 env/
 
-# Python
+# Python y caché
 __pycache__/
 *.py[cod]
 .env
+.pytest_cache/
+.coverage
 
 # Entornos e IDEs
 .vscode/
@@ -22,27 +24,18 @@ datasets/*
 modelos/*
 !modelos/.gitkeep
 
+# Pruebas temporales y scripts legacy
 scratch/
 
 # Herramientas externas con submódulo propio
 herramientas_extra/unrpyc/
 
-# Backups y temporales
+# Backups, temporales y partidas guardadas locales
 *.bak
 *.tmp
+*.rpgsave
+revision_*.csv
 
 # SO
 .DS_Store
 Thumbs.db
-# Scripts de un solo uso y pruebas
-test
-test.txt
-count_scripts.py
-clean_all_hallucinations.py
-clean_last_3.py
-traducir_nombres_npc.py
-traducir_opciones.py
-traducir_restantes_hills.py
-traducir_scripts.py
-traducir_scripts_lento.py
-
