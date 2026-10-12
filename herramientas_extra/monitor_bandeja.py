@@ -563,20 +563,54 @@ class MonitorBandeja:
         return c
 
     def _btn_accion(self, padre: tk.Widget, titulo: str, comando, color: str, desc: str = "") -> tk.Frame:
-        borde_color = oscurecer_hex(color, 0.75)
-
-        box = tk.Frame(padre, bg=color, cursor="hand2", padx=self.px(10), pady=self.px(6),
-                       highlightbackground=borde_color, highlightthickness=1)
-        lbl_t = tk.Label(box, text=titulo, font=("Segoe UI Semibold", 9), fg="#ffffff", bg=color, anchor="w")
+        box = tk.Frame(padre, bg=C_TARJETA_ALT, cursor="hand2", padx=self.px(10), pady=self.px(6),
+                       highlightbackground=C_BORDE, highlightthickness=1)
+        lbl_t = tk.Label(box, text=titulo, font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_TARJETA_ALT, anchor="w")
         lbl_t.pack(fill="x")
+        lbl_d = None
         if desc:
-            lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg="#f1f5f9", bg=color, anchor="w")
+            lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg=C_SUAVE, bg=C_TARJETA_ALT, anchor="w")
             lbl_d.pack(fill="x")
 
-        box.bind("<Button-1>", lambda _: comando())
-        lbl_t.bind("<Button-1>", lambda _: comando())
-        if desc:
-            lbl_d.bind("<Button-1>", lambda _: comando())
+        def pintar_color():
+            box.configure(bg=color, highlightbackground=color)
+            lbl_t.configure(bg=color, fg="#ffffff")
+            if lbl_d:
+                lbl_d.configure(bg=color, fg="#f1f5f9")
+
+        def pintar_normal():
+            box.configure(bg=C_TARJETA_ALT, highlightbackground=C_BORDE)
+            lbl_t.configure(bg=C_TARJETA_ALT, fg=C_TEXTO)
+            if lbl_d:
+                lbl_d.configure(bg=C_TARJETA_ALT, fg=C_SUAVE)
+
+        def raton_sigue_dentro() -> bool:
+            try:
+                rx = box.winfo_rootx()
+                ry = box.winfo_rooty()
+                rw = box.winfo_width()
+                rh = box.winfo_height()
+                px = box.winfo_pointerx()
+                py = box.winfo_pointery()
+                return (rx <= px <= rx + rw) and (ry <= py <= ry + rh)
+            except Exception:
+                return False
+
+        def al_entrar(_):
+            pintar_color()
+
+        def al_salir(_):
+            def verificar():
+                if not raton_sigue_dentro():
+                    pintar_normal()
+            box.after(25, verificar)
+
+        elementos = (box, lbl_t) if lbl_d is None else (box, lbl_t, lbl_d)
+        for w in elementos:
+            w.bind("<Enter>", al_entrar)
+            w.bind("<Leave>", al_salir)
+            w.bind("<Button-1>", lambda _: comando())
+
         return box
 
     # --- Pestaña 2: Progreso en Vivo ---
