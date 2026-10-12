@@ -28,7 +28,9 @@ class GameEngineInjector:
                  modo: str = "seguro",
                  juego: str | None = None,
                  endpoint: str = config.OLLAMA_URL,
-                 motor_forzado: str | None = None):
+                 motor_forzado: str | None = None,
+                 abrir_monitor: bool = True,
+                 monitor_en_bandeja: bool = False):
         self.ruta_juego = Path(ruta_juego)
         self.archivo_objetivo = archivo_objetivo
         self.modelo = modelo
@@ -57,6 +59,9 @@ class GameEngineInjector:
         # Estado compartido con monitor_bandeja.py y servidor_progreso.py
         self.progreso = EstadoProgreso(nombre_juego, modelo, modo)
         self.translator.progreso = self.progreso
+
+        if abrir_monitor:
+            lanzar_monitor(en_bandeja=monitor_en_bandeja)
 
     def run(self) -> None:
         try:
@@ -112,19 +117,23 @@ class GameEngineInjector:
         self.progreso.finalizar(cache=stats["cache"])
 
 
-def lanzar_monitor_bandeja() -> None:
-    """Arranca herramientas_extra/monitor_bandeja.py escondido en la bandeja (sin consola).
-    Si ya está abierto, la propia aplicación detecta la instancia y no duplica el icono."""
+def lanzar_monitor(en_bandeja: bool = False) -> None:
+    """Arranca herramientas_extra/monitor_bandeja.py.
+    Por defecto abre la ventana para que el usuario la vea de inmediato y pueda minimizarla.
+    Si ya hay una instancia abierta, la trae al frente sin duplicar iconos."""
     import subprocess
     script = config.RAIZ / "herramientas_extra" / "monitor_bandeja.py"
     pythonw = Path(sys.executable).with_name("pythonw.exe")
     exe = str(pythonw if pythonw.exists() else sys.executable)
+    cmd = [exe, str(script)]
+    if en_bandeja:
+        cmd.append("--bandeja")
     try:
-        subprocess.Popen([exe, str(script), "--bandeja"], cwd=str(config.RAIZ),
+        subprocess.Popen(cmd, cwd=str(config.RAIZ),
                          creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
-        log.info("Monitor de bandeja iniciado (icono junto al reloj).")
+        log.info("Monitor de traducción iniciado automáticamente.")
     except OSError as e:
-        log.warning("No se pudo abrir el monitor de bandeja: %s", e)
+        log.warning("No se pudo abrir el monitor: %s", e)
 
 
 def main(default_mode: str = "seguro") -> None:
@@ -138,14 +147,13 @@ def main(default_mode: str = "seguro") -> None:
     parser.add_argument("--motor", type=str, choices=["RPGMaker", "Godot", "Unity", "Unreal"], help="Forzar el motor de juego")
     parser.add_argument("--endpoint", type=str, default=config.OLLAMA_URL, help="URL de la API de Ollama")
     parser.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
+    parser.add_argument("--sin-monitor", action="store_true",
+                        help="No abrir automáticamente la aplicación del monitor")
     parser.add_argument("--bandeja", action="store_true",
-                        help="Abrir el monitor de progreso en la bandeja del sistema (junto al reloj)")
+                        help="Arrancar el monitor directamente escondido en la bandeja (sin mostrar la ventana)")
 
     args = parser.parse_args()
     configurar_logging(detallado=args.debug)
-
-    if args.bandeja:
-        lanzar_monitor_bandeja()
 
     modo_final = "turbo" if args.turbo else args.modo
 
@@ -157,6 +165,8 @@ def main(default_mode: str = "seguro") -> None:
         juego=args.juego,
         endpoint=args.endpoint,
         motor_forzado=args.motor,
+        abrir_monitor=not args.sin_monitor,
+        monitor_en_bandeja=args.bandeja,
     )
     injector.run()
 

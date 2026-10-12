@@ -35,12 +35,61 @@ MAX_ULTIMAS_FRASES = 8
 INTERVALO_ESCRITURA = 1.0  # segundos
 
 
-def leer_progreso(ruta: Path = ARCHIVO_PROGRESO) -> dict[str, Any] | None:
-    """Lee el estado actual. Devuelve None si no existe o está a medio escribir."""
+def buscar_traduccion_reciente() -> dict[str, Any] | None:
+    """Si no hay progreso_actual.json, busca el perfil de juego más reciente en workspace/."""
     try:
-        return json.loads(ruta.read_text(encoding="utf-8"))
-    except (OSError, ValueError):
+        candidatos = []
+        if config.DIR_WORKSPACE.exists():
+            for p in config.DIR_WORKSPACE.iterdir():
+                if p.is_dir():
+                    cache_dir = p / "cache"
+                    if cache_dir.exists():
+                        for cf in cache_dir.glob("cache_*.json"):
+                            try:
+                                mtime = cf.stat().st_mtime
+                                candidatos.append((mtime, p.name, cf))
+                            except OSError:
+                                pass
+        if not candidatos:
+            return None
+        candidatos.sort(reverse=True)
+        mtime, nombre_juego, cache_file = candidatos[0]
+        datos_cache = json.loads(cache_file.read_text(encoding="utf-8"))
+        n_frases = len(datos_cache)
+        frases_recientes = list(datos_cache.values())[-6:]
+        return {
+            "juego": nombre_juego,
+            "modelo": cache_file.stem.replace("cache_", ""),
+            "modo": "turbo",
+            "estado": "completado",
+            "porcentaje": 100.0,
+            "frases_hechas": n_frases,
+            "frases_totales": n_frases,
+            "frases_nuevas": n_frases,
+            "frases_cache": 0,
+            "archivo_actual": "Completado",
+            "archivos_hechos": 0,
+            "archivos_totales": 0,
+            "velocidad_fpm": 0.0,
+            "eta_segundos": None,
+            "ultimas_frases": [{"id": i, "texto": v} for i, v in enumerate(reversed(frases_recientes), 1)],
+            "mensaje": f"Última sesión registrada ({n_frases:,} frases)".replace(",", "."),
+            "pid": None,
+            "inicio": mtime,
+            "actualizado": mtime,
+        }
+    except Exception:
         return None
+
+
+def leer_progreso(ruta: Path = ARCHIVO_PROGRESO) -> dict[str, Any] | None:
+    """Lee el estado actual. Si no existe o está a medio escribir, busca la última sesión en workspace/."""
+    try:
+        if ruta.exists():
+            return json.loads(ruta.read_text(encoding="utf-8"))
+    except (OSError, ValueError):
+        pass
+    return buscar_traduccion_reciente()
 
 
 def proceso_vivo(pid: int | None) -> bool:

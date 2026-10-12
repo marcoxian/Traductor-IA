@@ -235,16 +235,17 @@ Aplicación nativa de escritorio que se oculta discretamente en el área de noti
 * **Notificaciones de Windows:** Envía avisos automáticos al iniciar o terminar la traducción completa.
 
 ```bash
-# Lanzar el monitor (abre la ventana):
+# Lanzar el monitor manualmente (abre la ventana):
 iniciar_monitor_bandeja.bat
-# o bien:
-pythonw herramientas_extra/monitor_bandeja.py
+# o bien desde el acceso directo del Escritorio: "Traductor IA Monitor"
 
-# Arrancar directamente oculto en la bandeja (ideal para inicio automático):
-pythonw herramientas_extra/monitor_bandeja.py --bandeja
+# Comportamiento automático:
+# Cualquier traducción abre automáticamente la ventana del monitor por defecto:
+python 1_traducir_juego.py --ruta "J:\Juegos\MiJuego" --modo turbo
 
-# Integrado al traducir:
-python 1_traducir_juego.py --ruta "J:\Juegos\MiJuego" --modo turbo --bandeja
+# Opciones avanzadas de monitor al traducir:
+#   --bandeja        Arranca el monitor directamente en la bandeja (sin mostrar la ventana)
+#   --sin-monitor    No abre la aplicación del monitor (modo solo terminal)
 ```
 
 ---
