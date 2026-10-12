@@ -352,7 +352,7 @@ def obtener_datos_progreso():
                         if texto_limpio and texto_limpio not in ultimas_lineas:
                             ultimas_lineas.append(texto_limpio)
 
-                    if "Proceso completado" in l and archivos_hechos >= 218:
+                    if "Proceso completado" in l or archivos_hechos >= 218:
                         completado = True
 
                     if len(ultimas_lineas) >= 6 and archivo_actual != "Map105.json":
@@ -360,16 +360,20 @@ def obtener_datos_progreso():
         except Exception:
             pass
 
-    # Calcular ETA
-    restantes = max(0, TOTAL_ESTIMADO - frases_cache)
-    minutos_restantes = max(1, round(restantes / 450))
-    tiempo_str = f"~{minutos_restantes} minutos" if not completado else "¡Finalizado!"
+    if completado or archivos_hechos >= 218:
+        pct = 100.0
+        completado = True
+        tiempo_str = "¡Finalizado con éxito!"
+    else:
+        restantes = max(0, TOTAL_ESTIMADO - frases_cache)
+        minutos_restantes = max(1, round(restantes / 450))
+        tiempo_str = f"~{minutos_restantes} minutos"
 
     return {
         "porcentaje": pct,
         "frases": frases_cache,
-        "total_estimado": TOTAL_ESTIMADO,
-        "archivo_actual": archivo_actual,
+        "total_estimado": frases_cache if completado else TOTAL_ESTIMADO,
+        "archivo_actual": "Completado (Todos los archivos listos)" if completado else archivo_actual,
         "archivos_hechos": archivos_hechos,
         "archivos_totales": archivos_totales,
         "tiempo_restante": tiempo_str,
