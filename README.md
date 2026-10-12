@@ -48,6 +48,7 @@ Traductor IA/
 ├── 📁 scratch/                 # [Ignorado en Git] Pruebas temporales y scripts legacy
 │
 ├── 📁 herramientas_extra/      # Utilidades, Dashboard Web y extractores de motores
+│   ├── monitor_bandeja.py     # Monitor en la bandeja del sistema estilo Steam/Discord (icono de % y tooltip)
 │   ├── servidor_progreso.py   # Monitor web en tiempo real y barra de progreso (http://localhost:5050)
 │   ├── app.py / dashboard.html # Interfaz web de monitorización y portapapeles en vivo
 │   ├── extraer_corpus_nadia.py# Extractor y alineador bilingüe 1:1 para juegos NLT Media
@@ -62,7 +63,8 @@ Traductor IA/
 │   ├── reanudar_traduccion.py # Reanudador por lotes de mapas o archivos específicos
 │   └── traducir_restos.py     # Traductor selectivo de System.json y plugins
 │
-├── 🐍 1_traducir_juego.py       # Paso 1: Traducción automática con Ollama (Modo Seguro / Turbo)
+├── 📜 iniciar_monitor_bandeja.bat # Acceso rápido para lanzar el monitor de bandeja sin consola
+├── 🐍 1_traducir_juego.py       # Paso 1: Traducción automática con Ollama (soporta flag --bandeja)
 ├── 🐍 1_traducir_juego_turbo.py # Paso 1: Envoltorio para ejecución directa en Modo Turbo
 ├── 🐍 ollama_proxy.py           # Proxy interceptor anti-timeouts para conexiones lentas a Ollama
 ├── 🐍 2_generar_revision.py     # Paso 2: Generación de hoja CSV para revisión
@@ -220,9 +222,36 @@ Para conseguir una traducción con calidad nativa y que no cometa errores con lo
 
 ---
 
+## 🔔 Monitor en la Bandeja del Sistema (Estilo Steam / Discord)
+
+Aplicación nativa de escritorio que se oculta discretamente en el área de notificación (junto al reloj de Windows):
+
+* **Comportamiento en segundo plano:**
+  * Al pulsar el botón **"Minimizar a la bandeja"**, la cruz de cierre o minimizar la ventana, esta se oculta completamente y **desaparece de la barra de tareas**.
+  * Solo vuelve a abrirse si haces clic en el icono de la bandeja o ejecutas de nuevo la aplicación.
+* **Icono dinámico y Tooltip:**
+  * El icono dibuja en tiempo real un anillo de progreso con el porcentaje exacto (o símbolos de estado: ✔ terminado, ⏸ pausa, ! error).
+  * Al **pasar el ratón por encima** del icono, muestra un tooltip con el juego, porcentaje, frases completadas, archivo actual y tiempo restante estimado (ETA).
+* **Notificaciones de Windows:** Envía avisos automáticos al iniciar o terminar la traducción completa.
+
+```bash
+# Lanzar el monitor (abre la ventana):
+iniciar_monitor_bandeja.bat
+# o bien:
+pythonw herramientas_extra/monitor_bandeja.py
+
+# Arrancar directamente oculto en la bandeja (ideal para inicio automático):
+pythonw herramientas_extra/monitor_bandeja.py --bandeja
+
+# Integrado al traducir:
+python 1_traducir_juego.py --ruta "J:\Juegos\MiJuego" --modo turbo --bandeja
+```
+
+---
+
 ## 📊 Monitor Web de Progreso en Vivo
 
-Para monitorizar cualquier traducción en ejecución de forma visual sin mirar la terminal:
+Para monitorizar cualquier traducción en ejecución de forma visual desde el navegador:
 ```bash
 python herramientas_extra/servidor_progreso.py
 ```

@@ -135,6 +135,16 @@ class OllamaTranslator:
         self.session = requests.Session()
         self.estadisticas: Counter = Counter()
         self._fallos_seguidos = 0
+        # Opcional: traductor.progreso.EstadoProgreso (lo asigna 1_traducir_juego.py)
+        self.progreso = None
+
+    def _avisar_nueva(self, texto: str) -> None:
+        if self.progreso is not None:
+            self.progreso.frase_nueva(texto)
+
+    def _avisar_avance(self, hechas: int) -> None:
+        if self.progreso is not None:
+            self.progreso.avance_archivo(hechas)
 
     # ----------------------------------------------------------------- Ciclo de vida
     def __enter__(self):
@@ -226,6 +236,7 @@ class OllamaTranslator:
         self.cache.set(clave, final)
         self.estadisticas["traducidas"] += 1
         self._recordar(text, final)
+        self._avisar_nueva(final)
         return final
 
     def batch_translate(self, texts: list[str]) -> list[str]:
@@ -243,12 +254,16 @@ class OllamaTranslator:
             else:
                 pendientes.setdefault(t, []).append(i)
 
+        resueltas = sum(r is not None for r in resultados)
+        self._avisar_avance(resueltas)
         unicos = list(pendientes)
         for inicio in range(0, len(unicos), self.tam_lote):
             bloque = unicos[inicio:inicio + self.tam_lote]
             for original, traducido in zip(bloque, self._traducir_bloque(bloque)):
                 for i in pendientes[original]:
                     resultados[i] = traducido
+                resueltas += len(pendientes[original])
+            self._avisar_avance(resueltas)
             if len(unicos) > self.tam_lote:
                 log.info("  Progreso: %d/%d frases nuevas", min(inicio + self.tam_lote, len(unicos)), len(unicos))
         return [r if r is not None else t for r, t in zip(resultados, texts)]
@@ -281,6 +296,7 @@ class OllamaTranslator:
             final = limpiar_respuesta(parte, original) or original
             self.cache.set(self._clave_de(original), final)
             self.estadisticas["traducidas"] += 1
+            self._avisar_nueva(final)
             finales.append(final)
         return finales
 
@@ -316,7 +332,10 @@ class OllamaTranslator:
     def traducir_textos(self, textos: list[str]) -> list[str]:
         """Traduce + valida etiquetas + autocorrige. Es lo que usan los motores."""
         if self.tam_lote == 1:
-            brutos = [self.translate(t) for t in textos]  # en orden, para el historial
+            brutos = []
+            for t in textos:  # en orden, para el historial
+                brutos.append(self.translate(t))
+                self._avisar_avance(len(brutos))
         else:
             brutos = self.batch_translate(textos)
         finales = []

@@ -13,6 +13,7 @@ from pathlib import Path
 from traductor import config
 from traductor.motores import InyectorCSV, InyectorRPGMaker, detectar_motor, inyectar_unity
 from traductor.ollama import OllamaNoDisponible, OllamaTranslator, ruta_cache_por_defecto
+from traductor.progreso import EstadoProgreso
 from traductor.registro import configurar_logging
 
 log = logging.getLogger(__name__)
@@ -53,12 +54,28 @@ class GameEngineInjector:
             usar_historial=usar_historial,
             ruta_cache=cache_path,
         )
+        # Estado compartido con monitor_bandeja.py y servidor_progreso.py
+        self.progreso = EstadoProgreso(nombre_juego, modelo, modo)
+        self.translator.progreso = self.progreso
 
     def run(self) -> None:
+        try:
+            self._run()
+        except KeyboardInterrupt:
+            self.progreso.detenido()
+            raise
+        except SystemExit:
+            raise
+        except Exception as e:
+            self.progreso.fallo(str(e))
+            raise
+
+    def _run(self) -> None:
         try:
             self.translator.comprobar_conexion()
         except OllamaNoDisponible as e:
             log.error("Error conectando con la IA: %s", e)
+            self.progreso.fallo(str(e))
             sys.exit(1)
 
         motor = self.motor_forzado
@@ -70,6 +87,8 @@ class GameEngineInjector:
                 motor = detectar_motor(self.ruta_juego)
 
         log.info("--- Iniciando proceso con motor: %s (Modo: %s) ---", motor, self.modo.upper())
+        self.progreso.estado = "traduciendo"
+        self.progreso.guardar(forzar=True)
 
         try:
             if motor == "RPGMaker":
@@ -90,6 +109,22 @@ class GameEngineInjector:
         stats = self.translator.estadisticas
         log.info("--- Proceso completado --- (Nuevas: %d | Caché: %d | Autocorregidas: %d)",
                  stats["traducidas"], stats["cache"], stats["autocorregidas"])
+        self.progreso.finalizar(cache=stats["cache"])
+
+
+def lanzar_monitor_bandeja() -> None:
+    """Arranca herramientas_extra/monitor_bandeja.py escondido en la bandeja (sin consola).
+    Si ya está abierto, la propia aplicación detecta la instancia y no duplica el icono."""
+    import subprocess
+    script = config.RAIZ / "herramientas_extra" / "monitor_bandeja.py"
+    pythonw = Path(sys.executable).with_name("pythonw.exe")
+    exe = str(pythonw if pythonw.exists() else sys.executable)
+    try:
+        subprocess.Popen([exe, str(script), "--bandeja"], cwd=str(config.RAIZ),
+                         creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+        log.info("Monitor de bandeja iniciado (icono junto al reloj).")
+    except OSError as e:
+        log.warning("No se pudo abrir el monitor de bandeja: %s", e)
 
 
 def main(default_mode: str = "seguro") -> None:
@@ -103,9 +138,14 @@ def main(default_mode: str = "seguro") -> None:
     parser.add_argument("--motor", type=str, choices=["RPGMaker", "Godot", "Unity", "Unreal"], help="Forzar el motor de juego")
     parser.add_argument("--endpoint", type=str, default=config.OLLAMA_URL, help="URL de la API de Ollama")
     parser.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
+    parser.add_argument("--bandeja", action="store_true",
+                        help="Abrir el monitor de progreso en la bandeja del sistema (junto al reloj)")
 
     args = parser.parse_args()
     configurar_logging(detallado=args.debug)
+
+    if args.bandeja:
+        lanzar_monitor_bandeja()
 
     modo_final = "turbo" if args.turbo else args.modo
 

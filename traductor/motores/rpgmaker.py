@@ -261,6 +261,24 @@ class InyectorRPGMaker:
         return obj
 
     # ----------------------------------------------------------------- Ejecución
+    def _leer_origen(self, json_path: Path) -> Any:
+        backup_path = json_path.with_suffix(".json.bak")
+        origen = backup_path if backup_path.exists() else json_path
+        with open(origen, "r", encoding="utf-8-sig") as f:
+            return json.load(f)
+
+    def _contar_frases(self, archivos: list[Path]) -> dict[Path, int]:
+        """Pre-escaneo rápido (solo lectura) para conocer el total real de frases."""
+        conteo: dict[Path, int] = {}
+        for json_path in archivos:
+            try:
+                cola: list[str] = []
+                self._extraer(self._leer_origen(json_path), cola)
+                conteo[json_path] = len(cola)
+            except Exception:
+                conteo[json_path] = 0
+        return conteo
+
     def procesar(self) -> None:
         archivos = self.obtener_archivos_json()
         if not archivos:
@@ -270,20 +288,29 @@ class InyectorRPGMaker:
         total_archivos = len(archivos)
         log.info("Iniciando procesamiento de %d archivo(s) JSON de RPG Maker...", total_archivos)
 
+        progreso = getattr(self.translator, "progreso", None)
+        conteo: dict[Path, int] = {}
+        if progreso is not None:
+            conteo = self._contar_frases(archivos)
+            progreso.definir_totales(sum(conteo.values()), total_archivos)
+            log.info("Total estimado: %d frases en %d archivos.", sum(conteo.values()), total_archivos)
+
         for idx, json_path in enumerate(archivos, 1):
             log.info("[%d/%d] Analizando: %s...", idx, total_archivos, json_path.name)
+            if progreso is not None:
+                progreso.inicio_archivo(json_path.name, idx, conteo.get(json_path, 0))
 
             backup_path = json_path.with_suffix(".json.bak")
             if not backup_path.exists():
                 shutil.copy2(json_path, backup_path)
                 log.debug("Copia de seguridad creada: %s", backup_path.name)
 
-            origen = backup_path if backup_path.exists() else json_path
             try:
-                with open(origen, "r", encoding="utf-8-sig") as f:
-                    datos = json.load(f)
+                datos = self._leer_origen(json_path)
             except Exception as e:
                 log.error("Error al leer %s: %s", json_path.name, e)
+                if progreso is not None:
+                    progreso.fin_archivo()
                 continue
 
             cola: list[str] = []
@@ -291,6 +318,8 @@ class InyectorRPGMaker:
 
             if not cola:
                 log.info("  No se encontraron textos para traducir en %s.", json_path.name)
+                if progreso is not None:
+                    progreso.fin_archivo()
                 continue
 
             log.info("  Traduciendo %d cadena(s) en %s...", len(cola), json_path.name)
@@ -306,3 +335,5 @@ class InyectorRPGMaker:
             os.replace(tmp_path, json_path)
 
             log.info("  ✔ Guardado con éxito: %s", json_path.name)
+            if progreso is not None:
+                progreso.fin_archivo()

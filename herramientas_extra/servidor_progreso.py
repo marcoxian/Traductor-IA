@@ -12,8 +12,13 @@ import time
 from pathlib import Path
 
 PORT = 5050
+RAIZ = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(RAIZ))
+from traductor.progreso import ARCHIVO_PROGRESO, leer_progreso, proceso_vivo  # noqa: E402
+
+# Respaldo antiguo (solo si no existe workspace/progreso_actual.json)
 LOG_FILE = Path(r"C:\Users\marco\.gemini\antigravity-ide\brain\1776e6af-5320-4277-ad33-b0236d3a1cb4\.system_generated\tasks\task-2867.log")
-CACHE_FILE = Path(r"workspace\treasure_of_nadia\cache\cache_IA_Traductora.json")
+CACHE_FILE = RAIZ / "workspace" / "treasure_of_nadia" / "cache" / "cache_IA_Traductora.json"
 TOTAL_ESTIMADO = 34500
 
 HTML_PAGE = """<!DOCTYPE html>
@@ -218,8 +223,8 @@ HTML_PAGE = """<!DOCTYPE html>
   <div class="container">
     <header>
       <div class="title-area">
-        <h1>Treasure of Nadia</h1>
-        <p>Monitor de Traducción en Vivo con IA (Modo Turbo)</p>
+        <h1 id="titulo-juego">Treasure of Nadia</h1>
+        <p id="subtitulo">Monitor de Traducción en Vivo con IA (Modo Turbo)</p>
       </div>
       <div class="status-badge" id="status-badge">
         <div class="pulse-dot"></div>
@@ -285,10 +290,19 @@ HTML_PAGE = """<!DOCTYPE html>
         document.getElementById('cur-file').textContent = data.archivo_actual || 'Completando...';
         document.getElementById('files-val').textContent = data.archivos_hechos + ' / ' + data.archivos_totales;
         document.getElementById('eta-val').textContent = data.tiempo_restante;
+        if (data.juego) {
+          document.getElementById('titulo-juego').textContent = data.juego;
+          document.title = 'Monitor de Traducción — ' + data.juego;
+        }
+        if (data.subtitulo) document.getElementById('subtitulo').textContent = data.subtitulo;
+        if (data.velocidad) document.getElementById('speed-val').textContent = data.velocidad;
         
         if (data.completado) {
           document.getElementById('status-text').textContent = '¡Completado al 100%!';
           document.getElementById('status-badge').style.background = 'rgba(16, 185, 129, 0.25)';
+        } else if (data.estado_texto) {
+          document.getElementById('status-text').textContent = data.estado_texto;
+          document.getElementById('status-badge').style.background = '';
         }
 
         // Solo actualizar el DOM si realmente hay frases nuevas
@@ -317,7 +331,62 @@ HTML_PAGE = """<!DOCTYPE html>
 </html>
 """
 
+TEXTO_ESTADOS = {
+    "preparando": "Preparando…",
+    "traduciendo": "Traduciendo en vivo",
+    "detenido": "Detenido",
+    "error": "Error",
+}
+
+
+def _formatear_eta(segundos):
+    if segundos is None:
+        return "Calculando..."
+    minutos = round(segundos / 60)
+    if minutos < 1:
+        return "menos de 1 minuto"
+    if minutos < 60:
+        return f"~{minutos} minutos"
+    return f"~{minutos // 60} h {minutos % 60:02d} min"
+
+
 def obtener_datos_progreso():
+    """Lee el estado compartido que publica 1_traducir_juego.py (traductor/progreso.py)."""
+    d = leer_progreso(ARCHIVO_PROGRESO)
+    if d is None:
+        return _datos_legacy()
+
+    estado = d.get("estado", "preparando")
+    if estado in ("traduciendo", "preparando") and not proceso_vivo(d.get("pid")):
+        estado = "detenido"
+    completado = estado == "completado"
+    if completado:
+        tiempo = "¡Finalizado con éxito!"
+    elif estado in ("error", "detenido"):
+        tiempo = d.get("mensaje") or TEXTO_ESTADOS[estado]
+    else:
+        tiempo = _formatear_eta(d.get("eta_segundos"))
+
+    juego = (d.get("juego") or "").replace("_", " ").title()
+    fpm = d.get("velocidad_fpm") or 0
+    return {
+        "porcentaje": d.get("porcentaje", 0.0),
+        "frases": d.get("frases_hechas", 0),
+        "total_estimado": d.get("frases_totales", 0),
+        "archivo_actual": "Completado (Todos los archivos listos)" if completado else d.get("archivo_actual", ""),
+        "archivos_hechos": d.get("archivos_hechos", 0),
+        "archivos_totales": d.get("archivos_totales", 0),
+        "tiempo_restante": tiempo,
+        "ultimas_lineas": [f["texto"] for f in d.get("ultimas_frases", [])[:6]],
+        "completado": completado,
+        "juego": juego,
+        "subtitulo": f"Monitor de Traducción en Vivo con IA (Modo {str(d.get('modo', '')).title()})",
+        "velocidad": f"~{fpm:.0f} frases/min" if fpm else "—",
+        "estado_texto": TEXTO_ESTADOS.get(estado, ""),
+    }
+
+
+def _datos_legacy():
     frases_cache = 0
     if CACHE_FILE.exists():
         try:
