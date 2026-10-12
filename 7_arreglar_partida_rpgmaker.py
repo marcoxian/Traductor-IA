@@ -22,6 +22,7 @@ except ImportError:
 
 from traductor import config
 from traductor.registro import configurar_logging
+from traductor.texto import corregir_puntuacion_pegada
 
 log = logging.getLogger(__name__)
 
@@ -52,6 +53,8 @@ def reparar_cadenas(obj, correcciones: dict[str, str], reemplazos: dict[str, str
                 for malo, bueno in reemplazos.items():
                     if malo in texto:
                         texto = texto.replace(malo, bueno)
+                # Separar oraciones pegadas sin espacio tras puntuación
+                texto = corregir_puntuacion_pegada(texto)
                 # Reemplazo directo o de palabras si coincide con el diccionario
                 if texto in correcciones:
                     texto = correcciones[texto]
@@ -68,6 +71,7 @@ def reparar_cadenas(obj, correcciones: dict[str, str], reemplazos: dict[str, str
                 for malo, bueno in reemplazos.items():
                     if malo in texto:
                         texto = texto.replace(malo, bueno)
+                texto = corregir_puntuacion_pegada(texto)
                 if texto in correcciones:
                     texto = correcciones[texto]
                 if texto != orig:

@@ -80,6 +80,19 @@ class TestTexto(unittest.TestCase):
         self.assertEqual(prefijo, r"\N<\C[5]Brad\C[0]>")
         self.assertEqual(cuerpo, "Hola a todos")
 
+    def test_corregir_puntuacion_pegada(self):
+        from traductor.texto import corregir_puntuacion_pegada
+        # Palabras pegadas tras punto
+        self.assertEqual(corregir_puntuacion_pegada("examen.Si"), "examen. Si")
+        self.assertEqual(corregir_puntuacion_pegada("Diana.Ella te dará dinero."), "Diana. Ella te dará dinero.")
+        # Signos pegados
+        self.assertEqual(corregir_puntuacion_pegada("progreso.¿Te gusta?"), "progreso. ¿Te gusta?")
+        self.assertEqual(corregir_puntuacion_pegada("¡Hola!¿Cómo estás?"), "¡Hola! ¿Cómo estás?")
+        # Prefijo de sprite en RPG Maker se preserva sin espacio extra
+        self.assertEqual(corregir_puntuacion_pegada("HeFrOp.Siento energía.Ahora voy."), "HeFrOp.Siento energía. Ahora voy.")
+        # Código Javascript intacto
+        self.assertEqual(corregir_puntuacion_pegada("Galv.CACHE.load('img')"), "Galv.CACHE.load('img')")
+
 
 if __name__ == "__main__":
     unittest.main()

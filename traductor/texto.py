@@ -66,6 +66,37 @@ def separar_prefijo(texto: str) -> tuple[str, str]:
     return prefijo, texto[len(prefijo):]
 
 
+# --------------------------------------------------------------------------- Puntuación y separación
+PATRON_PREFIJO_V21 = re.compile(
+    r"^((?:[A-Za-z0-9]{2},[A-Za-z0-9]{2},[A-Za-z0-9]{2}|(?=[A-Za-z0-9><_-]{4,15}\.)[A-Za-z0-9><_-]*[A-Z][A-Za-z0-9><_-]*[A-Z][A-Za-z0-9><_-]*))\.(.*)$"
+)
+PATRON_PUNTO_PEGADO = re.compile(r"([a-záéíóúñ])\.([A-ZÁÉÍÓÚÑ¿¡])")
+PATRON_SIGNO_PEGADO = re.compile(r"([?!])([A-ZÁÉÍÓÚÑ¿¡])")
+
+
+def corregir_puntuacion_pegada(texto: str) -> str:
+    """Corrige oraciones pegadas sin espacio tras punto, interrogación o exclamación.
+
+    Conserva intactos los prefijos de sprite en RPG Maker (ej: 'HeFrOp.' o 'Br,fr,op.')
+    así como llamadas de código Javascript (ej: 'Galv.CACHE.load').
+    """
+    if not texto or not isinstance(texto, str):
+        return texto
+    if any(kw in texto for kw in ("SceneManager.", "Galv.", "StorageManager.", "PluginManager.", ".prototype.")):
+        return texto
+
+    m_pref = PATRON_PREFIJO_V21.match(texto)
+    if m_pref:
+        pref = m_pref.group(1) + "."
+        cuerpo = m_pref.group(2)
+        cuerpo_corr = PATRON_PUNTO_PEGADO.sub(r"\1. \2", cuerpo)
+        cuerpo_corr = PATRON_SIGNO_PEGADO.sub(r"\1 \2", cuerpo_corr)
+        return pref + cuerpo_corr
+
+    t = PATRON_PUNTO_PEGADO.sub(r"\1. \2", texto)
+    return PATRON_SIGNO_PEGADO.sub(r"\1 \2", t)
+
+
 # --------------------------------------------------------------------------- Etiquetas
 def extraer_etiquetas(texto: str) -> list[str]:
     return PATRON_ETIQUETAS.findall(texto)

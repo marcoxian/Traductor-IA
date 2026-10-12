@@ -15,7 +15,8 @@ from pathlib import Path
 from typing import Any, Iterator
 
 from ..ollama import OllamaTranslator
-from ..texto import ajustar_lineas, sanitizar, tiene_texto_visible
+from ..texto import (PATRON_PREFIJO_V21, ajustar_lineas, corregir_puntuacion_pegada,
+                    sanitizar, tiene_texto_visible)
 
 log = logging.getLogger(__name__)
 
@@ -141,7 +142,8 @@ class InyectorRPGMaker:
                     m = PATRON_SET_VALUE_21.search(script)
                     if m:
                         contenido = m.group(2)
-                        texto = contenido.split(".", 1)[1] if "." in contenido else contenido
+                        m_pref = PATRON_PREFIJO_V21.match(contenido)
+                        texto = m_pref.group(2) if m_pref else contenido
                         if es_traducible(texto):
                             cola.append(sanitizar(texto))
                     i += 1
@@ -211,6 +213,7 @@ class InyectorRPGMaker:
                     if es_traducible(texto_completo):
                         trad = next(iterador)
                         trad = self.translator.perfil.restaurar_nombres(texto_completo, trad)
+                        trad = corregir_puntuacion_pegada(trad)
                         lineas = ajustar_lineas(trad, ancho=45)
                         nuevos_cmds = []
                         for linea in lineas:
@@ -227,7 +230,8 @@ class InyectorRPGMaker:
                         if es_traducible(opciones[idx]):
                             orig = opciones[idx]
                             trad = next(iterador)
-                            opciones[idx] = self.translator.perfil.restaurar_nombres(orig, trad)
+                            trad = self.translator.perfil.restaurar_nombres(orig, trad)
+                            opciones[idx] = corregir_puntuacion_pegada(trad)
                     i += 1
 
                 elif (isinstance(item, dict) and item.get("code") == 355 and
@@ -237,14 +241,17 @@ class InyectorRPGMaker:
                     m = PATRON_SET_VALUE_21.search(script)
                     if m:
                         contenido = m.group(2)
-                        if "." in contenido:
-                            prefijo_int, texto = contenido.split(".", 1)
-                            prefijo_int += "."
+                        m_pref = PATRON_PREFIJO_V21.match(contenido)
+                        if m_pref:
+                            prefijo_int = m_pref.group(1) + "."
+                            texto = m_pref.group(2)
                         else:
-                            prefijo_int, texto = "", contenido
+                            prefijo_int = ""
+                            texto = contenido
                         if es_traducible(texto):
                             trad = next(iterador)
                             trad = self.translator.perfil.restaurar_nombres(texto, trad)
+                            trad = corregir_puntuacion_pegada(trad)
                             # Limpiar comillas para no romper el string dentro del script JS
                             trad_seguro = trad.replace('"', "'").replace('\\', '')
                             nuevo_script = (

@@ -43,10 +43,16 @@ class TestRPGMaker(unittest.TestCase):
                                 {"code": 102, "parameters": [["I am fine", "Not so good"]], "indent": 0},
                                 # Code 402 (Bifurcación)
                                 {"code": 402, "parameters": [0, "I am fine"], "indent": 0},
-                                # Code 355 (Script setValue 21)
+                                # Code 355 (Script setValue 21 con prefijo de sprite)
                                 {
                                     "code": 355,
                                     "parameters": ['$gameVariables.setValue(21, "Br,fr,op.Smells like rain.");'],
+                                    "indent": 0
+                                },
+                                # Code 355 (Script setValue 21 SIN prefijo de sprite, frase con punto)
+                                {
+                                    "code": 355,
+                                    "parameters": ['$gameVariables.setValue(21, "Failed the exam. Please study more.");'],
                                     "indent": 0
                                 },
                                 {"code": 0, "parameters": [], "indent": 0}
@@ -69,6 +75,7 @@ class TestRPGMaker(unittest.TestCase):
         self.assertIn("I am fine", cola)  # 102 opción 1
         self.assertIn("Not so good", cola)  # 102 opción 2
         self.assertIn("Smells like rain.", cola)  # 355 texto tras el prefijo
+        self.assertIn("Failed the exam. Please study more.", cola)  # 355 texto completo sin prefijo
 
         # 2. Traducción mock
         traducciones = self.translator.traducir_textos(cola)
@@ -94,6 +101,8 @@ class TestRPGMaker(unittest.TestCase):
         self.assertEqual(cmds[1]["parameters"][0][1], "ESP:Not so good")
         # Code 355 script reensamblado con prefijo intacto
         self.assertIn('$gameVariables.setValue(21, "Br,fr,op.ESP:Smells like rain.");', cmds[3]["parameters"][0])
+        # Code 355 script sin prefijo reensamblado intacto sin romper oraciones
+        self.assertIn('$gameVariables.setValue(21, "ESP:Failed the exam. Please study more.");', cmds[4]["parameters"][0])
 
     def test_reparar_partidas_lzstring(self):
         import importlib

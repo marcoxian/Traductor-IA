@@ -546,11 +546,14 @@ class MonitorBandeja:
                          self.ejecutar_auditoria_semantica, color="#059669",
                          desc="Corrige party➔grupo, item➔objeto, save➔guardar...").pack(fill="x", pady=self.px(3))
 
-        # Tarjeta 4: Partidas Guardadas y Utilidades
-        card4 = self._crear_tarjeta(grid, "💾 Partidas y Motor RPG Maker (Paso 7)", 1, 1)
+        # Tarjeta 4: Partidas Guardadas y Utilidades RPG Maker
+        card4 = self._crear_tarjeta(grid, "💾 Partidas y Utilidades RPG Maker (Paso 7)", 1, 1)
         self._btn_accion(card4, "💾 Arreglar Partida RPG Maker (.rpgsave)",
                          self.ejecutar_arreglar_partida, color="#d97706",
                          desc="Parchea archivos de guardado sin tener que reiniciar partida").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card4, "🔤 Separar Palabras / Oraciones Juntas",
+                         self.ejecutar_separar_palabras_juntas, color="#0891b2",
+                         desc="Corrige diálogos pegados tras puntos o signos en el juego").pack(fill="x", pady=self.px(3))
         self._btn_accion(card4, "🔍 Gestor RPG Maker (Buscar / Inspeccionar)",
                          self.abrir_gestor_rpgmaker_info, color="#7c3aed",
                          desc="Herramienta avanzada para escenas y diálogos").pack(fill="x", pady=self.px(3))
@@ -904,6 +907,11 @@ class MonitorBandeja:
         ruta = self.var_ruta.get()
         cmd = ["7_arreglar_partida_rpgmaker.py", "--ruta", ruta]
         self.ejecutar_accion(cmd, "Arreglar Partida RPG Maker (.rpgsave)")
+
+    def ejecutar_separar_palabras_juntas(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["herramientas_extra/separar_palabras_juntas.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Separar Palabras y Oraciones Juntas")
 
     def abrir_gestor_rpgmaker_info(self) -> None:
         self.cambiar_tab("consola")
