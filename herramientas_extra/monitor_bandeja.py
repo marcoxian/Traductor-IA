@@ -536,15 +536,15 @@ class MonitorBandeja:
 
         # Tarjeta 3: Corrección, Semántica y Parches
         card3 = self._crear_tarjeta(grid, "🩹 Parcheo y Auditoría Semántica (Pasos 4, 5 y 6)", 1, 0)
-        self._btn_accion(card3, "🔍 Auditoría Semántica (Paso 6: Falsos Amigos)",
-                         self.ejecutar_auditoria_semantica, color="#059669",
-                         desc="Corrige party➔grupo, item➔objeto, save➔guardar...").pack(fill="x", pady=self.px(3))
-        self._btn_accion(card3, "👥 Traducir Nombres de Personajes (Paso 5)",
-                         self.ejecutar_traducir_nombres, color="#0d9488",
-                         desc="Unifica nombres de hablantes según la tabla").pack(fill="x", pady=self.px(3))
         self._btn_accion(card3, "🩹 Aplicar Parches y Diccionarios (Paso 4)",
                          self.ejecutar_aplicar_parches, color="#16a34a",
                          desc="Inyecta correcciones manuales en los archivos del juego").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card3, "👥 Traducir Nombres de Personajes (Paso 5)",
+                         self.ejecutar_traducir_nombres, color="#0d9488",
+                         desc="Unifica nombres de hablantes según la tabla").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card3, "🔍 Auditoría Semántica (Paso 6: Falsos Amigos)",
+                         self.ejecutar_auditoria_semantica, color="#059669",
+                         desc="Corrige party➔grupo, item➔objeto, save➔guardar...").pack(fill="x", pady=self.px(3))
 
         # Tarjeta 4: Partidas Guardadas y Utilidades
         card4 = self._crear_tarjeta(grid, "💾 Partidas Guardadas y Motor (Paso 7)", 1, 1)
