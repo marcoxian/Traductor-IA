@@ -71,7 +71,7 @@ PATRON_PREFIJO_V21 = re.compile(
     r"^((?:[A-Za-z0-9]{2},[A-Za-z0-9]{2},[A-Za-z0-9]{2}|(?=[A-Za-z0-9><_-]{4,15}\.)[A-Za-z0-9><_-]*[A-Z][A-Za-z0-9><_-]*[A-Z][A-Za-z0-9><_-]*))\.(.*)$"
 )
 PATRON_PUNTO_PEGADO = re.compile(r"([a-záéíóúñ])\.([A-ZÁÉÍÓÚÑ¿¡])")
-PATRON_SIGNO_PEGADO = re.compile(r"([?!])([A-ZÁÉÍÓÚÑ¿¡])")
+PATRON_SIGNO_PEGADO = re.compile(r"([a-záéíóúñ0-9][?!]+)([A-ZÁÉÍÓÚÑ¿¡])")
 
 
 def corregir_puntuacion_pegada(texto: str) -> str:

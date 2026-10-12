@@ -92,6 +92,10 @@ class TestTexto(unittest.TestCase):
         self.assertEqual(corregir_puntuacion_pegada("HeFrOp.Siento energía.Ahora voy."), "HeFrOp.Siento energía. Ahora voy.")
         # Código Javascript intacto
         self.assertEqual(corregir_puntuacion_pegada("Galv.CACHE.load('img')"), "Galv.CACHE.load('img')")
+        # Nombres de archivos o etiquetas con signo al inicio no deben separarse
+        self.assertEqual(corregir_puntuacion_pegada("!Strip"), "!Strip")
+        self.assertEqual(corregir_puntuacion_pegada("!Door"), "!Door")
+        self.assertEqual(corregir_puntuacion_pegada("?Help"), "?Help")
 
 
 if __name__ == "__main__":

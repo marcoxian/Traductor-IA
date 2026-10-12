@@ -34,6 +34,10 @@ def reparar_objeto(obj) -> int:
     """Recorre recursivamente un objeto o lista JSON y desune oraciones con puntuación pegada."""
     cambios = 0
     if isinstance(obj, dict):
+        # Objetos de audio (BGM, BGS, ME, SE): NUNCA modificar sus nombres de archivo
+        if "name" in obj and "volume" in obj and "pitch" in obj:
+            return 0
+
         # Code 355: Diálogos en scripts setValue(21, "...")
         if obj.get("code") == 355 and obj.get("parameters") and isinstance(obj["parameters"][0], str):
             script = obj["parameters"][0]
