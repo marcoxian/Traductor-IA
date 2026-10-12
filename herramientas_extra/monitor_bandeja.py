@@ -563,8 +563,7 @@ class MonitorBandeja:
         return c
 
     def _btn_accion(self, padre: tk.Widget, titulo: str, comando, color: str, desc: str = "") -> tk.Frame:
-        hover_color = aclarar_hex(color, 1.22)
-        borde_color = oscurecer_hex(color, 0.70)
+        borde_color = oscurecer_hex(color, 0.75)
 
         box = tk.Frame(padre, bg=color, cursor="hand2", padx=self.px(10), pady=self.px(6),
                        highlightbackground=borde_color, highlightthickness=1)
@@ -574,20 +573,6 @@ class MonitorBandeja:
             lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg="#f1f5f9", bg=color, anchor="w")
             lbl_d.pack(fill="x")
 
-        def al_entrar(_):
-            box.configure(bg=hover_color, highlightbackground="#ffffff")
-            lbl_t.configure(bg=hover_color)
-            if desc:
-                lbl_d.configure(bg=hover_color, fg="#ffffff")
-
-        def al_salir(_):
-            box.configure(bg=color, highlightbackground=borde_color)
-            lbl_t.configure(bg=color)
-            if desc:
-                lbl_d.configure(bg=color, fg="#f1f5f9")
-
-        box.bind("<Enter>", al_entrar)
-        box.bind("<Leave>", al_salir)
         box.bind("<Button-1>", lambda _: comando())
         lbl_t.bind("<Button-1>", lambda _: comando())
         if desc:
