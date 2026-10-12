@@ -149,9 +149,9 @@ def obtener_modelos_ollama() -> list[str]:
         if "IA_Traductora" in modelos:
             modelos.remove("IA_Traductora")
             modelos.insert(0, "IA_Traductora")
-        return modelos or ["IA_Traductora", "IA_Traductora_v2"]
+        return modelos or ["IA_Traductora"]
     except Exception:
-        return ["IA_Traductora", "IA_Traductora_v2", "llama3.1"]
+        return ["IA_Traductora", "llama3.1"]
 
 
 def detectar_info_juego(ruta_str: str) -> dict:
