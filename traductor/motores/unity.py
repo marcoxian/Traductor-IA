@@ -20,12 +20,12 @@ def inyectar_unity(ruta_juego: Path, modelo: str = config.MODELO_POR_DEFECTO, en
     auto_translator_dir.mkdir(parents=True, exist_ok=True)
     config_path = auto_translator_dir / "AutoTranslatorConfig.ini"
 
-    cfg = configparser.ConfigParser()
+    cfg = configparser.ConfigParser(strict=False)
     cfg.optionxform = str  # Preserva mayúsculas y minúsculas
 
     if config_path.exists():
         try:
-            cfg.read(config_path, encoding="utf-8")
+            cfg.read(config_path, encoding="utf-8-sig")
         except Exception as e:
             log.warning("No se pudo leer la configuración previa de AutoTranslator: %s", e)
 
