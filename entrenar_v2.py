@@ -44,13 +44,32 @@ from datasets import Dataset
 from trl import SFTTrainer
 from transformers import TrainingArguments
 
+import argparse
+
+parser = argparse.ArgumentParser(description="Reentrenamiento del traductor de videojuegos con Unsloth")
+parser.add_argument("--modo", choices=["balanceado", "completo"], default="balanceado",
+                    help="Modalidad de entrenamiento: balanceado (~25-30 min) o completo (~2.5h)")
+parser.add_argument("--muestras-corpus", type=int, default=None,
+                    help="Número personalizado de muestras del corpus de videojuegos")
+args, _ = parser.parse_known_args()
+
 modelo_candidato = Path("modelos/modelo_exportado_v2")
 MODELO_BASE = str(modelo_candidato) if modelo_candidato.exists() else "modelo_exportado_v2"
 salida_dir = Path("modelos") if Path("modelos").exists() else Path(".")
 SALIDA = str(salida_dir / "traductor_juegos_v2")
-REPETIR_GLOSARIO = 3
-REPETIR_CORPUS = 2
-MUESTRA_GENERAL = 4000
+
+if args.modo == "balanceado":
+    REPETIR_GLOSARIO = 3
+    REPETIR_CORPUS = 1
+    MUESTRA_CORPUS = args.muestras_corpus if args.muestras_corpus is not None else 10000
+    MUESTRA_GENERAL = 3000
+    print(f"--- Modo seleccionado: BALANCEADO (~25-30 min) ---")
+else:
+    REPETIR_GLOSARIO = 3
+    REPETIR_CORPUS = 2
+    MUESTRA_CORPUS = args.muestras_corpus
+    MUESTRA_GENERAL = 4000
+    print(f"--- Modo seleccionado: COMPLETO (~2.5 horas) ---")
 
 from traductor.prompts import INSTRUCCION, PLANTILLA
 
@@ -69,16 +88,29 @@ if not ruta_glosario.exists():
     sys.exit(f"Falta glosario_v2.jsonl (buscado en datasets/ y raíz). Ejecuta antes: python preparar_datos_v2.py")
 
 def leer_jsonl(ruta):
+    res = []
     with open(ruta, encoding="utf-8") as f:
-        return [json.loads(l) for l in f if l.strip()]
+        for l in f:
+            if not l.strip():
+                continue
+            d = json.loads(l)
+            if "input" not in d and "ingles" in d:
+                d["input"] = d["ingles"]
+            if "output" not in d and "espanol" in d:
+                d["output"] = d["espanol"]
+            res.append(d)
+    return res
 
 glosario = leer_jsonl(ruta_glosario)
 
 corpus_extra = []
 corpus_path = Path("datasets/corpus_videojuegos") if Path("datasets/corpus_videojuegos").exists() else Path("corpus_videojuegos")
 if corpus_path.exists():
-    for archivo in corpus_path.glob("*.jsonl"):
+    for archivo in sorted(corpus_path.glob("*.jsonl")):
         corpus_extra.extend(leer_jsonl(archivo))
+
+if MUESTRA_CORPUS is not None and len(corpus_extra) > MUESTRA_CORPUS:
+    corpus_extra = random.sample(corpus_extra, MUESTRA_CORPUS)
 
 ruta_general = buscar_archivo("dataset_base_general.jsonl")
 general = leer_jsonl(ruta_general) if ruta_general.exists() else []
@@ -87,7 +119,7 @@ if general:
 
 ejemplos = (glosario * REPETIR_GLOSARIO) + (corpus_extra * REPETIR_CORPUS) + general
 random.shuffle(ejemplos)
-print(f"Ejemplos: {len(glosario)} glosario(x{REPETIR_GLOSARIO}) + {len(corpus_extra)} corpus(x{REPETIR_CORPUS}) + {len(general)} gen = {len(ejemplos)}")
+print(f"Dataset listo: {len(glosario)} glosario(x{REPETIR_GLOSARIO}) + {len(corpus_extra)} corpus(x{REPETIR_CORPUS}) + {len(general)} gen = {len(ejemplos)} ejemplos totales.")
 
 # ---------------------------------------------------------------- Modelo
 max_seq_length = 2048
@@ -120,7 +152,7 @@ trainer = SFTTrainer(
     train_dataset = dataset,
     dataset_text_field = "text",
     max_seq_length = max_seq_length,
-    dataset_num_proc = 2,
+    dataset_num_proc = 1,
     packing = False,
     args = TrainingArguments(
         per_device_train_batch_size = 2,

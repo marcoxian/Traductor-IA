@@ -34,8 +34,15 @@ herramientas_extra/unrpyc/
 *.bak
 *.tmp
 *.rpgsave
+*.log
 revision_*.csv
+herramientas_extra/parches_aplicados.json
+
+# Checkpoints y cachés de entrenamiento
+checkpoints_entrenamiento_v2/
+unsloth_compiled_cache/
 
 # SO
 .DS_Store
 Thumbs.db
+

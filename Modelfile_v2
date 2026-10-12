@@ -1,0 +1,1 @@
+FROM ./modelos/traductor_juegos_v2_gguf/modelo_exportado_v2.Q4_K_M.gguf
