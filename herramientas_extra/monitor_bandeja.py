@@ -1,21 +1,24 @@
-"""monitor_bandeja.py — Monitor de traducción en la bandeja del sistema (estilo Discord / Steam).
+"""monitor_bandeja.py — Centro de Control y Monitor en la Bandeja del Sistema (Estilo Steam / Discord).
 
-- Se queda en la bandeja (junto al reloj) con un icono que dibuja el porcentaje en un anillo.
-- Al pasar el ratón por encima muestra el porcentaje, el archivo actual y el tiempo restante.
-- La ventana solo aparece en la barra de tareas cuando la abres tú (doble clic / clic en el icono
-  o volviendo a lanzar la aplicación). Minimizar, cerrar (X) o el botón "Minimizar a la bandeja"
-  la esconden de nuevo. Para cerrarla del todo: clic derecho en el icono → Salir.
-- Lee ``workspace/progreso_actual.json`` que escribe ``1_traducir_juego.py``.
-
-Uso:
-    pythonw herramientas_extra/monitor_bandeja.py              # abre la ventana
-    pythonw herramientas_extra/monitor_bandeja.py --bandeja    # arranca escondido en la bandeja
-    python  herramientas_extra/monitor_bandeja.py --acceso-directo   # crea acceso directo en el Escritorio
+Funcionalidades:
+1. 📁 Selector de juego con Explorador de Windows nativo (filedialog) y memoria de última carpeta.
+2. 🎮 Detección automática del motor (RPG Maker MV/MZ, Unity, Ren'Py, Godot) y perfil de juego.
+3. 🔘 Centro de Acciones para todo el pipeline:
+   - ⚡ Traducción con IA (Modo Turbo / Lotes x7 y Modo Seguro).
+   - 📋 Control de calidad (Generar revisión CSV y Reparar etiquetas con IA).
+   - 🩹 Parcheo y coherencia (Auditoría semántica de falsos amigos, Nombres, Parches).
+   - 💾 Arreglar partidas guardadas de RPG Maker (.rpgsave).
+   - 🛑 Botón para detener procesos en cualquier momento.
+4. 📊 Monitor en Vivo con porcentaje, barra con gradiente, estadísticas y feed de frases.
+5. 📜 Consola de registro en vivo integrada (sin necesidad de ventanas de consola negras).
+6. 🔔 Minimizable a la bandeja junto al reloj: icono dinámico con %, tooltip al pasar el ratón,
+   y notificaciones de Windows al completar tareas.
 """
 from __future__ import annotations
 
 import argparse
 import ctypes
+import json
 import os
 import queue
 import socket
@@ -24,6 +27,7 @@ import sys
 import threading
 import time
 import tkinter as tk
+from tkinter import filedialog, messagebox, ttk
 import urllib.request
 import webbrowser
 from pathlib import Path
@@ -34,35 +38,44 @@ sys.path.insert(0, str(RAIZ))
 import pystray  # noqa: E402
 from PIL import Image, ImageDraw, ImageFont, ImageTk  # noqa: E402
 
+from traductor import config  # noqa: E402
+from traductor.motores import detectar_motor  # noqa: E402
 from traductor.progreso import ARCHIVO_PROGRESO, leer_progreso, proceso_vivo  # noqa: E402
 
 APP_NOMBRE = "Traductor IA"
-APP_ID = "TraductorIA.MonitorBandeja"
-PUERTO_INSTANCIA = 50551          # una sola instancia: la segunda le pide a la primera que se muestre
+APP_ID = "TraductorIA.CentroControl"
+PUERTO_INSTANCIA = 50551
 URL_WEB = "http://localhost:5050"
 INTERVALO_MS = 1000
+CONFIG_GUI_PATH = config.DIR_WORKSPACE / "config_gui.json"
 
-# Paleta (a juego con el monitor web)
+# Paleta moderna en modo oscuro
 C_FONDO = "#0b0f19"
 C_TARJETA = "#151c2f"
+C_TARJETA_ALT = "#1b2338"
 C_BORDE = "#232c45"
 C_TEXTO = "#f8fafc"
 C_SUAVE = "#94a3b8"
 C_ACENTO = "#8b5cf6"
+C_ACENTO_HOVER = "#7c3aed"
+C_TURBO = "#ec4899"
+C_VERDE = "#10b981"
+C_ROJO = "#ef4444"
+C_AMBAR = "#f59e0b"
 GRADIENTE = ((99, 102, 241), (168, 85, 247), (236, 72, 153))
 
 ESTADOS = {
-    #  estado       (texto,                   color del anillo / pastilla)
     "traduciendo": ("Traduciendo en vivo", (139, 92, 246)),
+    "ejecutando": ("Ejecutando tarea…", (99, 102, 241)),
     "preparando": ("Preparando…", (99, 102, 241)),
     "completado": ("¡Completado!", (16, 185, 129)),
     "error": ("Error", (239, 68, 68)),
     "detenido": ("Detenido", (245, 158, 11)),
-    "inactivo": ("Sin traducción en curso", (100, 116, 139)),
+    "inactivo": ("En espera", (100, 116, 139)),
 }
 
 
-# --------------------------------------------------------------------------- Utilidades
+# --------------------------------------------------------------------------- Utilidades y Configuración
 def hex_rgb(rgb: tuple[int, int, int]) -> str:
     return "#%02x%02x%02x" % rgb
 
@@ -91,8 +104,83 @@ def nombre_bonito(juego: str) -> str:
     return juego.replace("_", " ").title() if juego else "Sin juego"
 
 
+def obtener_python_ejecutable() -> Path:
+    """Busca el mejor ejecutable de Python con todas las dependencias instaladas."""
+    venv_py = RAIZ / "venv_traductor" / "Scripts" / "python.exe"
+    if venv_py.exists():
+        return venv_py
+    p310 = Path(r"C:\Users\marco\AppData\Local\Programs\Python\Python310\python.exe")
+    if p310.exists():
+        return p310
+    return Path(sys.executable)
+
+
+def cargar_config_gui() -> dict:
+    if CONFIG_GUI_PATH.exists():
+        try:
+            return json.loads(CONFIG_GUI_PATH.read_text(encoding="utf-8"))
+        except Exception:
+            pass
+    # Buscar juego reciente por defecto
+    default_game = Path(r"J:\SteamLibrary\steamapps\common\Treasure of Nadia")
+    return {
+        "ultima_ruta": str(default_game) if default_game.exists() else "",
+        "ultimo_modelo": "IA_Traductora",
+        "ultimo_modo": "turbo"
+    }
+
+
+def guardar_config_gui(datos: dict) -> None:
+    try:
+        config.DIR_WORKSPACE.mkdir(parents=True, exist_ok=True)
+        CONFIG_GUI_PATH.write_text(json.dumps(datos, ensure_ascii=False, indent=2), encoding="utf-8")
+    except Exception:
+        pass
+
+
+def obtener_modelos_ollama() -> list[str]:
+    """Consulta la API local de Ollama para listar los modelos instalados."""
+    try:
+        req = urllib.request.urlopen("http://localhost:11434/api/tags", timeout=1.5)
+        datos = json.loads(req.read().decode("utf-8"))
+        modelos = [m.get("name", "").split(":")[0] for m in datos.get("models", []) if m.get("name")]
+        modelos = sorted(list(dict.fromkeys(modelos)))
+        if "IA_Traductora" in modelos:
+            modelos.remove("IA_Traductora")
+            modelos.insert(0, "IA_Traductora")
+        return modelos or ["IA_Traductora", "IA_Traductora_v2"]
+    except Exception:
+        return ["IA_Traductora", "IA_Traductora_v2", "llama3.1"]
+
+
+def detectar_info_juego(ruta_str: str) -> dict:
+    """Analiza la carpeta del juego y detecta el motor y perfil."""
+    if not ruta_str:
+        return {"motor": "No seleccionado", "perfil": "—", "valido": False, "descripcion": "Selecciona una carpeta"}
+    p = Path(ruta_str)
+    if not p.exists():
+        return {"motor": "Ruta no encontrada", "perfil": "—", "valido": False, "descripcion": "La carpeta no existe"}
+    motor = detectar_motor(p)
+    nombre = config.resolver_juego(None, p)
+    n_json = 0
+    if (p / "www" / "data").exists():
+        n_json = len(list((p / "www" / "data").glob("*.json")))
+    elif (p / "data").exists():
+        n_json = len(list((p / "data").glob("*.json")))
+
+    desc = f"Motor: {motor}"
+    if n_json > 0:
+        desc += f" ({n_json} archivos JSON)"
+    return {
+        "motor": motor,
+        "perfil": nombre,
+        "valido": True,
+        "descripcion": desc,
+        "archivos_json": n_json
+    }
+
+
 def normalizar(datos: dict | None) -> dict:
-    """Completa el estado leído y detecta traducciones cuyo proceso ya no existe."""
     if not datos:
         return {"estado": "inactivo", "porcentaje": 0.0, "ultimas_frases": []}
     datos = dict(datos)
@@ -104,11 +192,10 @@ def normalizar(datos: dict | None) -> dict:
 
 
 def texto_tooltip(d: dict) -> str:
-    """Texto al pasar el ratón por el icono (Windows admite como máximo 127 caracteres)."""
     estado = d.get("estado", "inactivo")
     lineas = [f"{APP_NOMBRE} · {nombre_bonito(d.get('juego', ''))}" if d.get("juego") else APP_NOMBRE]
     if estado == "inactivo":
-        lineas.append("Sin traducción en curso")
+        lineas.append("En espera")
     elif estado == "completado":
         lineas.append("✔ 100% completado")
     elif estado == "error":
@@ -126,10 +213,9 @@ def texto_tooltip(d: dict) -> str:
     return texto if len(texto) <= 127 else texto[:124] + "..."
 
 
-# --------------------------------------------------------------------------- Dibujo
+# --------------------------------------------------------------------------- Dibujo de Iconos y Barras
 def crear_icono(pct: float, estado: str, tam: int = 64) -> Image.Image:
-    """Icono de bandeja: anillo de progreso con el porcentaje (o un símbolo) en el centro."""
-    s = tam * 4  # sobremuestreo para bordes suaves
+    s = tam * 4
     img = Image.new("RGBA", (s, s), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
     color = ESTADOS.get(estado, ESTADOS["inactivo"])[1]
@@ -165,7 +251,6 @@ def crear_icono(pct: float, estado: str, tam: int = 64) -> Image.Image:
 
 
 def crear_barra(ancho: int, alto: int, fraccion: float, completado: bool) -> Image.Image:
-    """Barra de progreso redondeada con degradado (dibujada con PIL para que quede suave)."""
     s = 3
     W, H = ancho * s, alto * s
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
@@ -173,7 +258,7 @@ def crear_barra(ancho: int, alto: int, fraccion: float, completado: bool) -> Ima
     d.rounded_rectangle((0, 0, W - 1, H - 1), radius=H // 2, fill=(31, 39, 64, 255))
     relleno = int(W * max(0.0, min(1.0, fraccion)))
     if relleno > 0:
-        relleno = max(relleno, H)  # que el extremo redondeado no se deforme
+        relleno = max(relleno, H)
         grad = Image.new("RGBA", (W, H))
         gd = ImageDraw.Draw(grad)
         for x in range(W):
@@ -191,7 +276,7 @@ def crear_barra(ancho: int, alto: int, fraccion: float, completado: bool) -> Ima
     return img.resize((ancho, alto), Image.LANCZOS)
 
 
-# --------------------------------------------------------------------------- Instancia única
+# --------------------------------------------------------------------------- Instancia Única
 def avisar_instancia_existente(mensaje: bytes) -> bool:
     try:
         with socket.create_connection(("127.0.0.1", PUERTO_INSTANCIA), timeout=1) as c:
@@ -201,39 +286,44 @@ def avisar_instancia_existente(mensaje: bytes) -> bool:
         return False
 
 
-# --------------------------------------------------------------------------- Aplicación
+# --------------------------------------------------------------------------- Aplicación Principal
 class MonitorBandeja:
     def __init__(self, empezar_oculto: bool, servidor: socket.socket):
-        self.cola: queue.Queue[str] = queue.Queue()
+        self.cola: queue.Queue[tuple] = queue.Queue()
         self.servidor = servidor
         self.datos: dict = {}
+        self.config_gui = cargar_config_gui()
+        self.proceso_actual: subprocess.Popen | None = None
+        self.tarea_activa_nombre: str = ""
+        self._saliendo = False
         self._ultimo_id_frase: int | None = None
         self._clave_icono: tuple | None = None
         self._clave_barra: tuple | None = None
         self._estado_anterior: str | None = None
-        self._saliendo = False
 
         self.root = tk.Tk()
-        self.root.withdraw()  # evita el parpadeo inicial
+        self.root.withdraw()
         self.esc = self.root.winfo_fpixels("1i") / 96.0
-        self.root.title(f"{APP_NOMBRE} — Monitor")
+        self.root.title(f"{APP_NOMBRE} — Centro de Control y Traducción")
         self.root.configure(bg=C_FONDO)
-        self.root.resizable(False, False)
+        self.root.resizable(True, True)
+        self.root.minsize(self.px(760), self.px(660))
         self.root.protocol("WM_DELETE_WINDOW", self.ocultar)
         self.root.bind("<Unmap>", self._al_minimizar)
 
         self._construir_ui()
         self._centrar()
 
+        # Icono en bandeja de sistema
         self.icono = pystray.Icon(
             "traductor_ia",
             crear_icono(0, "inactivo"),
             APP_NOMBRE,
             pystray.Menu(
-                pystray.MenuItem("Mostrar ventana", lambda: self.cola.put("mostrar"), default=True),
-                pystray.MenuItem("Abrir monitor web", lambda: self.cola.put("web")),
+                pystray.MenuItem("Mostrar Centro de Control", lambda: self.cola.put(("mostrar", None)), default=True),
+                pystray.MenuItem("Abrir monitor web", lambda: self.cola.put(("web", None))),
                 pystray.Menu.SEPARATOR,
-                pystray.MenuItem("Salir", lambda: self.cola.put("salir")),
+                pystray.MenuItem("Salir", lambda: self.cola.put(("salir", None))),
             ),
         )
         threading.Thread(target=self.icono.run, daemon=True).start()
@@ -244,112 +334,495 @@ class MonitorBandeja:
             self.root.after(150, self.mostrar)
         self.root.after(100, self._procesar_cola)
 
-    # ----------------------------------------------------------------- Interfaz
     def px(self, valor: float) -> int:
         return int(valor * self.esc)
 
+    # ----------------------------------------------------------------- Construcción Visual
     def _construir_ui(self) -> None:
-        f_titulo = ("Segoe UI Variable Display", 17, "bold")
+        f_titulo = ("Segoe UI Variable Display", 16, "bold")
         f_sub = ("Segoe UI", 9)
-        f_pct = ("Segoe UI Variable Display", 34, "bold")
-        f_etiqueta = ("Segoe UI", 8)
-        f_valor = ("Segoe UI Semibold", 11)
-        f_feed = ("Segoe UI", 9)
-        self.ancho_barra = self.px(400)
+        f_btn = ("Segoe UI Semibold", 9)
+        f_badge = ("Segoe UI Semibold", 9)
+        self._f_feed = ("Segoe UI", 9)
+        self.ancho_barra = self.px(540)
 
-        cont = tk.Frame(self.root, bg=C_FONDO, padx=self.px(22), pady=self.px(18))
-        cont.pack(fill="both", expand=True)
+        # Contenedor raíz
+        self.cont_principal = tk.Frame(self.root, bg=C_FONDO, padx=self.px(20), pady=self.px(16))
+        self.cont_principal.pack(fill="both", expand=True)
 
-        # Cabecera
-        cab = tk.Frame(cont, bg=C_FONDO)
-        cab.pack(fill="x")
+        # 1. Cabecera
+        cab = tk.Frame(self.cont_principal, bg=C_FONDO)
+        cab.pack(fill="x", pady=(0, self.px(10)))
+
         izq = tk.Frame(cab, bg=C_FONDO)
         izq.pack(side="left", fill="x", expand=True)
-        self.lbl_juego = tk.Label(izq, text=APP_NOMBRE, font=f_titulo, fg=C_TEXTO, bg=C_FONDO, anchor="w")
-        self.lbl_juego.pack(fill="x")
-        self.lbl_sub = tk.Label(izq, text="Monitor de traducción con IA local", font=f_sub, fg=C_SUAVE,
-                                bg=C_FONDO, anchor="w")
-        self.lbl_sub.pack(fill="x")
-        self.pastilla = tk.Label(cab, text="", font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_TARJETA,
-                                 padx=self.px(10), pady=self.px(3))
-        self.pastilla.pack(side="right", anchor="n", pady=self.px(4))
+        self.lbl_titulo = tk.Label(izq, text=f"🎮 {APP_NOMBRE} — Centro de Control", font=f_titulo, fg=C_TEXTO, bg=C_FONDO, anchor="w")
+        self.lbl_titulo.pack(fill="x")
+        self.lbl_subtitulo = tk.Label(izq, text="Traducción asistida por IA local • Detección de motores y herramientas",
+                                      font=f_sub, fg=C_SUAVE, bg=C_FONDO, anchor="w")
+        self.lbl_subtitulo.pack(fill="x")
 
-        # Tarjeta principal
-        tarjeta = tk.Frame(cont, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
-                           padx=self.px(18), pady=self.px(16))
-        tarjeta.pack(fill="x", pady=(self.px(16), self.px(12)))
+        self.pastilla_estado = tk.Label(cab, text="● En espera", font=f_badge, fg=C_SUAVE, bg=C_TARJETA,
+                                        padx=self.px(12), pady=self.px(4))
+        self.pastilla_estado.pack(side="right", anchor="n", pady=self.px(2))
+
+        # 2. Selector de Juego y Explorador de Windows (Siempre visible arriba)
+        box_juego = tk.Frame(self.cont_principal, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
+                             padx=self.px(14), pady=self.px(10))
+        box_juego.pack(fill="x", pady=(0, self.px(12)))
+
+        fila_ruta = tk.Frame(box_juego, bg=C_TARJETA)
+        fila_ruta.pack(fill="x")
+
+        tk.Label(fila_ruta, text="Carpeta del juego:", font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_TARJETA).pack(side="left", padx=(0, self.px(8)))
+
+        self.var_ruta = tk.StringVar(value=self.config_gui.get("ultima_ruta", ""))
+        self.ent_ruta = tk.Entry(fila_ruta, textvariable=self.var_ruta, font=("Segoe UI", 9), bg=C_TARJETA_ALT,
+                                 fg=C_TEXTO, insertbackground=C_ACENTO, relief="flat", highlightbackground=C_BORDE, highlightthickness=1)
+        self.ent_ruta.pack(side="left", fill="x", expand=True, padx=(0, self.px(8)), ipady=self.px(4))
+        self.var_ruta.trace_add("write", lambda *_: self._al_cambiar_ruta())
+
+        self._btn_widget(fila_ruta, "📁 Examinar carpeta...", self.examinar_carpeta_juego, primario=True, font=f_btn).pack(side="left", padx=(0, self.px(6)))
+        self._btn_widget(fila_ruta, "🔄", self._refrescar_info_juego, primario=False, font=f_btn, px_extra=8).pack(side="left")
+
+        # Subfila con metadatos del juego y selector de modelo Ollama
+        fila_meta = tk.Frame(box_juego, bg=C_TARJETA)
+        fila_meta.pack(fill="x", pady=(self.px(8), 0))
+
+        self.lbl_motor = tk.Label(fila_meta, text="Motor: Detectando...", font=("Segoe UI", 9), fg=C_SUAVE, bg=C_TARJETA)
+        self.lbl_motor.pack(side="left", padx=(0, self.px(16)))
+
+        self.lbl_perfil = tk.Label(fila_meta, text="Perfil: —", font=("Segoe UI", 9), fg=C_SUAVE, bg=C_TARJETA)
+        self.lbl_perfil.pack(side="left", padx=(0, self.px(16)))
+
+        tk.Label(fila_meta, text="Modelo Ollama:", font=("Segoe UI", 9), fg=C_SUAVE, bg=C_TARJETA).pack(side="left", padx=(self.px(10), self.px(6)))
+        self.combo_modelo = ttk.Combobox(fila_meta, values=obtener_modelos_ollama(), state="readonly", width=18)
+        self.combo_modelo.set(self.config_gui.get("ultimo_modelo", "IA_Traductora"))
+        self.combo_modelo.pack(side="left")
+        self.combo_modelo.bind("<<ComboboxSelected>>", lambda _: self._guardar_config_actual())
+
+        # 3. Barra de Pestañas de Navegación (Tabs modernas)
+        nav = tk.Frame(self.cont_principal, bg=C_FONDO)
+        nav.pack(fill="x", pady=(0, self.px(10)))
+
+        self.tab_activa = "acciones"
+        self.tabs_btns: dict[str, tk.Label] = {}
+        self.tabs_frames: dict[str, tk.Frame] = {}
+
+        self.tabs_btns["acciones"] = self._crear_tab_btn(nav, "⚡ Acciones & Herramientas", "acciones")
+        self.tabs_btns["acciones"].pack(side="left", padx=(0, self.px(6)))
+
+        self.tabs_btns["progreso"] = self._crear_tab_btn(nav, "📊 Progreso en Vivo", "progreso")
+        self.tabs_btns["progreso"].pack(side="left", padx=(0, self.px(6)))
+
+        self.tabs_btns["consola"] = self._crear_tab_btn(nav, "📜 Consola de Salida", "consola")
+        self.tabs_btns["consola"].pack(side="left")
+
+        # Botón de detener en la barra de pestañas (visible y accesible siempre)
+        self.btn_detener = tk.Label(nav, text="🛑 Detener Proceso", font=("Segoe UI Semibold", 9), fg=C_TEXTO,
+                                    bg="#374151", cursor="arrow", padx=self.px(12), pady=self.px(5))
+        self.btn_detener.pack(side="right")
+        self.btn_detener.bind("<Button-1>", lambda _: self.detener_proceso())
+
+        # 4. Contenedor de Vistas
+        self.vista_contenedor = tk.Frame(self.cont_principal, bg=C_FONDO)
+        self.vista_contenedor.pack(fill="both", expand=True)
+
+        self._construir_tab_acciones()
+        self._construir_tab_progreso()
+        self._construir_tab_consola()
+
+        self.cambiar_tab("acciones")
+        self._refrescar_info_juego()
+
+        # 5. Barra Inferior con Enlaces Rápidos
+        pie = tk.Frame(self.cont_principal, bg=C_FONDO)
+        pie.pack(fill="x", pady=(self.px(10), 0))
+
+        self._btn_widget(pie, "🌐 Monitor Web (Port 5050)", self.abrir_web, primario=False, font=f_btn).pack(side="left", padx=(0, self.px(6)))
+        self._btn_widget(pie, "📂 Carpeta del Juego", self.abrir_carpeta_juego, primario=False, font=f_btn).pack(side="left", padx=(0, self.px(6)))
+        self._btn_widget(pie, "📂 Carpeta Workspace", self.abrir_carpeta_workspace, primario=False, font=f_btn).pack(side="left")
+
+        self._btn_widget(pie, "⬇ Minimizar a la Bandeja", self.ocultar, primario=True, font=f_btn).pack(side="right")
+
+    # ----------------------------------------------------------------- Construcción de Pestañas
+    def _crear_tab_btn(self, padre: tk.Widget, texto: str, clave: str) -> tk.Label:
+        b = tk.Label(padre, text=texto, font=("Segoe UI Semibold", 9), fg=C_SUAVE, bg=C_TARJETA, cursor="hand2",
+                     padx=self.px(14), pady=self.px(6))
+        b.bind("<Button-1>", lambda _: self.cambiar_tab(clave))
+        return b
+
+    def cambiar_tab(self, clave: str) -> None:
+        self.tab_activa = clave
+        for k, btn in self.tabs_btns.items():
+            if k == clave:
+                btn.configure(bg=C_ACENTO, fg=C_TEXTO)
+            else:
+                btn.configure(bg=C_TARJETA, fg=C_SUAVE)
+        for k, frame in self.tabs_frames.items():
+            if k == clave:
+                frame.pack(fill="both", expand=True)
+            else:
+                frame.pack_forget()
+
+    # --- Pestaña 1: Acciones & Herramientas ---
+    def _construir_tab_acciones(self) -> None:
+        frame = tk.Frame(self.vista_contenedor, bg=C_FONDO)
+        self.tabs_frames["acciones"] = frame
+
+        # Grid de tarjetas
+        grid = tk.Frame(frame, bg=C_FONDO)
+        grid.pack(fill="both", expand=True)
+        grid.columnconfigure(0, weight=1, uniform="col")
+        grid.columnconfigure(1, weight=1, uniform="col")
+
+        # Tarjeta 1: Traducción con IA
+        card1 = self._crear_tarjeta(grid, "🚀 Traducción con IA (Paso 1)", 0, 0)
+        self._btn_accion(card1, "⚡ Iniciar Traducción (Modo Turbo - Lotes x7)",
+                         lambda: self.ejecutar_traduccion(turbo=True), color=C_TURBO,
+                         desc="Traducción por bloques rápidos paralelos").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card1, "🛡️ Iniciar Traducción (Modo Seguro - Frase a frase)",
+                         lambda: self.ejecutar_traduccion(turbo=False), color="#4338ca",
+                         desc="Traducción con historial de contexto narrativo").pack(fill="x", pady=self.px(3))
+
+        # Tarjeta 2: Revisión y Control de Calidad
+        card2 = self._crear_tarjeta(grid, "📋 Revisión y Diagnóstico (Pasos 2 y 3)", 0, 1)
+        self._btn_accion(card2, "📄 Generar Hoja de Revisión (Paso 2)",
+                         self.ejecutar_generar_revision, color="#2563eb",
+                         desc="Crea revision_<juego>.csv comparando con originales").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card2, "🔧 Reparar Etiquetas con IA (Paso 3)",
+                         self.ejecutar_reparar_etiquetas, color="#0284c7",
+                         desc="Corrige códigos y formatos rotos automáticamente").pack(fill="x", pady=self.px(3))
+
+        # Tarjeta 3: Corrección, Semántica y Parches
+        card3 = self._crear_tarjeta(grid, "🩹 Parcheo y Auditoría Semántica (Pasos 4, 5 y 6)", 1, 0)
+        self._btn_accion(card3, "🔍 Auditoría Semántica (Paso 6: Falsos Amigos)",
+                         self.ejecutar_auditoria_semantica, color="#059669",
+                         desc="Corrige party➔grupo, item➔objeto, save➔guardar...").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card3, "👥 Traducir Nombres de Personajes (Paso 5)",
+                         self.ejecutar_traducir_nombres, color="#0d9488",
+                         desc="Unifica nombres de hablantes según la tabla").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card3, "🩹 Aplicar Parches y Diccionarios (Paso 4)",
+                         self.ejecutar_aplicar_parches, color="#16a34a",
+                         desc="Inyecta correcciones manuales en los archivos del juego").pack(fill="x", pady=self.px(3))
+
+        # Tarjeta 4: Partidas Guardadas y Utilidades
+        card4 = self._crear_tarjeta(grid, "💾 Partidas Guardadas y Motor (Paso 7)", 1, 1)
+        self._btn_accion(card4, "💾 Arreglar Partida RPG Maker (.rpgsave)",
+                         self.ejecutar_arreglar_partida, color="#d97706",
+                         desc="Parchea archivos de guardado sin tener que reiniciar partida").pack(fill="x", pady=self.px(3))
+        self._btn_accion(card4, "🔍 Gestor RPG Maker (Buscar / Inspeccionar)",
+                         self.abrir_gestor_rpgmaker_info, color="#7c3aed",
+                         desc="Herramienta avanzada para escenas y diálogos").pack(fill="x", pady=self.px(3))
+
+    def _crear_tarjeta(self, padre: tk.Widget, titulo: str, fila: int, col: int) -> tk.Frame:
+        c = tk.Frame(padre, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
+                    padx=self.px(12), pady=self.px(10))
+        c.grid(row=fila, column=col, sticky="nsew", padx=self.px(4), pady=self.px(4))
+        tk.Label(c, text=titulo, font=("Segoe UI Variable Display", 10, "bold"), fg=C_TEXTO, bg=C_TARJETA, anchor="w").pack(fill="x", pady=(0, self.px(6)))
+        return c
+
+    def _btn_accion(self, padre: tk.Widget, titulo: str, comando, color: str, desc: str = "") -> tk.Frame:
+        box = tk.Frame(padre, bg=C_TARJETA_ALT, cursor="hand2", padx=self.px(10), pady=self.px(6),
+                       highlightbackground=C_BORDE, highlightthickness=1)
+        lbl_t = tk.Label(box, text=titulo, font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_TARJETA_ALT, anchor="w")
+        lbl_t.pack(fill="x")
+        if desc:
+            lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg=C_SUAVE, bg=C_TARJETA_ALT, anchor="w")
+            lbl_d.pack(fill="x")
+
+        def al_entrar(_):
+            box.configure(bg=color)
+            lbl_t.configure(bg=color)
+            if desc:
+                lbl_d.configure(bg=color, fg="#f1f5f9")
+
+        def al_salir(_):
+            box.configure(bg=C_TARJETA_ALT)
+            lbl_t.configure(bg=C_TARJETA_ALT)
+            if desc:
+                lbl_d.configure(bg=C_TARJETA_ALT, fg=C_SUAVE)
+
+        box.bind("<Enter>", al_entrar)
+        box.bind("<Leave>", al_salir)
+        box.bind("<Button-1>", lambda _: comando())
+        lbl_t.bind("<Button-1>", lambda _: comando())
+        if desc:
+            lbl_d.bind("<Button-1>", lambda _: comando())
+        return box
+
+    # --- Pestaña 2: Progreso en Vivo ---
+    def _construir_tab_progreso(self) -> None:
+        frame = tk.Frame(self.vista_contenedor, bg=C_FONDO)
+        self.tabs_frames["progreso"] = frame
+
+        # Tarjeta principal de barra y %
+        tarjeta = tk.Frame(frame, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
+                           padx=self.px(18), pady=self.px(14))
+        tarjeta.pack(fill="x", pady=(0, self.px(10)))
+
         fila = tk.Frame(tarjeta, bg=C_TARJETA)
         fila.pack(fill="x")
-        self.lbl_pct = tk.Label(fila, text="0%", font=f_pct, fg=C_TEXTO, bg=C_TARJETA)
+        self.lbl_pct = tk.Label(fila, text="0%", font=("Segoe UI Variable Display", 32, "bold"), fg=C_TEXTO, bg=C_TARJETA)
         self.lbl_pct.pack(side="left")
         self.lbl_frases = tk.Label(fila, text="", font=("Segoe UI", 10), fg=C_SUAVE, bg=C_TARJETA)
-        self.lbl_frases.pack(side="right", anchor="s", pady=self.px(10))
-        self.barra = tk.Label(tarjeta, bg=C_TARJETA, bd=0)
-        self.barra.pack(fill="x", pady=(self.px(6), self.px(14)))
+        self.lbl_frases.pack(side="right", anchor="s", pady=self.px(8))
 
+        self.barra = tk.Label(tarjeta, bg=C_TARJETA, bd=0)
+        self.barra.pack(fill="x", pady=(self.px(6), self.px(12)))
+
+        # Rejilla 2x2 de métricas
         rejilla = tk.Frame(tarjeta, bg=C_TARJETA)
         rejilla.pack(fill="x")
         self.valores: dict[str, tk.Label] = {}
-        for i, (clave, titulo) in enumerate((("archivo", "ARCHIVO ACTUAL"), ("archivos", "ARCHIVOS"),
-                                             ("eta", "TIEMPO RESTANTE"), ("velocidad", "VELOCIDAD"))):
-            celda = tk.Frame(rejilla, bg="#1b2338", padx=self.px(12), pady=self.px(8))
+        for i, (clave, tit) in enumerate((("archivo", "ARCHIVO ACTUAL"), ("archivos", "ARCHIVOS"),
+                                         ("eta", "TIEMPO RESTANTE"), ("velocidad", "VELOCIDAD"))):
+            celda = tk.Frame(rejilla, bg=C_TARJETA_ALT, padx=self.px(10), pady=self.px(6))
             celda.grid(row=i // 2, column=i % 2, sticky="nsew", padx=self.px(3), pady=self.px(3))
-            tk.Label(celda, text=titulo, font=f_etiqueta, fg=C_SUAVE, bg="#1b2338", anchor="w").pack(fill="x")
-            lbl = tk.Label(celda, text="—", font=f_valor, fg=C_TEXTO, bg="#1b2338", anchor="w")
+            tk.Label(celda, text=tit, font=("Segoe UI", 7), fg=C_SUAVE, bg=C_TARJETA_ALT, anchor="w").pack(fill="x")
+            lbl = tk.Label(celda, text="—", font=("Segoe UI Semibold", 10), fg=C_TEXTO, bg=C_TARJETA_ALT, anchor="w")
             lbl.pack(fill="x")
             self.valores[clave] = lbl
         rejilla.columnconfigure(0, weight=1, uniform="c")
         rejilla.columnconfigure(1, weight=1, uniform="c")
 
-        # Últimas frases
-        feed = tk.Frame(cont, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
-                        padx=self.px(16), pady=self.px(12))
+        # Feed en vivo de frases traducidas
+        feed = tk.Frame(frame, bg=C_TARJETA, highlightbackground=C_BORDE, highlightthickness=1,
+                        padx=self.px(14), pady=self.px(10))
         feed.pack(fill="both", expand=True)
-        tk.Label(feed, text="⚡ Últimas frases traducidas por la IA", font=("Segoe UI Semibold", 10),
-                 fg=C_TEXTO, bg=C_TARJETA, anchor="w").pack(fill="x", pady=(0, self.px(8)))
-        self.feed_lista = tk.Frame(feed, bg=C_TARJETA, height=self.px(190))
+        tk.Label(feed, text="⚡ Últimas frases traducidas por la IA", font=("Segoe UI Semibold", 9),
+                 fg=C_TEXTO, bg=C_TARJETA, anchor="w").pack(fill="x", pady=(0, self.px(6)))
+
+        self.feed_lista = tk.Frame(feed, bg=C_TARJETA)
         self.feed_lista.pack(fill="both", expand=True)
-        self.feed_lista.pack_propagate(False)
-        self._f_feed = f_feed
 
-        # Botones
-        botones = tk.Frame(cont, bg=C_FONDO)
-        botones.pack(fill="x", pady=(self.px(14), 0))
-        self._boton(botones, "🌐  Monitor web", self.abrir_web, primario=False).pack(side="left")
-        self._boton(botones, "⬇  Minimizar a la bandeja", self.ocultar, primario=True).pack(side="right")
+    # --- Pestaña 3: Consola de Salida ---
+    def _construir_tab_consola(self) -> None:
+        frame = tk.Frame(self.vista_contenedor, bg=C_FONDO)
+        self.tabs_frames["consola"] = frame
 
-    def _boton(self, padre: tk.Widget, texto: str, comando, primario: bool) -> tk.Label:
+        barra_herramientas = tk.Frame(frame, bg=C_FONDO)
+        barra_herramientas.pack(fill="x", pady=(0, self.px(6)))
+
+        tk.Label(barra_herramientas, text="Registro de ejecución y salida de scripts en tiempo real:",
+                 font=("Segoe UI", 9), fg=C_SUAVE, bg=C_FONDO).pack(side="left")
+        self._btn_widget(barra_herramientas, "🗑️ Limpiar", self.limpiar_consola, primario=False, font=("Segoe UI", 8), px_extra=8).pack(side="right")
+
+        cont_txt = tk.Frame(frame, bg="#070a13", highlightbackground=C_BORDE, highlightthickness=1)
+        cont_txt.pack(fill="both", expand=True)
+
+        self.txt_consola = tk.Text(cont_txt, bg="#070a13", fg="#e2e8f0", insertbackground=C_ACENTO,
+                                   font=("Cascadia Mono", 9), wrap="word", relief="flat", state="disabled")
+        scroll = tk.Scrollbar(cont_txt, command=self.txt_consola.yview)
+        self.txt_consola.configure(yscrollcommand=scroll.set)
+
+        scroll.pack(side="right", fill="y")
+        self.txt_consola.pack(side="left", fill="both", expand=True, padx=self.px(6), pady=self.px(6))
+
+    def _btn_widget(self, padre: tk.Widget, texto: str, comando, primario: bool, font=("Segoe UI Semibold", 9), px_extra: int = 14) -> tk.Label:
         normal = C_ACENTO if primario else C_TARJETA
-        hover = "#a78bfa" if primario else "#1f2942"
-        b = tk.Label(padre, text=texto, font=("Segoe UI Semibold", 10), fg=C_TEXTO, bg=normal, cursor="hand2",
-                     padx=self.px(14), pady=self.px(7))
-        b.bind("<Enter>", lambda _e: b.configure(bg=hover))
-        b.bind("<Leave>", lambda _e: b.configure(bg=normal))
-        b.bind("<Button-1>", lambda _e: comando())
+        hover = C_ACENTO_HOVER if primario else "#1f2942"
+        b = tk.Label(padre, text=texto, font=font, fg=C_TEXTO, bg=normal, cursor="hand2",
+                     padx=self.px(px_extra), pady=self.px(6))
+        b.bind("<Enter>", lambda _: b.configure(bg=hover))
+        b.bind("<Leave>", lambda _: b.configure(bg=normal))
+        b.bind("<Button-1>", lambda _: comando())
         return b
 
+    # ----------------------------------------------------------------- Explorador de Archivos y Detección
+    def examinar_carpeta_juego(self) -> None:
+        """Abre el diálogo nativo de Windows para seleccionar la carpeta del juego."""
+        inicial = self.var_ruta.get()
+        if not inicial or not Path(inicial).exists():
+            inicial = r"J:\SteamLibrary\steamapps\common"
+            if not Path(inicial).exists():
+                inicial = r"C:"
+
+        carpeta = filedialog.askdirectory(parent=self.root, initialdir=inicial, title="Seleccionar carpeta del juego a traducir")
+        if carpeta:
+            self.var_ruta.set(str(Path(carpeta)))
+            self._guardar_config_actual()
+            self._refrescar_info_juego()
+
+    def _al_cambiar_ruta(self) -> None:
+        self._refrescar_info_juego()
+        self._guardar_config_actual()
+
+    def _guardar_config_actual(self) -> None:
+        self.config_gui["ultima_ruta"] = self.var_ruta.get()
+        self.config_gui["ultimo_modelo"] = self.combo_modelo.get()
+        guardar_config_gui(self.config_gui)
+
+    def _refrescar_info_juego(self) -> None:
+        ruta = self.var_ruta.get()
+        info = detectar_info_juego(ruta)
+        if info["valido"]:
+            self.lbl_motor.configure(text=f"🎮 {info['descripcion']}", fg=C_VERDE)
+            self.lbl_perfil.configure(text=f"🏷️ Perfil: {info['perfil']}", fg=C_TEXTO)
+            self.lbl_subtitulo.configure(text=f"Juego: {nombre_bonito(info['perfil'])} • {info['motor']}")
+        else:
+            self.lbl_motor.configure(text=f"⚠ {info['descripcion']}", fg=C_AMBAR)
+            self.lbl_perfil.configure(text="Perfil: —", fg=C_SUAVE)
+
+    # ----------------------------------------------------------------- Ejecución de Procesos en Segundo Plano
+    def ejecutar_accion(self, cmd: list[str], nombre_tarea: str, cambiar_a_progreso: bool = False) -> None:
+        """Lanza cualquier script en un hilo en segundo plano capturando su salida."""
+        if self.proceso_actual and self.proceso_actual.poll() is None:
+            messagebox.showwarning("Proceso en ejecución",
+                                   f"Ya hay una tarea activa ({self.tarea_activa_nombre}).\n"
+                                   "Usa el botón '🛑 Detener Proceso' si deseas cancelarla antes de iniciar otra.")
+            return
+
+        ruta = self.var_ruta.get()
+        if not ruta or not Path(ruta).exists():
+            messagebox.showerror("Ruta requerida", "Por favor, selecciona primero la carpeta del juego con el botón '📁 Examinar carpeta...'.")
+            return
+
+        self.tarea_activa_nombre = nombre_tarea
+        self.btn_detener.configure(bg=C_ROJO, cursor="hand2")
+        self.pastilla_estado.configure(text=f"● {nombre_tarea}…", fg=C_TURBO)
+
+        self._agregar_log(f"\n{'='*60}\n🚀 [INICIO] {nombre_tarea}\nComando: {' '.join(cmd)}\n{'='*60}\n")
+        if cambiar_a_progreso:
+            self.cambiar_tab("progreso")
+        else:
+            self.cambiar_tab("consola")
+
+        def worker():
+            try:
+                py_exe = obtener_python_ejecutable()
+                full_cmd = [str(py_exe)] + cmd
+                self.proceso_actual = subprocess.Popen(
+                    full_cmd,
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.STDOUT,
+                    text=True,
+                    encoding="utf-8",
+                    errors="replace",
+                    bufsize=1,
+                    cwd=str(RAIZ),
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                )
+
+                for linea in self.proceso_actual.stdout:
+                    if linea:
+                        self.cola.put(("log", linea.rstrip("\r\n")))
+
+                rc = self.proceso_actual.wait()
+                if rc == 0:
+                    self.cola.put(("log", f"\n✔ [ÉXITO] {nombre_tarea} finalizada correctamente."))
+                    self.cola.put(("fin_tarea", (True, nombre_tarea)))
+                else:
+                    self.cola.put(("log", f"\n✖ [AVISO] {nombre_tarea} finalizada con código de salida: {rc}."))
+                    self.cola.put(("fin_tarea", (False, nombre_tarea)))
+            except Exception as e:
+                self.cola.put(("log", f"\n💥 [ERROR] Error ejecutando {nombre_tarea}: {e}"))
+                self.cola.put(("fin_tarea", (False, nombre_tarea)))
+
+        threading.Thread(target=worker, daemon=True).start()
+
+    def detener_proceso(self) -> None:
+        """Detiene de forma forzosa el proceso actual y su árbol de subprocesos."""
+        if self.proceso_actual and self.proceso_actual.poll() is None:
+            pid = self.proceso_actual.pid
+            try:
+                subprocess.run(["taskkill", "/F", "/T", "/PID", str(pid)],
+                               capture_output=True, creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
+                self._agregar_log(f"\n🛑 [DETENIDO] Proceso (PID {pid}) terminado por el usuario.\n")
+            except Exception as e:
+                self._agregar_log(f"Error al detener proceso: {e}")
+            self.btn_detener.configure(bg="#374151", cursor="arrow")
+            self.pastilla_estado.configure(text="● Detenido", fg=C_AMBAR)
+        else:
+            self._agregar_log("No hay ningún proceso activo que detener.")
+
+    # Acciones específicas del pipeline
+    def ejecutar_traduccion(self, turbo: bool = True) -> None:
+        ruta = self.var_ruta.get()
+        modelo = self.combo_modelo.get() or "IA_Traductora"
+        modo = "turbo" if turbo else "seguro"
+        cmd = ["1_traducir_juego.py", "--ruta", ruta, "--modo", modo, "--modelo", modelo, "--sin-monitor"]
+        nombre = f"Traducción ({'Modo Turbo' if turbo else 'Modo Seguro'})"
+        self.ejecutar_accion(cmd, nombre, cambiar_a_progreso=True)
+
+    def ejecutar_generar_revision(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["2_generar_revision.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Generar Hoja de Revisión (Paso 2)")
+
+    def ejecutar_reparar_etiquetas(self) -> None:
+        modelo = self.combo_modelo.get() or "IA_Traductora"
+        cmd = ["3_reparar_etiquetas_ia.py", "--modelo", modelo]
+        self.ejecutar_accion(cmd, "Reparar Etiquetas con IA (Paso 3)")
+
+    def ejecutar_aplicar_parches(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["4_aplicar_parches.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Aplicar Parches y Diccionarios (Paso 4)")
+
+    def ejecutar_traducir_nombres(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["5_traducir_nombres_personajes.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Traducir Nombres de Personajes (Paso 5)")
+
+    def ejecutar_auditoria_semantica(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["6_auditoria_semantica.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Auditoría Semántica (Paso 6: Falsos Amigos)")
+
+    def ejecutar_arreglar_partida(self) -> None:
+        ruta = self.var_ruta.get()
+        cmd = ["7_arreglar_partida_rpgmaker.py", "--ruta", ruta]
+        self.ejecutar_accion(cmd, "Arreglar Partida RPG Maker (.rpgsave)")
+
+    def abrir_gestor_rpgmaker_info(self) -> None:
+        self.cambiar_tab("consola")
+        self._agregar_log("\n🎭 Gestor RPG Maker disponible mediante línea de comandos:")
+        self._agregar_log("  python herramientas_extra/gestor_rpgmaker.py buscar \"texto a buscar\"")
+        self._agregar_log("  python herramientas_extra/gestor_rpgmaker.py inspeccionar --archivo Map012.json --evento 55")
+        self._agregar_log("  python herramientas_extra/gestor_rpgmaker.py parchear --archivo Map012.json --buscar \"A\" --reemplazar \"B\"\n")
+
+    def abrir_carpeta_juego(self) -> None:
+        ruta = self.var_ruta.get()
+        if ruta and Path(ruta).exists():
+            os.startfile(ruta)
+        else:
+            messagebox.showwarning("Aviso", "Selecciona una carpeta válida primero.")
+
+    def abrir_carpeta_workspace(self) -> None:
+        if config.DIR_WORKSPACE.exists():
+            os.startfile(config.DIR_WORKSPACE)
+
+    def limpiar_consola(self) -> None:
+        self.txt_consola.configure(state="normal")
+        self.txt_consola.delete("1.0", "end")
+        self.txt_consola.configure(state="disabled")
+
+    def _agregar_log(self, texto: str) -> None:
+        self.txt_consola.configure(state="normal")
+        self.txt_consola.insert("end", texto + "\n")
+        self.txt_consola.see("end")
+        self.txt_consola.configure(state="disabled")
+
+    # ----------------------------------------------------------------- Mostrar / Ocultar / Bandeja
     def _centrar(self) -> None:
         self.root.update_idletasks()
         w, h = self.root.winfo_reqwidth(), self.root.winfo_reqheight()
         x = (self.root.winfo_screenwidth() - w) // 2
         y = (self.root.winfo_screenheight() - h) // 3
-        self.root.geometry(f"+{x}+{y}")
+        self.root.geometry(f"{max(w, self.px(760))}x{max(h, self.px(660))}+{x}+{y}")
 
-    # ----------------------------------------------------------------- Mostrar / ocultar
     def mostrar(self) -> None:
         self.root.deiconify()
         self.root.state("normal")
         if self.datos:
-            # Mientras estaba escondida no se redibujaba: ponerla al día antes de que se vea
-            self._actualizar_ventana(self.datos, self.datos.get("estado", "inactivo"),
-                                     float(self.datos.get("porcentaje", 0.0)))
+            self._actualizar_ventana(self.datos, self.datos.get("estado", "inactivo"), float(self.datos.get("porcentaje", 0.0)))
         self.root.lift()
         self.root.attributes("-topmost", True)
         self.root.after(200, lambda: self.root.attributes("-topmost", False))
         self.root.focus_force()
 
     def ocultar(self) -> None:
-        # withdraw() quita la ventana de la barra de tareas; el icono sigue en la bandeja
         self.root.withdraw()
 
     def _al_minimizar(self, evento) -> None:
@@ -358,6 +831,7 @@ class MonitorBandeja:
 
     def salir(self) -> None:
         self._saliendo = True
+        self.detener_proceso()
         try:
             self.icono.stop()
         except Exception:
@@ -368,11 +842,10 @@ class MonitorBandeja:
             pass
         self.root.destroy()
 
-    # ----------------------------------------------------------------- Comunicación entre hilos
     def _procesar_cola(self) -> None:
         try:
             while True:
-                orden = self.cola.get_nowait()
+                orden, payload = self.cola.get_nowait()
                 if orden == "mostrar":
                     self.mostrar()
                 elif orden == "web":
@@ -380,6 +853,17 @@ class MonitorBandeja:
                 elif orden == "salir":
                     self.salir()
                     return
+                elif orden == "log":
+                    self._agregar_log(str(payload))
+                elif orden == "fin_tarea":
+                    exito, nombre = payload
+                    self.btn_detener.configure(bg="#374151", cursor="arrow")
+                    self.pastilla_estado.configure(text="● Completado" if exito else "● Finalizado con avisos",
+                                                  fg=C_VERDE if exito else C_AMBAR)
+                    try:
+                        self.icono.notify(f"{nombre} finalizada.", APP_NOMBRE)
+                    except Exception:
+                        pass
         except queue.Empty:
             pass
         self.root.after(100, self._procesar_cola)
@@ -393,40 +877,48 @@ class MonitorBandeja:
             with conexion:
                 try:
                     if conexion.recv(32).strip() == b"mostrar":
-                        self.cola.put("mostrar")
+                        self.cola.put(("mostrar", None))
                 except OSError:
                     pass
 
-    # ----------------------------------------------------------------- Monitor web
     def abrir_web(self) -> None:
         def tarea():
             try:
                 urllib.request.urlopen(URL_WEB + "/api/progreso", timeout=1)
             except OSError:
-                pythonw = Path(sys.executable).with_name("pythonw.exe")
-                exe = str(pythonw if pythonw.exists() else sys.executable)
-                subprocess.Popen([exe, str(RAIZ / "herramientas_extra" / "servidor_progreso.py")], cwd=str(RAIZ),
+                py_exe = obtener_python_ejecutable()
+                subprocess.Popen([str(py_exe), str(RAIZ / "herramientas_extra" / "servidor_progreso.py")], cwd=str(RAIZ),
                                  creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0))
                 time.sleep(1.5)
             webbrowser.open(URL_WEB)
         threading.Thread(target=tarea, daemon=True).start()
 
-    # ----------------------------------------------------------------- Actualización periódica
+    # ----------------------------------------------------------------- Actualización Periódica
     def actualizar(self) -> None:
         if self._saliendo:
             return
         bruto = leer_progreso(ARCHIVO_PROGRESO)
         if bruto is None and ARCHIVO_PROGRESO.exists() and self.datos:
-            d = self.datos  # archivo a medio escribir: conservar lo último bueno
+            d = self.datos
         else:
             d = normalizar(bruto)
         self.datos = d
-        estado = d.get("estado", "inactivo")
-        pct = float(d.get("porcentaje", 0.0))
 
+        # Si hay proceso ejecutando una tarea no-traducción, reflejarlo
+        if self.proceso_actual and self.proceso_actual.poll() is None and self.tarea_activa_nombre:
+            if "Traducción" not in self.tarea_activa_nombre:
+                estado = "ejecutando"
+            else:
+                estado = d.get("estado", "traduciendo")
+        else:
+            estado = d.get("estado", "inactivo")
+
+        pct = float(d.get("porcentaje", 0.0))
         self._actualizar_bandeja(d, estado, pct)
+
         if self.root.state() != "withdrawn":
             self._actualizar_ventana(d, estado, pct)
+
         self._notificar_cambios(d, estado)
         self.root.after(INTERVALO_MS, self.actualizar)
 
@@ -444,10 +936,8 @@ class MonitorBandeja:
 
     def _actualizar_ventana(self, d: dict, estado: str, pct: float) -> None:
         texto_estado, color = ESTADOS.get(estado, ESTADOS["inactivo"])
-        self.lbl_juego.configure(text=nombre_bonito(d.get("juego", "")) if d.get("juego") else APP_NOMBRE)
-        detalles = [p for p in (d.get("modelo"), f"Modo {d['modo']}" if d.get("modo") else None) if p]
-        self.lbl_sub.configure(text=" · ".join(detalles) or "Monitor de traducción con IA local")
-        self.pastilla.configure(text=f"●  {texto_estado}", fg=hex_rgb(color))
+        if not (self.proceso_actual and self.proceso_actual.poll() is None):
+            self.pastilla_estado.configure(text=f"● {texto_estado}", fg=hex_rgb(color))
 
         self.lbl_pct.configure(text=f"{pct:.1f}%" if 0 < pct < 100 else f"{int(pct)}%")
         totales = d.get("frases_totales", 0)
@@ -466,17 +956,18 @@ class MonitorBandeja:
         elif estado in ("error", "detenido"):
             archivo, eta = d.get("mensaje", "") or "—", "—"
         elif estado == "inactivo":
-            archivo, eta = "Esperando a 1_traducir_juego.py", "—"
+            archivo, eta = "En espera de acción", "—"
         else:
             archivo, eta = d.get("archivo_actual") or "Analizando…", formatear_eta(d.get("eta_segundos"))
-        self.valores["archivo"].configure(text=archivo[:38])
+
+        self.valores["archivo"].configure(text=archivo[:40])
         tot_arch = d.get("archivos_totales", 0)
         self.valores["archivos"].configure(text=f"{d.get('archivos_hechos', 0)} / {tot_arch}" if tot_arch else "—")
         self.valores["eta"].configure(text=eta)
         fpm = d.get("velocidad_fpm") or 0
         self.valores["velocidad"].configure(text=f"{fpm:.0f} frases/min" if fpm else "—")
 
-        # Solo se reconstruye la lista cuando la IA ha traducido algo nuevo (sin parpadeos)
+        # Lista de feed en vivo
         frases = d.get("ultimas_frases", [])
         id_top = frases[0]["id"] if frases else None
         if id_top != self._ultimo_id_frase:
@@ -484,14 +975,14 @@ class MonitorBandeja:
             for w in self.feed_lista.winfo_children():
                 w.destroy()
             if not frases:
-                tk.Label(self.feed_lista, text="Esperando diálogos…", font=self._f_feed, fg=C_SUAVE,
+                tk.Label(self.feed_lista, text="Esperando diálogos traducidos…", font=self._f_feed, fg=C_SUAVE,
                          bg=C_TARJETA, anchor="w").pack(fill="x")
             for i, frase in enumerate(frases[:6]):
-                fila = tk.Frame(self.feed_lista, bg="#1b2338")
+                fila = tk.Frame(self.feed_lista, bg=C_TARJETA_ALT)
                 fila.pack(fill="x", pady=(0, self.px(4)))
                 tk.Frame(fila, bg=C_ACENTO if i == 0 else "#4c4f8a", width=self.px(3)).pack(side="left", fill="y")
                 tk.Label(fila, text=frase["texto"], font=self._f_feed, fg=C_TEXTO if i == 0 else "#cbd5e1",
-                         bg="#1b2338", anchor="w", justify="left", wraplength=self.px(370),
+                         bg=C_TARJETA_ALT, anchor="w", justify="left", wraplength=self.px(480),
                          padx=self.px(10), pady=self.px(4)).pack(side="left", fill="x", expand=True)
 
     def _notificar_cambios(self, d: dict, estado: str) -> None:
@@ -504,8 +995,6 @@ class MonitorBandeja:
                 self.icono.notify(f"{juego} se ha traducido al 100%.", "✔ Traducción completada")
             elif estado == "error":
                 self.icono.notify(d.get("mensaje", "Error desconocido")[:200], "✖ Error en la traducción")
-            elif estado == "traduciendo" and anterior in ("inactivo", "completado", "detenido", "error"):
-                self.icono.notify(f"Empezando a traducir {juego}.", APP_NOMBRE)
         except Exception:
             pass
 
@@ -513,25 +1002,30 @@ class MonitorBandeja:
         self.root.mainloop()
 
 
-# --------------------------------------------------------------------------- Acceso directo
+# --------------------------------------------------------------------------- Acceso Directo
 def crear_acceso_directo() -> None:
-    """Crea 'Traductor IA Monitor' en el Escritorio, sin ventana de consola y con icono propio."""
+    """Crea 'Traductor IA Monitor' en el Escritorio, sin consola y con icono propio."""
     ico = RAIZ / "herramientas_extra" / "monitor_bandeja.ico"
     crear_icono(75, "traduciendo", 256).save(ico, sizes=[(16, 16), (24, 24), (32, 32), (48, 48), (64, 64), (256, 256)])
+
     pythonw = Path(sys.executable).with_name("pythonw.exe")
+    if not pythonw.exists():
+        pythonw = RAIZ / "venv_traductor" / "Scripts" / "pythonw.exe"
+    if not pythonw.exists():
+        pythonw = Path(r"C:\Users\marco\AppData\Local\Programs\Python\Python310\pythonw.exe")
+
     destino = Path(os.path.expandvars(r"%USERPROFILE%\Desktop")) / "Traductor IA Monitor.lnk"
     script = (
         "$s=(New-Object -ComObject WScript.Shell).CreateShortcut('{lnk}');"
         "$s.TargetPath='{exe}';$s.Arguments='\"{py}\"';$s.WorkingDirectory='{raiz}';"
-        "$s.IconLocation='{ico}';$s.Description='Monitor de traducción en la bandeja';$s.Save()"
-    ).format(lnk=destino, exe=pythonw if pythonw.exists() else sys.executable,
-             py=Path(__file__).resolve(), raiz=RAIZ, ico=ico)
+        "$s.IconLocation='{ico}';$s.Description='Centro de Control y Monitor de Traducción';$s.Save()"
+    ).format(lnk=destino, exe=pythonw, py=Path(__file__).resolve(), raiz=RAIZ, ico=ico)
     subprocess.run(["powershell", "-NoProfile", "-Command", script], check=True)
     print(f"Acceso directo creado: {destino}")
 
 
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Monitor de traducción en la bandeja del sistema.")
+    parser = argparse.ArgumentParser(description="Centro de Control y Monitor de Traducción en la Bandeja.")
     parser.add_argument("--bandeja", action="store_true", help="Arrancar escondido en la bandeja")
     parser.add_argument("--acceso-directo", action="store_true", help="Crear acceso directo en el Escritorio")
     args = parser.parse_args()
@@ -541,7 +1035,6 @@ def main() -> None:
         return
 
     try:
-        # Si ya hay una instancia abierta, se le pide que se muestre (o nada si venimos con --bandeja)
         if avisar_instancia_existente(b"ping" if args.bandeja else b"mostrar"):
             return
 
@@ -551,15 +1044,13 @@ def main() -> None:
             servidor.bind(("127.0.0.1", PUERTO_INSTANCIA))
             servidor.listen(4)
         except OSError:
-            # Si no se puede vincular al puerto pero tampoco respondió ninguna instancia previa,
-            # cerramos el socket y permitimos que la app arranque sin el listener de instancia única
             servidor.close()
             servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
         if os.name == "nt":
             try:
                 ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
-                ctypes.windll.shcore.SetProcessDpiAwareness(1)  # texto nítido en pantallas con escalado
+                ctypes.windll.shcore.SetProcessDpiAwareness(1)
             except (AttributeError, OSError):
                 pass
 
@@ -575,9 +1066,9 @@ def main() -> None:
             try:
                 ctypes.windll.user32.MessageBoxW(
                     0,
-                    f"Error al iniciar el monitor de traducción:\n\n{e}\n\nLos detalles se han guardado en herramientas_extra/monitor_error.log",
+                    f"Error al iniciar el Centro de Control:\n\n{e}\n\nLos detalles se han guardado en herramientas_extra/monitor_error.log",
                     "Traductor IA - Error",
-                    0x10  # MB_ICONERROR
+                    0x10
                 )
             except Exception:
                 pass

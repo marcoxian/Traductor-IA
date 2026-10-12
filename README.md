@@ -222,30 +222,31 @@ Para conseguir una traducción con calidad nativa y que no cometa errores con lo
 
 ---
 
-## 🔔 Monitor en la Bandeja del Sistema (Estilo Steam / Discord)
+## 🔔 Centro de Control y Monitor en la Bandeja (Estilo Steam / Discord)
 
-Aplicación nativa de escritorio que se oculta discretamente en el área de notificación (junto al reloj de Windows):
+Aplicación nativa de escritorio todo en uno con interfaz gráfica y soporte para la bandeja del sistema (junto al reloj de Windows):
 
-* **Comportamiento en segundo plano:**
-  * Al pulsar el botón **"Minimizar a la bandeja"**, la cruz de cierre o minimizar la ventana, esta se oculta completamente y **desaparece de la barra de tareas**.
-  * Solo vuelve a abrirse si haces clic en el icono de la bandeja o ejecutas de nuevo la aplicación.
-* **Icono dinámico y Tooltip:**
-  * El icono dibuja en tiempo real un anillo de progreso con el porcentaje exacto (o símbolos de estado: ✔ terminado, ⏸ pausa, ! error).
-  * Al **pasar el ratón por encima** del icono, muestra un tooltip con el juego, porcentaje, frases completadas, archivo actual y tiempo restante estimado (ETA).
-* **Notificaciones de Windows:** Envía avisos automáticos al iniciar o terminar la traducción completa.
+* **📁 Selector de juego con Explorador de Windows nativo:**
+  * Pulsa **`Examinar carpeta...`** para elegir cualquier juego desde tus discos duros (`J:\SteamLibrary\...`).
+  * Recuerda automáticamente la última carpeta seleccionada.
+  * **Detección automática de motor:** Identifica al instante si el juego es RPG Maker MV/MZ, Unity, Ren'Py o Godot, y su perfil en `workspace/`.
+* **🔘 Centro de Acciones para todo el pipeline:**
+  * **🚀 Traducción con IA:** Botones para lanzar traducción en **Modo Turbo** (lotes x7) o **Modo Seguro**, con selector de modelos Ollama instalados.
+  * **📋 Revisión y Diagnóstico:** Generar Hoja de Revisión CSV (Paso 2) y Reparar Etiquetas con IA (Paso 3).
+  * **🩹 Parcheo y Semántica:** Auditoría semántica de falsos amigos (Paso 6: *party➔grupo*, *item➔objeto*...), Homogeneizar nombres (Paso 5) y Aplicar parches (Paso 4).
+  * **💾 Partidas Guardadas:** Arreglar y descompresor en caliente de partidas de RPG Maker (`.rpgsave`, Paso 7).
+  * **🛑 Control de procesos:** Botón para detener cualquier tarea en curso al instante.
+* **📜 Consola de salida integrada:** Muestra la salida del terminal en tiempo real dentro de la propia app sin abrir ventanas de consola negras adicionales.
+* **📊 Monitor en vivo y Bandeja:** Barra con gradiente, estadísticas y feed de frases. Se minimiza a la bandeja del sistema junto al reloj y muestra el porcentaje al pasar el ratón.
 
 ```bash
-# Lanzar el monitor manualmente (abre la ventana):
+# Lanzar el Centro de Control manualmente:
 iniciar_monitor_bandeja.bat
 # o bien desde el acceso directo del Escritorio: "Traductor IA Monitor"
 
 # Comportamiento automático:
-# Cualquier traducción abre automáticamente la ventana del monitor por defecto:
+# Cualquier traducción desde consola también abre automáticamente la app:
 python 1_traducir_juego.py --ruta "J:\Juegos\MiJuego" --modo turbo
-
-# Opciones avanzadas de monitor al traducir:
-#   --bandeja        Arranca el monitor directamente en la bandeja (sin mostrar la ventana)
-#   --sin-monitor    No abre la aplicación del monitor (modo solo terminal)
 ```
 
 ---
