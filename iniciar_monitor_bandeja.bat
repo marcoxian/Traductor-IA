@@ -2,8 +2,15 @@
 setlocal
 cd /d "%~dp0"
 
-if exist venv_traductor\Scripts\pythonw.exe (
-    start "" venv_traductor\Scripts\pythonw.exe herramientas_extra\monitor_bandeja.py %*
+set "PY="
+if exist "venv_traductor\Scripts\pythonw.exe" (
+    set "PY=venv_traductor\Scripts\pythonw.exe"
+) else if exist "C:\Users\marco\AppData\Local\Programs\Python\Python310\pythonw.exe" (
+    set "PY=C:\Users\marco\AppData\Local\Programs\Python\Python310\pythonw.exe"
+) else if exist "C:\Python313\pythonw.exe" (
+    set "PY=C:\Python313\pythonw.exe"
 ) else (
-    start "" pythonw herramientas_extra\monitor_bandeja.py %*
+    set "PY=pythonw.exe"
 )
+
+start "" "%PY%" herramientas_extra\monitor_bandeja.py %*

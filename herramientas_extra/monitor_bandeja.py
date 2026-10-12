@@ -540,25 +540,48 @@ def main() -> None:
         crear_acceso_directo()
         return
 
-    # Si ya hay una instancia abierta, se le pide que se muestre (o nada si venimos con --bandeja)
-    if avisar_instancia_existente(b"ping" if args.bandeja else b"mostrar"):
-        return
-
-    servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        servidor.bind(("127.0.0.1", PUERTO_INSTANCIA))
-    except OSError:
-        return
-    servidor.listen(4)
+        # Si ya hay una instancia abierta, se le pide que se muestre (o nada si venimos con --bandeja)
+        if avisar_instancia_existente(b"ping" if args.bandeja else b"mostrar"):
+            return
 
-    if os.name == "nt":
+        servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        servidor.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         try:
-            ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
-            ctypes.windll.shcore.SetProcessDpiAwareness(1)  # texto nítido en pantallas con escalado
-        except (AttributeError, OSError):
-            pass
+            servidor.bind(("127.0.0.1", PUERTO_INSTANCIA))
+            servidor.listen(4)
+        except OSError:
+            # Si no se puede vincular al puerto pero tampoco respondió ninguna instancia previa,
+            # cerramos el socket y permitimos que la app arranque sin el listener de instancia única
+            servidor.close()
+            servidor = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-    MonitorBandeja(empezar_oculto=args.bandeja, servidor=servidor).ejecutar()
+        if os.name == "nt":
+            try:
+                ctypes.windll.shell32.SetCurrentProcessExplicitAppUserModelID(APP_ID)
+                ctypes.windll.shcore.SetProcessDpiAwareness(1)  # texto nítido en pantallas con escalado
+            except (AttributeError, OSError):
+                pass
+
+        MonitorBandeja(empezar_oculto=args.bandeja, servidor=servidor).ejecutar()
+    except Exception as e:
+        import traceback
+        err_msg = traceback.format_exc()
+        try:
+            (RAIZ / "herramientas_extra" / "monitor_error.log").write_text(err_msg, encoding="utf-8")
+        except Exception:
+            pass
+        if os.name == "nt":
+            try:
+                ctypes.windll.user32.MessageBoxW(
+                    0,
+                    f"Error al iniciar el monitor de traducción:\n\n{e}\n\nLos detalles se han guardado en herramientas_extra/monitor_error.log",
+                    "Traductor IA - Error",
+                    0x10  # MB_ICONERROR
+                )
+            except Exception:
+                pass
+        raise
 
 
 if __name__ == "__main__":
