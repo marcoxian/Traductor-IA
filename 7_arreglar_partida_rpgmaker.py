@@ -111,6 +111,8 @@ def main():
             appdata_local = Path(os.environ.get("LOCALAPPDATA", ""))
             if appdata_local.exists():
                 candidatos.extend([
+                    appdata_local / "User Data",
+                    appdata_local / "User Data" / "Default",
                     appdata_local / r_juego.name / "save",
                     appdata_local / r_juego.name,
                     appdata_local / config.slug(r_juego.name) / "save",
@@ -151,12 +153,24 @@ def main():
         print(f"{'='*70}\n")
         return
 
+    # Obtener el título traducido del juego desde System.json para sincronizar los títulos de los slots
+    titulo_juego_actual = None
+    if args.ruta:
+        for pj in [Path(args.ruta) / "www" / "data" / "System.json", Path(args.ruta) / "data" / "System.json"]:
+            if pj.exists():
+                try:
+                    with open(pj, "r", encoding="utf-8") as f:
+                        titulo_juego_actual = json.load(f).get("gameTitle")
+                    break
+                except Exception:
+                    pass
+
     path_dic = Path(args.diccionario)
     correcciones = cargar_diccionario(path_dic)
     log.info("Diccionario cargado con %d entradas desde %s", len(correcciones), path_dic.name)
 
     compresor = lzstring.LZString()
-    log.info("Analizando %d partida(s) guardada(s) en: %s...", len(archivos), save_dir)
+    log.info("Analizando %d archivo(s) de partida en: %s...", len(archivos), save_dir)
     for f_path in archivos:
         backup = f_path.with_suffix(".rpgsave.bak")
         if not backup.exists():
@@ -170,12 +184,23 @@ def main():
 
         try:
             parsed = json.loads(descomprimido)
-            cambios = reparar_cadenas(parsed, correcciones, REEMPLAZOS_BRUTOS)
+            cambios = 0
+            # Si es el archivo índice global de partidas (global.rpgsave o Defaultglobal.rpgsave)
+            if isinstance(parsed, list):
+                if titulo_juego_actual:
+                    for slot in parsed:
+                        if isinstance(slot, dict) and "title" in slot:
+                            if slot["title"] != titulo_juego_actual:
+                                slot["title"] = titulo_juego_actual
+                                cambios += 1
+            else:
+                cambios = reparar_cadenas(parsed, correcciones, REEMPLAZOS_BRUTOS)
+
             if cambios > 0:
                 nuevo_json = json.dumps(parsed, separators=(",", ":"))
                 comprimido = compresor.compressToBase64(nuevo_json)
                 f_path.write_text(comprimido, encoding="utf-8")
-                log.info("✔ %s parcheado con éxito (%d reemplazos aplicados).", f_path.name, cambios)
+                log.info("✔ %s sincronizado con éxito (%d ajustes aplicados).", f_path.name, cambios)
             else:
                 log.info("  %s no requería cambios.", f_path.name)
         except Exception as e:
