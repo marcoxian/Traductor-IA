@@ -95,6 +95,30 @@ class TestRPGMaker(unittest.TestCase):
         # Code 355 script reensamblado con prefijo intacto
         self.assertIn('$gameVariables.setValue(21, "Br,fr,op.ESP:Smells like rain.");', cmds[3]["parameters"][0])
 
+    def test_reparar_partidas_lzstring(self):
+        import importlib
+        import json
+        mod = importlib.import_module("7_arreglar_partida_rpgmaker")
+        self.assertIsNotNone(mod.lzstring, "lzstring debe estar disponible")
+
+        compresor = mod.lzstring.LZString()
+        partida = {
+            "party": {"name": "Equipo Heroico"},
+            "inventario": ["tímida y tímida", "Normal"],
+            "mapa": {"titulo": "introducciones de caracteres"}
+        }
+        reemplazos = {"tímida y tímida": "tímida", "introducciones de caracteres": "introducción de los personajes"}
+        cambios = mod.reparar_cadenas(partida, {}, reemplazos)
+        self.assertEqual(cambios, 2)
+        self.assertEqual(partida["inventario"][0], "tímida")
+        self.assertEqual(partida["mapa"]["titulo"], "introducción de los personajes")
+
+        # Comprimir a LZString y descomprimir
+        raw_json = json.dumps(partida)
+        comprimido = compresor.compressToBase64(raw_json)
+        descomprimido = compresor.decompressFromBase64(comprimido)
+        self.assertEqual(json.loads(descomprimido), partida)
+
 
 if __name__ == "__main__":
     unittest.main()

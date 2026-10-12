@@ -11,7 +11,7 @@ pip install "unsloth[colab-new] @ git+https://github.com/unslothai/unsloth.git"
 echo Instalando dependencias criticas de IA...
 pip install --no-deps xformers trl peft accelerate bitsandbytes
 echo Instalando dependencias del Servidor Puente y Monitor...
-pip install flask flask-cors requests pyperclip pystray pillow
+pip install flask flask-cors requests pyperclip pystray pillow lzstring
 echo.
 echo ==========================================
 echo TODO TERMINADO. ENTORNO LISTO PARA ENTRENAR.

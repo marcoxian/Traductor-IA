@@ -97,27 +97,62 @@ def main():
         save_dir = Path(args.save_dir)
     elif args.ruta:
         r_juego = Path(args.ruta)
-        candidatos = [r_juego / "www" / "save", r_juego / "save"]
+        candidatos = [
+            r_juego / "www" / "save",
+            r_juego / "save",
+            r_juego / "www" / "saves",
+            r_juego / "saves",
+        ]
+        if os.name == "nt":
+            appdata_local = Path(os.environ.get("LOCALAPPDATA", ""))
+            if appdata_local.exists():
+                candidatos.extend([
+                    appdata_local / r_juego.name / "save",
+                    appdata_local / r_juego.name,
+                    appdata_local / config.slug(r_juego.name) / "save",
+                    appdata_local / config.slug(r_juego.name),
+                ])
+        # Primero buscar una carpeta que realmente contenga archivos .rpgsave
         for c in candidatos:
-            if c.exists():
+            if c.exists() and list(c.glob("*.rpgsave")):
                 save_dir = c
                 break
+        # Si ninguna tiene .rpgsave pero existe la carpeta de guardado
+        if not save_dir:
+            for c in candidatos:
+                if c.exists():
+                    save_dir = c
+                    break
 
     if not save_dir or not save_dir.exists():
-        log.error("Directorio de guardado no encontrado. Especifica --ruta o --save-dir")
-        sys.exit(1)
+        print(f"\n{'='*70}")
+        print("ℹ️  [INFORMACIÓN DE PARTIDAS GUARDADAS (.rpgsave)]")
+        print(f"{'='*70}")
+        print("No se encontró ninguna carpeta de partidas guardadas ('save/' o 'www/save/').")
+        print("• Si aún no has guardado ninguna partida dentro del juego, esto es completamente normal.")
+        print("• Toda la traducción ya está inyectada en los archivos del juego (Paso 1).")
+        print("• Cualquier partida nueva que comiences ya se guardará en español.")
+        print("• Si tus partidas están en otra ruta, especifícala con: --save-dir <ruta>")
+        print(f"{'='*70}\n")
+        return
+
+    archivos = list(save_dir.glob("*.rpgsave"))
+    if not archivos:
+        print(f"\n{'='*70}")
+        print("ℹ️  [INFORMACIÓN DE PARTIDAS GUARDADAS (.rpgsave)]")
+        print(f"{'='*70}")
+        print(f"La carpeta '{save_dir.name}' existe, pero no contiene archivos .rpgsave.")
+        print("• Aún no has guardado ninguna partida en este juego.")
+        print("• Las nuevas partidas que inicies ya saldrán traducidas al 100%.")
+        print(f"{'='*70}\n")
+        return
 
     path_dic = Path(args.diccionario)
     correcciones = cargar_diccionario(path_dic)
     log.info("Diccionario cargado con %d entradas desde %s", len(correcciones), path_dic.name)
 
     compresor = lzstring.LZString()
-    archivos = list(save_dir.glob("*.rpgsave"))
-    if not archivos:
-        log.warning("No se encontraron archivos .rpgsave en %s", save_dir)
-        return
-
-    log.info("Analizando %d partida(s) guardada(s)...", len(archivos))
+    log.info("Analizando %d partida(s) guardada(s) en: %s...", len(archivos), save_dir)
     for f_path in archivos:
         backup = f_path.with_suffix(".rpgsave.bak")
         if not backup.exists():
