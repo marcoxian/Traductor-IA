@@ -73,9 +73,10 @@ def main():
     ap.add_argument("--diccionario", nargs="+", help="Archivos 'ingles;correccion' a aplicar")
     ap.add_argument("--resetear", action="store_true",
                     help="Devolver al inglés las líneas con fallos no corregidas, para retraducirlas")
+    ap.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = ap.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
     ruta_juego = Path(args.ruta)
 
     if not args.revision and not args.diccionario:

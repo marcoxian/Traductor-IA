@@ -106,9 +106,10 @@ def main():
     parser.add_argument("--original", help="Ruta al CSV original en inglés")
     parser.add_argument("--traducido", help="Ruta al CSV traducido")
     parser.add_argument("--diccionario", default=str(config.DICCIONARIO_INTERFAZ), help="Ruta al CSV de diccionario")
+    parser.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = parser.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
     path_dic = Path(args.diccionario)
 
     if args.ruta:

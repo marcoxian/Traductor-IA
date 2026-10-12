@@ -83,9 +83,10 @@ def main():
     parser.add_argument("--ruta", help="Ruta principal del juego (busca automáticamente www/save o save)")
     parser.add_argument("--save-dir", help="Ruta a la carpeta con archivos .rpgsave")
     parser.add_argument("--diccionario", default=str(config.DICCIONARIO_INTERFAZ), help="Ruta al diccionario CSV de correcciones")
+    parser.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = parser.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
 
     if lzstring is None:
         log.error("La librería 'lzstring' no está instalada. Ejecuta: pip install lzstring")

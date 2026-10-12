@@ -251,6 +251,42 @@ python 1_traducir_juego.py --ruta "J:\Juegos\MiJuego" --modo turbo
 
 ---
 
+## 🛠️ Depuración, Diagnóstico y Soporte de Fallos
+
+Para facilitar el reporte y solución inmediata de cualquier error o comportamiento anómalo:
+
+### 1. Lanzador con Consola CMD Activa (`iniciar_modo_depuracion.bat`)
+Ejecuta el Centro de Control en una ventana de consola Command Prompt normal (no oculta):
+* Muestra el entorno de Python, GPU y conexiones internas en tiempo real.
+* Activa el flag `--debug` en todos los procesos.
+* **No se cierra si hay un fallo:** Si se produce una excepción no controlada, el script se detiene y muestra un mensaje de pausa para que puedas leer o copiar la traza de error directamente.
+
+### 2. Diagnóstico del Sistema con 1 Clic (`diagnostico.bat`)
+Analiza en segundos todo el ecosistema de traducción y **copia automáticamente el reporte al portapapeles**:
+* Estado de Python (ejecutable, versión, venv).
+* Hardware y GPU (nombre, versión del controlador NVIDIA, VRAM total y libre).
+* Servicio de IA local (ping a Ollama y modelos instalados como `IA_Traductora`).
+* Estado del servidor web y progreso de la última traducción.
+* Últimos 25 registros de error de `monitor_error.log` y `crash_gui.log`.
+```bash
+# Ejecutar diagnóstico desde el explorador con doble clic en:
+diagnostico.bat
+# O por terminal:
+python herramientas_extra/diagnostico.py
+```
+> **Nota:** Al terminar el diagnóstico, el informe se copia automáticamente al portapapeles de Windows. Solo tienes que ir a tu chat con la IA y pulsar **Ctrl + V** para enviárselo.
+
+### 3. Consola CMD del Entorno (`consola_cmd.bat`)
+Abre una consola de comandos interactiva en la raíz del proyecto con el entorno virtual ya activado y una guía rápida de comandos disponibles.
+
+### 4. Soporte Integrado en la App (Pestaña "Consola de Salida")
+* **`📋 Copiar Registro para la IA`**: Copia todo el texto de la consola y la configuración activa al portapapeles con un solo clic.
+* **`🩺 Diagnóstico Completo`**: Ejecuta la auditoría del sistema directamente dentro de la interfaz gráfica.
+* **`🖥️ Abrir CMD del Entorno`**: Abre un terminal interactivo de Windows.
+* **`[✓] Modo Depuración (--debug)`**: Conmuta entre logs normales y logs detallados con trazas de excepciones completas.
+
+---
+
 ## 📊 Monitor Web de Progreso en Vivo
 
 Para monitorizar cualquier traducción en ejecución de forma visual desde el navegador:

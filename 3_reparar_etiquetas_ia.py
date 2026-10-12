@@ -27,9 +27,10 @@ def main():
     parser.add_argument("--archivo", help="Ruta al archivo CSV de revisión (por defecto busca revision_*.csv)")
     parser.add_argument("--modelo", default=config.MODELO_POR_DEFECTO, help="Modelo de Ollama a usar")
     parser.add_argument("--endpoint", default=config.OLLAMA_URL, help="URL del endpoint de Ollama")
+    parser.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = parser.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
 
     if args.archivo:
         archivo_path = Path(args.archivo)

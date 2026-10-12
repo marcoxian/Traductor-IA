@@ -35,6 +35,7 @@ herramientas_extra/unrpyc/
 *.tmp
 *.rpgsave
 *.log
+reporte_*.txt
 revision_*.csv
 herramientas_extra/parches_aplicados.json
 

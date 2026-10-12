@@ -80,9 +80,10 @@ def main():
     ap.add_argument("--ruta", required=True, help="Carpeta del juego que contiene archivos .csv")
     ap.add_argument("--salida", help="Ruta del archivo CSV de salida resultante")
     ap.add_argument("--sin-menus", action="store_true", help="No incluir los textos cortos de menú en la revisión")
+    ap.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = ap.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
     juego = Path(args.ruta)
 
     if args.salida:

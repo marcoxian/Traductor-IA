@@ -28,6 +28,7 @@ import threading
 import time
 import tkinter as tk
 from tkinter import filedialog, messagebox, ttk
+import traceback
 import urllib.request
 import webbrowser
 from pathlib import Path
@@ -288,7 +289,7 @@ def avisar_instancia_existente(mensaje: bytes) -> bool:
 
 # --------------------------------------------------------------------------- Aplicación Principal
 class MonitorBandeja:
-    def __init__(self, empezar_oculto: bool, servidor: socket.socket):
+    def __init__(self, empezar_oculto: bool, servidor: socket.socket, modo_debug: bool = False):
         self.cola: queue.Queue[tuple] = queue.Queue()
         self.servidor = servidor
         self.datos: dict = {}
@@ -310,6 +311,24 @@ class MonitorBandeja:
         self.root.minsize(self.px(760), self.px(660))
         self.root.protocol("WM_DELETE_WINDOW", self.ocultar)
         self.root.bind("<Unmap>", self._al_minimizar)
+
+        # Control de modo depuración
+        self.var_modo_debug = tk.BooleanVar(value=modo_debug)
+
+        # Captura automática de fallos y excepciones internas de la interfaz
+        def _capturar_excepcion_gui(exc_type, exc_val, exc_tb):
+            traza = "".join(traceback.format_exception(exc_type, exc_val, exc_tb))
+            self._agregar_log(f"\n💥 [ERROR INTERNO GUI]\n{traza}\n")
+            try:
+                (config.DIR_WORKSPACE / "crash_gui.log").write_text(traza, encoding="utf-8")
+            except Exception:
+                pass
+            if self.var_modo_debug.get():
+                messagebox.showerror(
+                    "Error Interno GUI",
+                    f"Se produjo un fallo en la interfaz:\n\n{exc_val}\n\nLos detalles se han registrado en la pestaña 'Consola de Salida' y en workspace/crash_gui.log"
+                )
+        self.root.report_callback_exception = _capturar_excepcion_gui
 
         self._construir_ui()
         self._centrar()
@@ -596,17 +615,53 @@ class MonitorBandeja:
         self.feed_lista = tk.Frame(feed, bg=C_TARJETA)
         self.feed_lista.pack(fill="both", expand=True)
 
-    # --- Pestaña 3: Consola de Salida ---
+    # --- Pestaña 3: Consola de Salida y Herramientas de Depuración ---
     def _construir_tab_consola(self) -> None:
         frame = tk.Frame(self.vista_contenedor, bg=C_FONDO)
         self.tabs_frames["consola"] = frame
 
         barra_herramientas = tk.Frame(frame, bg=C_FONDO)
-        barra_herramientas.pack(fill="x", pady=(0, self.px(6)))
+        barra_herramientas.pack(fill="x", pady=(0, self.px(8)))
 
-        tk.Label(barra_herramientas, text="Registro de ejecución y salida de scripts en tiempo real:",
-                 font=("Segoe UI", 9), fg=C_SUAVE, bg=C_FONDO).pack(side="left")
-        self._btn_widget(barra_herramientas, "🗑️ Limpiar", self.limpiar_consola, primario=False, font=("Segoe UI", 8), px_extra=8).pack(side="right")
+        # Fila superior: Título y conmutador de Modo Depuración
+        fila_sup = tk.Frame(barra_herramientas, bg=C_FONDO)
+        fila_sup.pack(fill="x", pady=(0, self.px(6)))
+
+        tk.Label(fila_sup, text="📜 Registro de ejecución y herramientas de depuración:",
+                 font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_FONDO).pack(side="left")
+
+        chk_debug = tk.Checkbutton(
+            fila_sup,
+            text="Modo Depuración (--debug)",
+            variable=self.var_modo_debug,
+            command=self._al_cambiar_modo_debug,
+            font=("Segoe UI Semibold", 8),
+            fg=C_TURBO,
+            bg=C_FONDO,
+            selectcolor=C_TARJETA,
+            activebackground=C_FONDO,
+            activeforeground=C_TURBO,
+            cursor="hand2",
+            bd=0,
+            highlightthickness=0
+        )
+        chk_debug.pack(side="right")
+
+        # Fila inferior: Botones de diagnóstico, soporte y consola CMD
+        fila_botones = tk.Frame(barra_herramientas, bg=C_FONDO)
+        fila_botones.pack(fill="x")
+
+        self._btn_widget(fila_botones, "📋 Copiar Registro para la IA", self.copiar_registro_ia,
+                         primario=True, font=("Segoe UI", 8, "bold"), px_extra=10).pack(side="left", padx=(0, self.px(6)))
+
+        self._btn_widget(fila_botones, "🩺 Ejecutar Diagnóstico", self.ejecutar_diagnostico_ui,
+                         primario=False, font=("Segoe UI", 8), px_extra=8).pack(side="left", padx=(0, self.px(6)))
+
+        self._btn_widget(fila_botones, "🖥️ Abrir CMD del Entorno", self.abrir_consola_cmd,
+                         primario=False, font=("Segoe UI", 8), px_extra=8).pack(side="left", padx=(0, self.px(6)))
+
+        self._btn_widget(fila_botones, "🗑️ Limpiar", self.limpiar_consola,
+                         primario=False, font=("Segoe UI", 8), px_extra=8).pack(side="right")
 
         cont_txt = tk.Frame(frame, bg="#070a13", highlightbackground=C_BORDE, highlightthickness=1)
         cont_txt.pack(fill="both", expand=True)
@@ -673,16 +728,22 @@ class MonitorBandeja:
                                    "Usa el botón '🛑 Detener Proceso' si deseas cancelarla antes de iniciar otra.")
             return
 
-        ruta = self.var_ruta.get()
-        if not ruta or not Path(ruta).exists():
-            messagebox.showerror("Ruta requerida", "Por favor, selecciona primero la carpeta del juego con el botón '📁 Examinar carpeta...'.")
-            return
+        # Solo exigimos carpeta de juego si la tarea no es un diagnóstico global
+        if "diagnóstico" not in nombre_tarea.lower():
+            ruta = self.var_ruta.get()
+            if not ruta or not Path(ruta).exists():
+                messagebox.showerror("Ruta requerida", "Por favor, selecciona primero la carpeta del juego con el botón '📁 Examinar carpeta...'.")
+                return
+
+        cmd_final = list(cmd)
+        if self.var_modo_debug.get() and "--debug" not in cmd_final and not any("diagnostico" in c for c in cmd_final):
+            cmd_final.append("--debug")
 
         self.tarea_activa_nombre = nombre_tarea
         self.btn_detener.configure(bg=C_ROJO, cursor="hand2")
         self.pastilla_estado.configure(text=f"● {nombre_tarea}…", fg=C_TURBO)
 
-        self._agregar_log(f"\n{'='*60}\n🚀 [INICIO] {nombre_tarea}\nComando: {' '.join(cmd)}\n{'='*60}\n")
+        self._agregar_log(f"\n{'='*60}\n🚀 [INICIO] {nombre_tarea}\nComando: {' '.join(cmd_final)}\n{'='*60}\n")
         if cambiar_a_progreso:
             self.cambiar_tab("progreso")
         else:
@@ -691,7 +752,7 @@ class MonitorBandeja:
         def worker():
             try:
                 py_exe = obtener_python_ejecutable()
-                full_cmd = [str(py_exe)] + cmd
+                full_cmd = [str(py_exe)] + cmd_final
                 self.proceso_actual = subprocess.Popen(
                     full_cmd,
                     stdout=subprocess.PIPE,
@@ -797,6 +858,88 @@ class MonitorBandeja:
         self.txt_consola.configure(state="normal")
         self.txt_consola.delete("1.0", "end")
         self.txt_consola.configure(state="disabled")
+
+    def _al_cambiar_modo_debug(self) -> None:
+        estado = "ACTIVADO" if self.var_modo_debug.get() else "DESACTIVADO"
+        self._agregar_log(f"\n⚙ [MODO DEPURACIÓN] {estado}. Se incluirán argumentos detallados en las siguientes tareas.")
+
+    def copiar_registro_ia(self) -> None:
+        """Copia todo el texto de la consola junto con el entorno del sistema al portapapeles para soporte con IA."""
+        contenido = self.txt_consola.get("1.0", "end-1c").strip()
+        ahora = time.strftime("%Y-%m-%d %H:%M:%S")
+
+        bloque = [
+            "================================================================================",
+            "📋 REPORTE DE CONSOLA Y ESTADO PARA SOPORTE CON LA IA (TRADUCTOR IA)",
+            "================================================================================",
+            f"Fecha: {ahora}",
+            f"Carpeta del juego: {self.var_ruta.get() or 'No seleccionada'}",
+            f"Modelo IA: {self.combo_modelo.get()}",
+            f"Modo Depuración: {'SÍ (Activo)' if self.var_modo_debug.get() else 'NO'}",
+            f"Python: {sys.executable} ({sys.version.splitlines()[0]})",
+            "--------------------------------------------------------------------------------",
+            "REGISTRO ACTUAL DE LA CONSOLA:",
+            contenido if contenido else "(La consola estaba vacía al momento de copiar)",
+            "================================================================================",
+            "Fin del registro copiado."
+        ]
+        texto_final = "\n".join(bloque)
+
+        # Copiar al portapapeles de Tkinter
+        try:
+            self.root.clipboard_clear()
+            self.root.clipboard_append(texto_final)
+            self.root.update()
+        except Exception:
+            pass
+
+        # Asegurar copia con el clip nativo de Windows (fiable al 100%)
+        if os.name == "nt":
+            try:
+                subprocess.run(
+                    ["clip"],
+                    input=texto_final.encode("utf-16le"),
+                    check=False,
+                    creationflags=getattr(subprocess, "CREATE_NO_WINDOW", 0)
+                )
+            except Exception:
+                pass
+
+        # Guardar archivo de respaldo en workspace
+        try:
+            archivo_respaldo = config.DIR_WORKSPACE / "ultimo_registro_copiado.txt"
+            archivo_respaldo.write_text(texto_final, encoding="utf-8")
+        except Exception:
+            pass
+
+        self._agregar_log("\n📋 [COPIADO] El registro completo se ha copiado al portapapeles.")
+        self._agregar_log("👉 Ahora solo ve a la ventana de chat con la IA y pulsa Ctrl + V para enviárselo.")
+
+        messagebox.showinfo(
+            "¡Registro Copiado!",
+            "El registro completo de la consola se ha copiado a tu portapapeles de Windows.\n\n"
+            "Ya puedes ir a la ventana de chat con la IA y pulsar Ctrl + V para pegarlo directamente."
+        )
+
+    def ejecutar_diagnostico_ui(self) -> None:
+        """Lanza el diagnóstico completo del sistema y muestra los resultados en tiempo real."""
+        cmd = ["herramientas_extra/diagnostico.py"]
+        ruta = self.var_ruta.get()
+        if ruta and Path(ruta).exists():
+            cmd.extend(["--ruta", ruta])
+        self.ejecutar_accion(cmd, "Diagnóstico Completo del Sistema", cambiar_a_progreso=False)
+
+    def abrir_consola_cmd(self) -> None:
+        """Abre una ventana de CMD interactiva de Windows preconfigurada con el entorno."""
+        cmd_bat = RAIZ / "consola_cmd.bat"
+        try:
+            if cmd_bat.exists():
+                os.startfile(cmd_bat)
+            else:
+                subprocess.Popen(["cmd.exe", "/k", "title Traductor IA - CMD"], cwd=str(RAIZ))
+            self._agregar_log("🖥️ Consola interactiva CMD de Windows abierta.")
+        except Exception as e:
+            self._agregar_log(f"Error al abrir CMD: {e}")
 
     def _agregar_log(self, texto: str) -> None:
         self.txt_consola.configure(state="normal")
@@ -1028,6 +1171,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(description="Centro de Control y Monitor de Traducción en la Bandeja.")
     parser.add_argument("--bandeja", action="store_true", help="Arrancar escondido en la bandeja")
     parser.add_argument("--acceso-directo", action="store_true", help="Crear acceso directo en el Escritorio")
+    parser.add_argument("--debug", action="store_true", help="Arrancar en modo depuración con registros detallados")
     args = parser.parse_args()
 
     if args.acceso_directo:
@@ -1054,7 +1198,7 @@ def main() -> None:
             except (AttributeError, OSError):
                 pass
 
-        MonitorBandeja(empezar_oculto=args.bandeja, servidor=servidor).ejecutar()
+        MonitorBandeja(empezar_oculto=args.bandeja, servidor=servidor, modo_debug=args.debug).ejecutar()
     except Exception as e:
         import traceback
         err_msg = traceback.format_exc()

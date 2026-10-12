@@ -67,9 +67,10 @@ def main():
     ap.add_argument("--tabla", help="Ruta al archivo CSV con correspondencias 'ingles;correccion'")
     ap.add_argument("--propios", help="Archivo .txt con un nombre propio por línea para no traducir")
     ap.add_argument("--simular", action="store_true", help="Solo muestra lo que cambiaría sin escribir en disco")
+    ap.add_argument("--debug", action="store_true", help="Mostrar logs detallados de depuración")
     args = ap.parse_args()
 
-    configurar_logging()
+    configurar_logging(detallado=args.debug)
     ruta_juego = Path(args.ruta)
     nombre_juego = config.resolver_juego(args.juego, ruta_juego)
     carpeta_ws = config.carpeta_juego(nombre_juego)
