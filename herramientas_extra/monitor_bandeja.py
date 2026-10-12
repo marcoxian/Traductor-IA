@@ -415,7 +415,13 @@ class MonitorBandeja:
         self.lbl_perfil.pack(side="left", padx=(0, self.px(16)))
 
         tk.Label(fila_meta, text="Modelo Ollama:", font=("Segoe UI", 9), fg=C_SUAVE, bg=C_TARJETA).pack(side="left", padx=(self.px(10), self.px(6)))
-        self.combo_modelo = ttk.Combobox(fila_meta, values=obtener_modelos_ollama(), state="readonly", width=18)
+        self.combo_modelo = ttk.Combobox(
+            fila_meta,
+            values=obtener_modelos_ollama(),
+            state="readonly",
+            width=18,
+            postcommand=self._refrescar_modelos_combo
+        )
         self.combo_modelo.set(self.config_gui.get("ultimo_modelo", "IA_Traductora"))
         self.combo_modelo.pack(side="left")
         self.combo_modelo.bind("<<ComboboxSelected>>", lambda _: self._guardar_config_actual())
@@ -955,7 +961,20 @@ class MonitorBandeja:
         y = (self.root.winfo_screenheight() - h) // 3
         self.root.geometry(f"{max(w, self.px(760))}x{max(h, self.px(660))}+{x}+{y}")
 
+    def _refrescar_modelos_combo(self) -> None:
+        """Actualiza la lista de modelos de Ollama en el desplegable en tiempo real."""
+        try:
+            modelos = obtener_modelos_ollama()
+            if hasattr(self, "combo_modelo"):
+                self.combo_modelo["values"] = modelos
+                if self.combo_modelo.get() not in modelos:
+                    self.combo_modelo.set(modelos[0] if modelos else "IA_Traductora")
+                    self._guardar_config_actual()
+        except Exception:
+            pass
+
     def mostrar(self) -> None:
+        self._refrescar_modelos_combo()
         self.root.deiconify()
         self.root.state("normal")
         if self.datos:
