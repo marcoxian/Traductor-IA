@@ -81,6 +81,21 @@ def hex_rgb(rgb: tuple[int, int, int]) -> str:
     return "#%02x%02x%02x" % rgb
 
 
+def aclarar_hex(hex_str: str, factor: float = 1.18) -> str:
+    h = hex_str.lstrip("#")
+    if len(h) != 6:
+        return hex_str
+    r, g, b = (int(h[i:i+2], 16) for i in (0, 2, 4))
+    r = min(255, max(0, int(r * factor)))
+    g = min(255, max(0, int(g * factor)))
+    b = min(255, max(0, int(b * factor)))
+    return f"#{r:02x}{g:02x}{b:02x}"
+
+
+def oscurecer_hex(hex_str: str, factor: float = 0.75) -> str:
+    return aclarar_hex(hex_str, factor)
+
+
 def fuente_pil(tam: int) -> ImageFont.ImageFont:
     for nombre in ("segoeuib.ttf", "arialbd.ttf"):
         try:
@@ -548,25 +563,28 @@ class MonitorBandeja:
         return c
 
     def _btn_accion(self, padre: tk.Widget, titulo: str, comando, color: str, desc: str = "") -> tk.Frame:
-        box = tk.Frame(padre, bg=C_TARJETA_ALT, cursor="hand2", padx=self.px(10), pady=self.px(6),
-                       highlightbackground=C_BORDE, highlightthickness=1)
-        lbl_t = tk.Label(box, text=titulo, font=("Segoe UI Semibold", 9), fg=C_TEXTO, bg=C_TARJETA_ALT, anchor="w")
+        hover_color = aclarar_hex(color, 1.22)
+        borde_color = oscurecer_hex(color, 0.70)
+
+        box = tk.Frame(padre, bg=color, cursor="hand2", padx=self.px(10), pady=self.px(6),
+                       highlightbackground=borde_color, highlightthickness=1)
+        lbl_t = tk.Label(box, text=titulo, font=("Segoe UI Semibold", 9), fg="#ffffff", bg=color, anchor="w")
         lbl_t.pack(fill="x")
         if desc:
-            lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg=C_SUAVE, bg=C_TARJETA_ALT, anchor="w")
+            lbl_d = tk.Label(box, text=desc, font=("Segoe UI", 7), fg="#f1f5f9", bg=color, anchor="w")
             lbl_d.pack(fill="x")
 
         def al_entrar(_):
-            box.configure(bg=color)
+            box.configure(bg=hover_color, highlightbackground="#ffffff")
+            lbl_t.configure(bg=hover_color)
+            if desc:
+                lbl_d.configure(bg=hover_color, fg="#ffffff")
+
+        def al_salir(_):
+            box.configure(bg=color, highlightbackground=borde_color)
             lbl_t.configure(bg=color)
             if desc:
                 lbl_d.configure(bg=color, fg="#f1f5f9")
-
-        def al_salir(_):
-            box.configure(bg=C_TARJETA_ALT)
-            lbl_t.configure(bg=C_TARJETA_ALT)
-            if desc:
-                lbl_d.configure(bg=C_TARJETA_ALT, fg=C_SUAVE)
 
         box.bind("<Enter>", al_entrar)
         box.bind("<Leave>", al_salir)
