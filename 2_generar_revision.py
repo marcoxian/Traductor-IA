@@ -93,8 +93,27 @@ def main():
         salida = Path(f"revision_{nombre_limpio}.csv")
 
     filas, resumen = [], Counter()
+    pares = list(pares_traducidos(juego))
 
-    for original, traducido in pares_traducidos(juego):
+    if not pares:
+        print(f"\n{'='*70}")
+        print("ℹ️  [INFORMACIÓN DE MOTOR — NO SE REQUIERE HOJA DE REVISIÓN CSV]")
+        print(f"{'='*70}")
+        es_rpgmaker = bool(list(juego.glob("**/data/Map*.json")) or list(juego.glob("**/www/data/Map*.json")))
+        if es_rpgmaker:
+            print("• Este juego utiliza el motor RPG Maker MV/MZ con archivos JSON nativos (Map*.json, etc.).")
+            print("• En juegos de RPG Maker, la IA traduce e inyecta los textos DIRECTAMENTE en los archivos del juego (Paso 1).")
+            print("• Las hojas de revisión CSV (Pasos 2 a 6) solo se aplican a juegos basados en tablas CSV (Ren'Py, Godot o plugins como DKTools).")
+            print("\n✔ TU TRADUCCIÓN YA ESTÁ LISTA:")
+            print("  - Los diálogos ya están traducidos en los archivos del juego.")
+            print("  - Si tenías una partida guardada antes de traducir, usa el Paso 7 (Arreglar Partida .rpgsave).")
+        else:
+            print(f"No se encontraron archivos de localización .csv con copia original en: {juego.resolve()}")
+            print("Asegúrate de haber traducido primero el juego con el Paso 1.")
+        print(f"{'='*70}\n")
+        return
+
+    for original, traducido in pares:
         _, o_lines = leer_lineas(original)
         _, t_lines = leer_lineas(traducido)
 

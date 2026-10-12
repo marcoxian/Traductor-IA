@@ -526,7 +526,7 @@ class MonitorBandeja:
                          desc="Traducción con historial de contexto narrativo").pack(fill="x", pady=self.px(3))
 
         # Tarjeta 2: Revisión y Control de Calidad
-        card2 = self._crear_tarjeta(grid, "📋 Revisión y Diagnóstico (Pasos 2 y 3)", 0, 1)
+        card2 = self._crear_tarjeta(grid, "📋 Revisión y Diagnóstico (Juegos con CSV: Pasos 2 y 3)", 0, 1)
         self._btn_accion(card2, "📄 Generar Hoja de Revisión (Paso 2)",
                          self.ejecutar_generar_revision, color="#2563eb",
                          desc="Crea revision_<juego>.csv comparando con originales").pack(fill="x", pady=self.px(3))
@@ -535,7 +535,7 @@ class MonitorBandeja:
                          desc="Corrige códigos y formatos rotos automáticamente").pack(fill="x", pady=self.px(3))
 
         # Tarjeta 3: Corrección, Semántica y Parches
-        card3 = self._crear_tarjeta(grid, "🩹 Parcheo y Auditoría Semántica (Pasos 4, 5 y 6)", 1, 0)
+        card3 = self._crear_tarjeta(grid, "🩹 Parcheo y Semántica (Juegos con CSV: Pasos 4, 5 y 6)", 1, 0)
         self._btn_accion(card3, "🩹 Aplicar Parches y Diccionarios (Paso 4)",
                          self.ejecutar_aplicar_parches, color="#16a34a",
                          desc="Inyecta correcciones manuales en los archivos del juego").pack(fill="x", pady=self.px(3))
@@ -547,7 +547,7 @@ class MonitorBandeja:
                          desc="Corrige party➔grupo, item➔objeto, save➔guardar...").pack(fill="x", pady=self.px(3))
 
         # Tarjeta 4: Partidas Guardadas y Utilidades
-        card4 = self._crear_tarjeta(grid, "💾 Partidas Guardadas y Motor (Paso 7)", 1, 1)
+        card4 = self._crear_tarjeta(grid, "💾 Partidas y Motor RPG Maker (Paso 7)", 1, 1)
         self._btn_accion(card4, "💾 Arreglar Partida RPG Maker (.rpgsave)",
                          self.ejecutar_arreglar_partida, color="#d97706",
                          desc="Parchea archivos de guardado sin tener que reiniciar partida").pack(fill="x", pady=self.px(3))
@@ -840,7 +840,17 @@ class MonitorBandeja:
         else:
             self._agregar_log("No hay ningún proceso activo que detener.")
 
-    # Acciones específicas del pipeline
+    def _es_rpgmaker_sin_csv(self, ruta_str: str) -> bool:
+        if not ruta_str:
+            return False
+        p = Path(ruta_str)
+        if not p.exists():
+            return False
+        info = detectar_info_juego(ruta_str)
+        if info.get("motor") == "RPGMaker":
+            return not any(p.glob("**/*.csv"))
+        return False
+
     def ejecutar_traduccion(self, turbo: bool = True) -> None:
         ruta = self.var_ruta.get()
         modelo = self.combo_modelo.get() or "IA_Traductora"
@@ -851,10 +861,26 @@ class MonitorBandeja:
 
     def ejecutar_generar_revision(self) -> None:
         ruta = self.var_ruta.get()
+        if self._es_rpgmaker_sin_csv(ruta):
+            self.cambiar_tab("consola")
+            self._agregar_log(
+                "\nℹ️ [INFO DE COMPATIBILIDAD]:\n"
+                "Este juego utiliza archivos JSON nativos de RPG Maker (Map*.json, etc.), no tablas CSV.\n"
+                "• La traducción ya se inyectó directamente en los archivos del juego en el Paso 1.\n"
+                "• Los Pasos 2 a 6 solo aplican a juegos basados en tablas CSV (Ren'Py, Godot o DKTools).\n"
+                "• Si tienes una partida guardada previa, usa el Paso 7 (Arreglar Partida .rpgsave).\n"
+            )
         cmd = ["2_generar_revision.py", "--ruta", ruta]
         self.ejecutar_accion(cmd, "Generar Hoja de Revisión (Paso 2)")
 
     def ejecutar_reparar_etiquetas(self) -> None:
+        ruta = self.var_ruta.get()
+        if self._es_rpgmaker_sin_csv(ruta):
+            self.cambiar_tab("consola")
+            self._agregar_log(
+                "\nℹ️ [INFO DE COMPATIBILIDAD]:\n"
+                "Los juegos de RPG Maker no utilizan hojas de revisión CSV; sus etiquetas ya se validan automáticamente al traducir.\n"
+            )
         modelo = self.combo_modelo.get() or "IA_Traductora"
         cmd = ["3_reparar_etiquetas_ia.py", "--modelo", modelo]
         self.ejecutar_accion(cmd, "Reparar Etiquetas con IA (Paso 3)")

@@ -37,9 +37,16 @@ def main():
     else:
         archivo_path = buscar_archivo_revision()
 
-    if not archivo_path or not archivo_path.exists():
-        print("Error: No se encontró ningún archivo de revisión. Especifica uno con --archivo <ruta.csv>")
-        sys.exit(1)
+    if not archivo_path or not archivo_path.exists() or archivo_path.stat().st_size == 0:
+        print(f"\n{'='*70}")
+        print("ℹ️  [INFORMACIÓN DE REPARACIÓN DE ETIQUETAS]")
+        print(f"{'='*70}")
+        print("No se encontró ningún archivo de revisión 'revision_*.csv' con fallos pendientes.")
+        print("• En juegos de RPG Maker (como Treasure of Nadia), los códigos se conservan automáticamente.")
+        print("• Este paso solo es necesario si generaste una hoja de revisión en el Paso 2 con errores detectados.")
+        print("✔ No hay ninguna etiqueta rota que reparar.")
+        print(f"{'='*70}\n")
+        return
 
     print(f"Cargando archivo de revisión: {archivo_path}")
     filas = []
@@ -48,7 +55,12 @@ def main():
         filas = list(reader)
 
     if not filas:
-        print("El archivo de revisión está vacío.")
+        print(f"\n{'='*70}")
+        print("ℹ️  [INFORMACIÓN DE REPARACIÓN DE ETIQUETAS]")
+        print(f"{'='*70}")
+        print("El archivo de revisión no tiene ninguna línea pendiente de corregir (0 errores detectados).")
+        print("✔ Todas las etiquetas están en perfecto estado.")
+        print(f"{'='*70}\n")
         return
 
     translator = OllamaTranslator(model_name=args.modelo, endpoint=args.endpoint)
