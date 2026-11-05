@@ -148,7 +148,12 @@ def inyectar_unity(ruta_juego: Path, modelo: str = config.MODELO_POR_DEFECTO, en
         except Exception as e:
             log.warning("No se pudo copiar AutoProxyPlugin.dll: %s", e)
 
-    # 11. Quién dice cada frase, si el juego lo guarda en sus archivos (lo usa el proxy para el género)
+    # 11. El plugin pasa al proxy el nombre de la carpeta del juego; si no da el perfil (p. ej. está en chino),
+    # el perfil recuerda su carpeta para que el proxy lo encuentre
+    if juego:
+        config.guardar_ajustes_juego(juego, carpeta_juego=Path(ruta_juego).name)
+
+    # 12. Quién dice cada frase, si el juego lo guarda en sus archivos (lo usa el proxy para el género)
     try:
         preparar_tabla(juego, ruta_juego)
     except Exception as e:  # nunca impide traducir

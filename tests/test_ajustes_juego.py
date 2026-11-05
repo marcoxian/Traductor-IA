@@ -28,6 +28,16 @@ class TestModeloPorJuego(unittest.TestCase):
         self.assertEqual(config.modelo_para_juego("juego_x", "IA_Traductora"), "IA_Traductora")  # --modelo
         self.assertEqual(config.modelo_para_juego(None), config.MODELO_SIN_FICHA)
 
+    def test_perfil_por_carpeta_del_juego(self):
+        """Carpeta con un nombre que no da perfil (en chino): el perfil recuerda su carpeta (lo guarda el
+        inyector de Unity) y el proxy, que recibe el nombre de la carpeta, lo encuentra."""
+        carpeta = "我的遊戲 Demo"
+        self.assertNotEqual(config.resolver_perfil_existente("我的遊戲_demo"), "juego_x")  # aún sin perfil
+        config.guardar_ajustes_juego("juego_x", carpeta_juego=carpeta)
+        self.assertEqual(config.resolver_perfil_existente(carpeta), "juego_x")
+        self.assertEqual(config.resolver_perfil_existente("我的遊戲_demo"), "juego_x")  # como lo manda el plugin
+        self.assertEqual(config.resolver_perfil_existente("juego_x"), "juego_x")
+
     def test_automatico(self):
         """V2: con ficha de personajes, v4; sin ficha, v1. "auto" (o la etiqueta del Centro de Control) en
         ajustes.json o en --modelo vuelve a la elección automática."""

@@ -15,6 +15,7 @@ from pathlib import Path
 from traductor import config
 from traductor.motores import InyectorCSV, InyectorRenPy, InyectorRPGMaker, detectar_motor, inyectar_unity
 from traductor.motores.unity import archivo_xunity, repasar_xunity
+from traductor.motores.unity_tablas import pretraducir_tablas
 from traductor.unity_dialogos import TablaHablantes, preparar_tabla, ruta_tabla
 from traductor.ollama import OllamaNoDisponible, OllamaTranslator, ruta_cache_por_defecto
 from traductor.progreso import EstadoProgreso
@@ -37,7 +38,8 @@ class GameEngineInjector:
                  monitor_en_bandeja: bool = False,
                  analizar_personajes: bool = True,
                  analizar_con_ia: bool = False,
-                 solo_genero: bool = False):
+                 solo_genero: bool = False,
+                 pretraducir: bool = False):
         self.ruta_juego = Path(ruta_juego)
         self.archivo_objetivo = archivo_objetivo
         self.modelo = modelo
@@ -83,6 +85,7 @@ class GameEngineInjector:
         # --solo-genero: se conserva lo ya traducido (por otro modelo o lo que ya tiene el juego) y solo se
         # retraducen las frases con marcas de género y las que faltan
         self.solo_genero = solo_genero
+        self.pretraducir = pretraducir
         if solo_genero:
             self.translator.reaprovechar_cache_de()
         # Estado compartido con monitor_bandeja.py y servidor_progreso.py
@@ -148,6 +151,10 @@ class GameEngineInjector:
             elif motor == "Unity":
                 inyectar_unity(self.ruta_juego, modelo=self.modelo, endpoint=self.translator.endpoint,
                                juego=self.perfil.juego)
+                if self.pretraducir:
+                    # Tablas de texto del juego traducidas antes de jugar: XUnity ya las encuentra hechas
+                    pretraducir_tablas(self.ruta_juego, self.translator, archivo_xunity(self.ruta_juego),
+                                       progreso=self.progreso)
                 import ollama_proxy
                 log.info("Iniciando servidor proxy de traducción para Unity en tiempo real...")
                 ollama_proxy.ejecutar_proxy(self.translator)
@@ -253,6 +260,11 @@ def main(default_mode: str = "seguro") -> None:
                              "y solo retraduce las frases con marcas de género y las que faltan. Útil al cambiar "
                              "a un modelo que acierta más el género sin retraducir el juego entero")
 
+    parser.add_argument("--pretraducir", action="store_true",
+                        help="Unity: antes de abrir el proxy, traduce las tablas de texto que el juego lleva "
+                             "dentro (CSV/TSV con columna inglesa) y las deja en el archivo de XUnity. Así no "
+                             "hay que esperar a la IA mientras se juega")
+
     args = parser.parse_args()
     configurar_logging(detallado=args.debug)
 
@@ -271,6 +283,7 @@ def main(default_mode: str = "seguro") -> None:
         analizar_personajes=not args.sin_analisis,
         analizar_con_ia=args.analizar_ia,
         solo_genero=args.solo_genero,
+        pretraducir=args.pretraducir,
     )
     injector.run()
 

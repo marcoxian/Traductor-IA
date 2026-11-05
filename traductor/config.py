@@ -186,6 +186,26 @@ def huella_contexto(contexto: str) -> str:
 _SUFIJOS_EDICION = re.compile(r"(?:_(?:demo|steam|final|full|edition|remastered|goty|v\d+))+$")
 
 
+def _clave_carpeta(nombre: str) -> str:
+    return str(nombre).strip().casefold().replace(" ", "_")
+
+
+def _perfil_por_carpeta(nombre: str) -> str | None:
+    """Perfil cuyo ``ajustes.json`` dice que su juego está en una carpeta llamada ``nombre`` (lo guarda el
+    inyector de Unity). Sirve para carpetas cuyo nombre no da un perfil (en chino, japonés...)."""
+    if not DIR_WORKSPACE.is_dir():
+        return None
+    clave = _clave_carpeta(nombre)
+    for carpeta in sorted(DIR_WORKSPACE.iterdir()):
+        ajustes = carpeta / "ajustes.json"
+        if carpeta.name.startswith("_") or not ajustes.is_file():
+            continue
+        datos = cargar_json(ajustes, {})
+        if isinstance(datos, dict) and datos.get("carpeta_juego") and _clave_carpeta(datos["carpeta_juego"]) == clave:
+            return carpeta.name
+    return None
+
+
 def resolver_perfil_existente(nombre: str | None) -> str | None:
     """Busca en ``workspace/`` el perfil que mejor corresponde a ``nombre``.
 
@@ -197,10 +217,13 @@ def resolver_perfil_existente(nombre: str | None) -> str | None:
     if not nombre:
         return None
     s = slug(nombre)
+    if s and (DIR_WORKSPACE / s).is_dir():
+        return s
+    por_carpeta = _perfil_por_carpeta(nombre)
+    if por_carpeta:
+        return por_carpeta
     if not s:
         return nombre
-    if (DIR_WORKSPACE / s).is_dir():
-        return s
     recortado = _SUFIJOS_EDICION.sub("", s)
     if recortado and (DIR_WORKSPACE / recortado).is_dir():
         return recortado
