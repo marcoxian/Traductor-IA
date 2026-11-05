@@ -1,0 +1,69 @@
+# Entornos virtuales
+venv*/
+.venv/
+env/
+
+# Python y caché
+__pycache__/
+*.py[cod]
+.env
+.pytest_cache/
+.coverage
+
+# Entornos e IDEs
+.vscode/
+.idea/
+
+# Carpetas locales de datos, modelos pesados y partidas (no se suben a GitHub)
+workspace/*
+!workspace/.gitkeep
+
+datasets/*
+!datasets/.gitkeep
+
+modelos/*
+!modelos/.gitkeep
+
+# Pruebas temporales y scripts legacy
+scratch/
+
+# Herramientas externas con submódulo propio
+herramientas_extra/unrpyc/
+
+# Backups, temporales y partidas guardadas locales
+*.bak
+*.tmp
+*.rpgsave
+*.log
+*.zip
+.pausa
+backups/
+reporte_*.txt
+revision_*.csv
+herramientas_extra/parches_aplicados.json
+
+# Checkpoints y cachés de entrenamiento (entrenar_v2.py --version N)
+checkpoints_entrenamiento_v*/
+Modelfile_v*.anterior_*
+unsloth_compiled_cache/
+
+# SO
+.DS_Store
+Thumbs.db
+
+# ----------------------------------------------------------------------------------------------------------------
+# PRIVADO: lo que es de cada usuario se queda en su ordenador y NUNCA se sube (ver "Qué no incluye este
+# repositorio" en el README): textos y traducciones de juegos, glosarios, fichas, correcciones propias, modelos
+# entrenados y herramientas hechas para un juego concreto (esas, mejor en privado/).
+# ----------------------------------------------------------------------------------------------------------------
+privado/
+docs/PLAN_*.md
+Modelfile_v*
+!Modelfile
+# Glosarios y correcciones propios: se suben solo los ejemplos (*.ejemplo.*) y los genéricos
+glosarios/*
+!glosarios/*.ejemplo.*
+!glosarios/glosario_adulto.json
+!glosarios/glosario_interfaz_rpgmaker.csv
+!glosarios/contexto.txt
+herramientas_extra/*.ps1

@@ -1,0 +1,73 @@
+{
+ "_info": "Correcciones locales de PRUEBA (nombres inventados) para los tests.",
+ "etapas": {
+  "interfaz": [
+   {
+    "buscar": "\\b1\\s*H[ée]roes?\\b",
+    "cambiar": "1Hero",
+    "ignorar_mayusculas": true
+   }
+  ],
+  "calcos": [
+   {
+    "buscar": "\\bFácil\\s+(?:allí|ahí)(?=\\s*,\\s*(?:Lucía|Marta)\\b)",
+    "cambiar": "Tranquila"
+   },
+   {
+    "buscar": "\\bfácil\\s+(?:allí|ahí)(?=\\s*,\\s*(?:Lucía|Marta)\\b)",
+    "cambiar": "tranquila"
+   }
+  ],
+  "segun_original_1": [
+   {
+    "buscar": "\\b1\\s*H[ée]roes?(?:\\s*1)?\\b|\\bH[ée]roes?(?:\\s*1)?\\b|\\b1\\s*Hero(?:\\s*1)?\\b|\\b1\\s+1Hero\\b|\\b1Hero\\s+1\\b",
+    "cambiar": "1Hero",
+    "ignorar_mayusculas": true,
+    "si_original": "1hero"
+   }
+  ],
+  "segun_original_2": [
+   {
+    "buscar": "\\bal\\s+Chiringuito\\s+de\\s+Joe\\b",
+    "cambiar": "a Joe's Diner",
+    "ignorar_mayusculas": true,
+    "si_original": "\\bjoe['’]s\\b"
+   },
+   {
+    "buscar": "\\bSalom[oó]n\\b",
+    "cambiar": "Solomon",
+    "si_original": "\\bsolomon\\b"
+   },
+   {
+    "buscar": "\\bPuerto\\s+Brisa\\b",
+    "cambiar": "Breeze Harbor",
+    "si_original": "\\bbreeze\\s+harbor\\b"
+   }
+  ],
+  "segun_original_3": [],
+  "erratas_nombres": [
+   {
+    "buscar": "\\bLcuía\\b",
+    "cambiar": "Lucía"
+   },
+   {
+    "buscar": "\\b1\\s+1Hero\\b|\\b1Hero\\s+1\\b",
+    "cambiar": "1Hero"
+   },
+   {
+    "buscar": "\\bal\\s+1Hero\\b",
+    "cambiar": "a 1Hero"
+   }
+  ]
+ },
+ "codigos_hablante": {
+  "masculinos": [
+   "Mc"
+  ],
+  "femeninos": [
+   "He",
+   "Ar",
+   "Ch"
+  ]
+ }
+}

@@ -1,0 +1,14 @@
+{
+ "_info": "EJEMPLO. Copia este archivo como 'auditoria_semantica_local.json' (privado) para 6_auditoria_semantica.py. 'residuales': textos que se quedaron en inglés -> su traducción. 'exactos': [inglés, traducción mala, traducción buena] para erratas concretas.",
+ "residuales": {
+  "Rusty Key": "Llave oxidada",
+  "Old Map": "Mapa antiguo"
+ },
+ "exactos": [
+  [
+   "Attic Key",
+   "Lave de Ático",
+   "Llave del Ático"
+  ]
+ ]
+}

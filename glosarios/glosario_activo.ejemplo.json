@@ -1,0 +1,7 @@
+{
+ "_info": "EJEMPLO de glosario. Copia este archivo como 'glosario_activo.json' (privado; se aplica a todos los juegos) o como workspace/<juego>/glosario.json (solo ese juego). Cada término inglés se pide con su traducción en las frases que lo contienen.",
+ "Always Dash": "Correr siempre",
+ "Save": "Guardar",
+ "Key Items": "Objetos clave",
+ "Rusty Key": "Llave oxidada"
+}

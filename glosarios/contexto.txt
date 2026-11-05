@@ -1,0 +1,6 @@
+# Directrices universales de traducción (español de España)
+# Este archivo se inyecta automáticamente en todos los juegos.
+# Las líneas "@sin_ficha:" solo se usan en juegos SIN workspace/<juego>/personajes.json; con ficha
+# de personajes se omiten y la regla del protagonista (nombre y género) sale de la propia ficha.
+@sin_ficha: El protagonista habla de sí mismo SIEMPRE en masculino ("estoy cansado", "estoy seguro", "estoy listo", "preocupado") y los demás se dirigen a él en masculino ("bienvenido", "encantador").
+Español de España coloquial y natural ("tú", "vosotros", "coche", "ordenador", "coger", "joder"). En escenas adultas usa léxico explícito directo ("polla", "coño", "follar", "correrme", "mamada"). Conserva intactos los nombres propios, marcadores como 1Hero y códigos técnicos.

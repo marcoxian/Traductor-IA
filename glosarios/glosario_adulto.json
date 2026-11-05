@@ -1,0 +1,15 @@
+{
+  "_info": "Palabras vulgares de los juegos para adultos (traductor/ambiguas.py). Cada frase que las contiene pide esta traducción y se comprueba que no se suaviza ni se cambia por otra parte del cuerpo. En los insultos ('What a pussy!', 'Don't be a dick') se pide un insulto igual de vulgar: las claves '(insulto)'. En otros sentidos ('the cock crowed', 'Dick Grayson', 'tit for tat') el modelo traduce libremente. Puedes cambiar cualquier palabra; deja el valor vacío ('') para no forzar esa palabra. 'cum' no se fuerza (puede ser 'correrse' o 'la corrida'), solo se comprueba.",
+  "pussy": "coño",
+  "cock": "polla",
+  "dick": "polla",
+  "tits": "tetas",
+  "boobs": "tetas",
+  "blowjob": "mamada",
+  "handjob": "paja",
+  "dildo": "consolador",
+  "clit": "clítoris",
+  "nipples": "pezón",
+  "pussy (insulto)": "nenaza",
+  "dick (insulto)": "capullo"
+}

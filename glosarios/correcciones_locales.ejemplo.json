@@ -1,0 +1,55 @@
+{
+ "_info": "EJEMPLO. Copia este archivo como 'correcciones_locales.json' (es privado: no se sube) y pon las correcciones de TUS juegos. El traductor las aplica al retocar cada traducción. Cada regla: 'buscar' (expresión regular en la traducción), 'cambiar' (por qué), 'ignorar_mayusculas', 'preservar_mayusculas' (respeta 'Palabra'/'PALABRA') y 'si_original' (solo si el original en inglés, en minúsculas, contiene eso). 'etapas': en qué punto del retoque se aplica cada lista. 'codigos_hablante': si el juego pone delante de cada diálogo un código de hablante de 2 letras ('McHoOp.') y no tiene ficha de personajes, qué códigos son hombres y cuáles mujeres.",
+ "etapas": {
+  "interfaz": [
+   {
+    "buscar": "\\b1\\s*H[ée]roes?\\b",
+    "cambiar": "1Hero",
+    "ignorar_mayusculas": true
+   }
+  ],
+  "calcos": [
+   {
+    "buscar": "\\bFácil\\s+(?:allí|ahí)(?=\\s*,\\s*(?:Lucía|Marta)\\b)",
+    "cambiar": "Tranquila"
+   }
+  ],
+  "segun_original_1": [],
+  "segun_original_2": [
+   {
+    "buscar": "\\bSalom[oó]n\\b",
+    "cambiar": "Solomon",
+    "si_original": "\\bsolomon\\b"
+   },
+   {
+    "buscar": "\\bPuerto\\s+Brisa\\b",
+    "cambiar": "Breeze Harbor",
+    "si_original": "\\bbreeze\\s+harbor\\b"
+   }
+  ],
+  "segun_original_3": [
+   {
+    "buscar": "\\bpinups?\\b",
+    "cambiar": "postales",
+    "si_original": "\\bpinups?\\b",
+    "preservar_mayusculas": true
+   }
+  ],
+  "erratas_nombres": [
+   {
+    "buscar": "\\bLcuía\\b",
+    "cambiar": "Lucía"
+   }
+  ]
+ },
+ "codigos_hablante": {
+  "masculinos": [
+   "Mc"
+  ],
+  "femeninos": [
+   "He",
+   "Ar",
+   "Ch"
+  ]
+ }
+}

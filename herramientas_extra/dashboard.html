@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Traducción IA</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0f19;
+            --panel-bg: rgba(22, 30, 46, 0.7);
+            --panel-border: rgba(255, 255, 255, 0.08);
+            --text-main: #e2e8f0;
+            --text-muted: #94a3b8;
+            --accent-primary: #3b82f6;
+            --accent-hover: #2563eb;
+            --success-color: #10b981;
+            --font-main: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            font-family: var(--font-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            /* Premium gradient background */
+            background-image: 
+                radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, rgba(16, 185, 129, 0.1) 0px, transparent 50%);
+        }
+
+        /* Top Bar */
+        .top-bar {
+            height: 60px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--panel-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            z-index: 10;
+        }
+
+        .brand {
+            font-size: 1.25rem;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .brand svg {
+            width: 24px;
+            height: 24px;
+            color: var(--accent-primary);
+        }
+
+        .status-indicators {
+            display: flex;
+            gap: 20px;
+        }
+
+        .status-pill {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.2);
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--success-color);
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.1);
+            transition: all 0.3s ease;
+        }
+
+        .status-pill:hover {
+            background: rgba(16, 185, 129, 0.15);
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);
+        }
+
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background-color: var(--success-color);
+            border-radius: 50%;
+            box-shadow: 0 0 8px var(--success-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+            70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+            100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+        }
+
+        /* Main Layout */
+        .main-container {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 340px;
+            background: var(--panel-bg);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-right: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px;
+        }
+
+        .sidebar-header {
+            font-size: 1.1rem;
+            font-weight: 600;
+            margin-bottom: 20px;
+            color: var(--text-main);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .search-container {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--panel-border);
+            color: var(--text-main);
+            padding: 12px 14px 12px 40px;
+            border-radius: 8px;
+            font-family: var(--font-main);
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-primary);
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2);
+            background: rgba(0, 0, 0, 0.4);
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--text-muted);
+            width: 16px;
+            height: 16px;
+        }
+
+        .btn-add {
+            width: 100%;
+            background: var(--accent-primary);
+            color: white;
+            border: none;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-bottom: 24px;
+            display: flex;
+            align-content: center;
+            justify-content: center;
+            gap: 8px;
+            font-family: var(--font-main);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+        }
+
+        .btn-add:hover {
+            background: var(--accent-hover);
+            box-shadow: 0 4px 16px rgba(59, 130, 246, 0.3);
+            transform: translateY(-1px);
+        }
+
+        .btn-add:active {
+            transform: scale(0.98);
+        }
+
+        .glossary-list {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding-right: 6px;
+        }
+
+        /* Scrollbar styles */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 4px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .glossary-item {
+            background: rgba(255, 255, 255, 0.02);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            padding: 14px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            cursor: default;
+        }
+
+        .glossary-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            border-color: rgba(255, 255, 255, 0.15);
+            transform: translateX(4px);
+        }
+
+        .glossary-term {
+            font-size: 0.85rem;
+            color: var(--accent-primary);
+            margin-bottom: 6px;
+            font-family: var(--font-mono);
+            letter-spacing: -0.2px;
+        }
+
+        .glossary-trans {
+            font-size: 0.95rem;
+            font-weight: 500;
+            color: var(--text-main);
+        }
+
+        /* Console Area */
+        .console-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            padding: 24px 32px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .console-header {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            color: var(--text-main);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .clear-btn {
+            background: transparent;
+            border: 1px solid var(--panel-border);
+            color: var(--text-muted);
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 0.85rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .clear-btn:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+
+        .translation-feed {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+            padding-right: 12px;
+            scroll-behavior: smooth;
+        }
+
+        .log-entry {
+            background: var(--panel-bg);
+            border: 1px solid var(--panel-border);
+            border-left: 3px solid var(--accent-primary);
+            border-radius: 8px;
+            padding: 16px 20px;
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            animation: slideIn 0.3s ease-out forwards;
+            opacity: 0;
+            transform: translateY(15px);
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+
+        @keyframes slideIn {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .log-original {
+            font-family: var(--font-mono);
+            color: var(--text-muted);
+            font-size: 0.9rem;
+            margin-bottom: 12px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            line-height: 1.5;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+
+        .tag-orig {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .tag-trans {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--accent-primary);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-size: 0.7rem;
+            font-weight: 600;
+        }
+
+        .log-translation {
+            color: var(--text-main);
+            font-size: 1.15rem;
+            line-height: 1.6;
+            font-weight: 400;
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+        }
+        
+        .empty-state {
+            text-align: center;
+            color: var(--text-muted);
+            margin: auto;
+            font-style: italic;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+            opacity: 0.5;
+        }
+
+        .empty-state svg {
+            width: 48px;
+            height: 48px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Top Bar -->
+    <header class="top-bar">
+        <div class="brand">
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5h12M9 3v2m1.048 9.5A18.022 18.022 0 016.412 9m6.088 9h7M11 21l5-10 5 10M12.751 5C11.783 10.77 8.07 15.61 3 18.129" />
+            </svg>
+            Live Translator Hub
+        </div>
+        <div class="status-indicators">
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                Textractor Conectado
+            </div>
+            <div class="status-pill">
+                <div class="status-dot"></div>
+                Ollama Local Activo
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="main-container">
+        
+        <!-- Sidebar: Glossary -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                </svg>
+                Glosario Dinámico
+            </div>
+            
+            <div class="search-container">
+                <svg class="search-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <input type="text" id="searchInput" class="search-input" placeholder="Buscar términos...">
+            </div>
+
+            <button id="btnAddRule" class="btn-add">
+                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                </svg>
+                Añadir Regla
+            </button>
+
+            <div class="glossary-list" id="glossaryList">
+                <!-- Items populated via JS -->
+            </div>
+        </aside>
+
+        <!-- Main Console -->
+        <main class="console-area">
+            <div class="console-header">
+                Flujo de Traducción en Vivo
+                <button class="clear-btn" onclick="document.getElementById('translationFeed').innerHTML = '';">Limpiar</button>
+            </div>
+            
+            <div class="translation-feed" id="translationFeed">
+                <div class="empty-state" id="emptyState">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                    </svg>
+                    Esperando líneas de Textractor...
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script>
+        // Initial Glossary Data
+        let glossaryData = [
+            { original: "Hollow Knight", translation: "Hollow Knight" },
+            { original: "Nail", translation: "Aguijón" },
+            { original: "Geo", translation: "Geo" },
+            { original: "Dirtmouth", translation: "Bocasucia" },
+            { original: "Hallownest", translation: "Hallownest" }
+        ];
+
+        const glossaryList = document.getElementById('glossaryList');
+        const searchInput = document.getElementById('searchInput');
+        const translationFeed = document.getElementById('translationFeed');
+        const btnAddRule = document.getElementById('btnAddRule');
+
+        // Render Glossary
+        function renderGlossary(filter = "") {
+            glossaryList.innerHTML = '';
+            const filtered = glossaryData.filter(item => 
+                item.original.toLowerCase().includes(filter.toLowerCase()) || 
+                item.translation.toLowerCase().includes(filter.toLowerCase())
+            );
+
+            if (filtered.length === 0) {
+                glossaryList.innerHTML = '<div class="glossary-item"><div class="glossary-trans" style="color: var(--text-muted); font-size: 0.85rem; text-align: center;">No se encontraron resultados</div></div>';
+                return;
+            }
+
+            filtered.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'glossary-item';
+                div.innerHTML = `
+                    <div class="glossary-term">${item.original}</div>
+                    <div class="glossary-trans">${item.translation}</div>
+                `;
+                glossaryList.appendChild(div);
+            });
+        }
+
+        // Handle Search
+        searchInput.addEventListener('input', (e) => {
+            renderGlossary(e.target.value);
+        });
+
+        // Handle Add Rule
+        btnAddRule.addEventListener('click', () => {
+            const rule = prompt("Añade una nueva regla (Formato: Original = Traducción)\nEjemplo: Radiance = El Destello");
+            if (rule && rule.includes('=')) {
+                const parts = rule.split('=');
+                if (parts.length === 2 && parts[0].trim() !== '' && parts[1].trim() !== '') {
+                    glossaryData.unshift({
+                        original: parts[0].trim(),
+                        translation: parts[1].trim()
+                    });
+                    renderGlossary(searchInput.value);
+                    
+                    // Pequeña animación visual en el buscador para indicar éxito
+                    searchInput.style.borderColor = 'var(--success-color)';
+                    setTimeout(() => searchInput.style.borderColor = 'var(--panel-border)', 1000);
+                } else {
+                    alert("Formato inválido. Asegúrate de incluir texto en ambos lados del signo igual.");
+                }
+            } else if (rule) {
+                alert("Formato incorrecto. Usa: Término = Traducción");
+            }
+        });
+
+        let contextLines = [];
+        const MAX_CONTEXT = 5;
+
+        function addTranslationLog(original, translation) {
+            // Remove empty state if present
+            const emptyState = document.getElementById('emptyState');
+            if (emptyState) {
+                emptyState.remove();
+            }
+
+            const div = document.createElement('div');
+            div.className = 'log-entry';
+            div.innerHTML = `
+                <div class="log-original">
+                    <span class="tag-orig">ORIG</span>
+                    <span>${original}</span>
+                </div>
+                <div class="log-translation">
+                    <span class="tag-trans">IA</span>
+                    <span>${translation}</span>
+                </div>
+            `;
+            
+            translationFeed.appendChild(div);
+            
+            // Auto scroll to bottom
+            translationFeed.scrollTop = translationFeed.scrollHeight;
+
+            // Actualizar contexto con las últimas líneas
+            contextLines.push({ original, translation });
+            if (contextLines.length > MAX_CONTEXT) {
+                contextLines.shift();
+            }
+        }
+        // Render inicial del glosario
+        renderGlossary();
+
+        let ultimoOriginalVisto = "";
+
+        // Escucha activa (Polling) al servidor puente para captar lo que lea del portapapeles
+        setInterval(async () => {
+            try {
+                const response = await fetch("http://localhost:5000/obtener_traduccion");
+                if (response.ok) {
+                    const data = await response.json();
+                    
+                    // Si hay un texto original nuevo, lo añadimos al flujo
+                    if (data.original && data.original !== ultimoOriginalVisto) {
+                        ultimoOriginalVisto = data.original;
+                        addTranslationLog(data.original, data.traduccion);
+                    }
+                }
+            } catch (error) {
+                // Fallo silencioso. Si app.py no está abierto, no satura la consola de errores.
+            }
+        }, 1000);
+    </script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+{
+ "_info": "EJEMPLO. Copia este archivo como 'nombres_protegidos.json' (privado). Nombre correcto -> expresión regular de cómo lo deforma el modelo; si el original tiene el nombre y la traducción lo pierde, se restaura. Nunca se cambia una palabra que esté tal cual en el original.",
+ "Solomon": "\\b(?:Salom[oó]n|Salm[oó]n)\\b",
+ "Breeze Harbor": "\\bPuerto\\s+Brisa\\b"
+}
