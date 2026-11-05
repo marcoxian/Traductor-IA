@@ -494,6 +494,8 @@ class InfoLinea:
     - ``es_opcion``: opción de diálogo que elige el jugador (la dice el protagonista).
     - ``es_pensamiento``: True/False si el motor lo sabe; None = detectarlo por el texto "(...)".
     - ``destinatario``: nombre de a quién se habla, si el motor lo sabe.
+    - ``genero``: género de quien habla según el propio juego ('hombre'/'mujer'). Solo se usa si el hablante no
+      está en la ficha (extras como "Woman" o "Guard 2"); si está, manda la ficha.
     """
 
     hablante: str | None = None
@@ -501,6 +503,7 @@ class InfoLinea:
     es_opcion: bool = False
     es_pensamiento: bool | None = None
     destinatario: str | None = None
+    genero: str | None = None
 
 
 _PENSAMIENTO = re.compile(r"^[\s\"'“”«»*~]*[(（][^()（）]*[A-Za-zÁÉÍÓÚáéíóúñÑ][^()（）]*[)）][\s\"'“”«»*~.!?…]*$")
@@ -601,6 +604,8 @@ def resolver_linea(ficha: FichaPersonajes | None, texto: str, info: InfoLinea | 
         hablante = ficha.buscar(info.hablante)
     if hablante is None and info.codigo:
         hablante = ficha.por_codigo(info.codigo)
+    if hablante is None and info.genero and normalizar_genero(info.genero) in (HOMBRE, MUJER):
+        hablante = Personaje(nombre=info.hablante or "Hablante", genero=info.genero, rol="extra")
     pensamiento = (not info.es_opcion) and (
         info.es_pensamiento if info.es_pensamiento is not None else es_pensamiento(texto))
     if hablante is None and pensamiento:

@@ -155,6 +155,29 @@ class TestVulgares(unittest.TestCase):
         self.assertIn(("pussy", "coño"), ambiguas.terminos("Fuck my pussy!"))
         self.assertNotIn(("cum", ""), ambiguas.terminos("Make me cum, baby!"))
 
+    def test_organo_inventado(self):
+        """La traducción pone un órgano que el original no dice: se vuelve a pedir."""
+        mal = [("Pound my ass!", "¡Mátame con tu polla!"), ("My ass… It feels amazing!", "¡Mi coño... qué gusto!"),
+               ("Looks like you found the buttplugs.", "Parece que encontraste los plug de polla."),
+               ("This girl's mouth feels amazing too.", "El coño de esta chica también es increíble.")]
+        for en, es in mal:
+            self.assertEqual([d.palabra for d in ambiguas.sentido_equivocado(en, es)],
+                             ["polla" if "polla" in es else "coño"], en)
+        bien = [("What the fuck!?", "¡¿Qué coño es esto?!"), ("What a pretty weiner.", "Qué polla más bonita."),
+                ("Stick it in your cooter.", "Mételo en tu coño."), ("Her\\npussy is wet.", "Su\\ncoño está mojado."),
+                ("Suck it harder!", "¡Chúpame la polla más fuerte!"), ("Nice tits.", "Bonitas tetas.")]
+        for en, es in bien:
+            self.assertEqual(ambiguas.organos_inventados(en, es), [], en)
+        self.assertIn("no añadas esa palabra",
+                      ambiguas.nota_reintento(ambiguas.sentido_equivocado("Pound my ass!", "¡Dame con tu polla!")))
+
+    def test_siglas_y_productos_no_cuentan(self):
+        """En mayúsculas dentro de una frase normal es una sigla o una marca; "pocket pussy" es un producto."""
+        for frase in ("Call CLIT support, they fix headsets.", "Try CUM cola today!", "Unlocked Pocket Pussy Shop!",
+                      "Buy a pocket pussy."):
+            self.assertEqual(self.vulgares(frase), {}, frase)
+        self.assertEqual(self.vulgares("FUCK MY PUSSY!"), {"pussy": "coño"})  # todo en mayúsculas: grito, sí cuenta
+
     def test_excepciones(self):
         for frase in ("Yes! What a pussy!", "Ugh. You’re a pussy.", "Don't be a pussy.", "He pussied out.",
                       "The cock crowed at dawn.", "Don't be a dick.", "You're such a dick.", "What a dick move.",

@@ -24,6 +24,7 @@ from urllib.parse import parse_qs, urlparse
 from traductor import config
 from traductor.ollama import OllamaTranslator, TraduccionFallida, ruta_cache_por_defecto
 from traductor.texto import evaluar_traduccion, tiene_fallo_grave, tiene_texto_visible
+from traductor.unity_dialogos import TablaHablantes, ruta_tabla
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s - %(levelname)s - %(message)s")
 log = logging.getLogger("ProxyUnity")
@@ -31,6 +32,7 @@ log = logging.getLogger("ProxyUnity")
 
 class TranslationHandler(BaseHTTPRequestHandler):
     translator: OllamaTranslator
+    hablantes: TablaHablantes = TablaHablantes({})  # quién dice cada frase (si el juego lo guarda)
     _lock_vuelo = threading.Lock()
     _lock_gpu = threading.Lock()
     _en_vuelo: dict[str, threading.Event] = {}
@@ -67,7 +69,7 @@ class TranslationHandler(BaseHTTPRequestHandler):
         try:
             texto_a_traducir = texto_limpio_zalgo if (texto_limpio_zalgo != text and len(texto_limpio_zalgo.strip()) >= 2) else text
             with self._lock_gpu:
-                traducido = self.translator.translate(texto_a_traducir)
+                traducido = self.translator.translate(texto_a_traducir, info=self.hablantes.info(text))
             problemas = evaluar_traduccion(texto_a_traducir, traducido)
             if tiene_fallo_grave(problemas):
                 raise TraduccionFallida(f"rechazado por puerta de calidad ({problemas})")
@@ -125,6 +127,12 @@ def iniciar_servidor_proxy(translator: OllamaTranslator, puerto: int = 11435, ho
         _resultados_vuelo = {}
 
     CustomHandler.translator = translator
+    juego = getattr(translator.perfil, "juego", None)
+    if isinstance(juego, str) and juego:
+        CustomHandler.hablantes = TablaHablantes.cargar(ruta_tabla(juego))
+        if len(CustomHandler.hablantes):
+            log.info("🗣 %d frases con hablante conocido (sacado de los archivos del juego).",
+                     len(CustomHandler.hablantes))
     servidor = ThreadingHTTPServer((host, puerto), CustomHandler)
     return servidor
 

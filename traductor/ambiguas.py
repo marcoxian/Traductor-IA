@@ -217,7 +217,7 @@ class _Vulgar:
 
 _VULGARES = (
     _Vulgar("pussy", re.compile(r"\bpuss(?:y|ies)\b", _I), "coño", r"\bcoñ\w*|\bchoch\w*|\bchumin\w*|\bvagin\w*",
-            re.compile(r"\bpuss(?:y|ied)\s+out\b|\bpussy[\s-]?(?:cat|whipped)\b", _I)),
+            re.compile(r"\bpuss(?:y|ied)\s+out\b|\bpussy[\s-]?(?:cat|whipped)\b|\bpocket\s+puss(?:y|ies)\b", _I)),
     _Vulgar("cock", re.compile(r"\bcocks?\b", _I), "polla", r"\bpoll\w*|\bpene\w*|\bverg\w*|\braboa?s?\b|\bmiembro",
             re.compile(r"\b(?:roosters?|crow(?:s|ed|ing)?|hens?|cock-a-doodle\w*)\b|"
                        r"\bcocks?\s+(?:the|his|her|my|a)\s+(?:gun|pistol|rifle|revolver|hammer|head|eyebrow)", _I)),
@@ -297,9 +297,12 @@ def terminos_adultos() -> dict[str, str]:
 def _decidir_vulgares(texto: str) -> list[Decision]:
     decisiones = []
     elegidas = terminos_adultos()
+    hay_minusculas = bool(re.search(r"[a-z]{3}", texto))
     for v in _VULGARES:
         if not v.patron.search(texto) or (v.excepcion is not None and v.excepcion.search(texto)):
             continue
+        if hay_minusculas and all(m.group(0).isupper() for m in v.patron.finditer(texto)):
+            continue  # "Call CLIT support!", "Try CUM cola!": sigla o marca en una frase normal, no la palabra
         if v.clave == "dick" and _NOMBRE_DICK.search(texto) and not re.search(r"\bdicks?\b", texto):
             continue  # "Dick Grayson", "Dick's Diner": un nombre (si además sale "dick" en minúscula, cuenta)
         if v.clave in _INSULTOS and _INSULTOS[v.clave][0].search(texto):
@@ -385,6 +388,39 @@ def sentido_equivocado(original: str, traduccion: str) -> list[Decision]:
                 fallos.append(d)
         elif mal.search(traduccion) and not tiene_bien:
             fallos.append(d)
+    return fallos + organos_inventados(original, traduccion)
+
+
+# Órganos que la traducción pone y el original no menciona ("Pound my ass!" -> "¡Mátame con tu polla!",
+# "Eat my pussy!" -> "¡Lleva tu polla hasta mi coño!", "buttplugs" -> "plug de polla"): fallos de modelos
+# antiguos que ninguna otra regla veía. Se aceptan sinónimos y genéricos ("weiner", "cooter", "taco", "crotch",
+# "it") y la exclamación "¿Qué coño...?" por "What the fuck".
+_GENITALES_EN = r"crotch|groin|junk|privates|genitals?|down\s+there|sex\b"
+_ORGANOS = (
+    ("polla", re.compile(r"\bpollas?\b", _I),
+     re.compile(r"\b(?:cocks?|dicks?|penis\w*|members?|rods?|shafts?|pricks?|dongs?|schlongs?|w[ie]{2}ners?|willy|"
+                r"boners?|erections?|hard-?ons?|chubs?|manhood|meat|tools?|peckers?|johnson|package|bulge|it|"
+                r"thing|one|sausage|" + _GENITALES_EN + r")", _I)),
+    ("coño", re.compile(r"\bcoños?\b", _I),
+     re.compile(r"\b(?:pussy|pussies|cunts?|vagina\w*|snatch|twats?|slits?|cooch\w*|cooters?|tacos?|kitty|beaver|"
+                r"muff|clams?|box|folds|petals|lips|honeypot|holes?|cherry|" + _GENITALES_EN + r")", _I)),
+    ("tetas", re.compile(r"\btetas?\b", _I),
+     re.compile(r"\b(?:tits?|titties|boob\w*|breasts?|chest|knockers|jugs|melons|rack|bust|bosom|nipples?|udders|"
+                r"jiggl\w*)", _I)),
+)
+_EXCLAMACION_COÑO = re.compile(r"\bqu[eé]\s+coño\b|(?:^|[¡¿.!?…]\s*)coño\b|\bcoño\s*[,!.]", _I)
+_TACO_EN = re.compile(r"\b(?:fuck\w*|hell|damn\w*|shit\w*|heck|crap)\b", _I)
+
+
+def organos_inventados(original: str, traduccion: str) -> list[Decision]:
+    original = original.replace("\\n", " ")  # "Cove's\npussy": el salto del juego va pegado a la palabra
+    fallos = []
+    for palabra, es, en in _ORGANOS:
+        if not es.search(traduccion) or en.search(original):
+            continue
+        if palabra == "coño" and _TACO_EN.search(original) and _EXCLAMACION_COÑO.search(traduccion):
+            continue  # "What the fuck!?" -> "¡¿Qué coño...?!": una exclamación, no el órgano
+        fallos.append(Decision(palabra, "inventado", "", "el original no lo dice"))
     return fallos
 
 
@@ -408,6 +444,9 @@ def nota_reintento(fallos: list[Decision]) -> str:
             partes.append(f"'{d.palabra}' es '{d.termino}' (vulgar, como en el original): no lo suavices ni lo "
                           "cambies por otra palabra." if d.termino else
                           f"'{d.palabra}' es 'correrse' (verbo) o 'la corrida' (nombre): no lo suavices.")
+        elif d.sentido == "inventado":
+            partes.append(f"el original no dice '{d.palabra}': no añadas esa palabra; traduce la parte del cuerpo "
+                          "(o la acción) que dice el original.")
         elif d.sentido in _EXPLICACION:
             partes.append(_EXPLICACION[d.sentido].format(p=d.palabra))
     return ("En esta frase " + " ".join(partes)) if partes else ""

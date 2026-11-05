@@ -54,7 +54,7 @@ class TestUnityMotor(unittest.TestCase):
             ) as resp_trans:
                 self.assertEqual(resp_trans.status, 200)
                 self.assertEqual(resp_trans.read().decode("utf-8"), "Nueva Partida")
-            mock_translator.translate.assert_called_once_with("New Game")
+            mock_translator.translate.assert_called_once_with("New Game", info=None)
 
             # Si el modelo devuelve el texto en inglés sin traducir, el proxy responde 503 (no 200)
             import urllib.error
