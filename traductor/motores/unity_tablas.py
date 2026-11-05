@@ -26,6 +26,8 @@ from ..texto import evaluar_traduccion, gravedad, tiene_texto_visible
 log = logging.getLogger(__name__)
 
 COLUMNAS_INGLES = {"en", "eng", "english", "en-us", "en_us", "en-gb"}
+# código de pausa entre dos trozos de frase ("{wc}" = esperar a que se pulse); "{0}" (un número) no lo es
+_PAUSA = re.compile(r"\s*\{[A-Za-z]+\}\s*")
 _CJK = re.compile(r"[぀-ヿ㐀-鿿가-힯]")
 
 # --------------------------------------------------------------------------- pista de sexo (ruso / ucraniano)
@@ -114,13 +116,17 @@ def leer_tabla(nombre: str, contenido: str) -> TablaTexto | None:
             continue
         celdas = {cab[i]: fila[i] for i in range(min(len(cab), len(fila)))}
         genero = genero_de_quien_habla(celdas)
-        if texto in vistos:  # la misma frase dicha por personas de distinto sexo: sin pista
-            i = vistos[texto]
-            if tabla.entradas[i][1] != genero:
-                tabla.entradas[i] = (texto, None)
-            continue
-        vistos[texto] = len(tabla.entradas)
-        tabla.entradas.append((texto, genero))
+        # Una pausa del juego en mitad de la frase ("...culture,{wc} so she..."): el juego enseña cada
+        # trozo por separado y XUnity los ve sueltos, así que también se traduce cada trozo
+        trozos = [p.strip() for p in _PAUSA.split(texto)] if _PAUSA.search(texto) else []
+        for frase in [texto] + [p for p in trozos if _texto_visible_ingles(p)]:
+            if frase in vistos:  # la misma frase dicha por personas de distinto sexo: sin pista
+                i = vistos[frase]
+                if tabla.entradas[i][1] != genero:
+                    tabla.entradas[i] = (frase, None)
+                continue
+            vistos[frase] = len(tabla.entradas)
+            tabla.entradas.append((frase, genero))
     return tabla if tabla.entradas else None
 
 
