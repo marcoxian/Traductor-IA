@@ -128,7 +128,8 @@ class GameEngineInjector:
                                             reaprovechar_traduccion=self.solo_genero)
                 inyector.procesar()
             elif motor == "Godot":
-                inyector_csv = InyectorCSV(self.ruta_juego, self.translator)
+                inyector_csv = InyectorCSV(self.ruta_juego, self.translator,
+                                           reaprovechar_traduccion=self.solo_genero)
                 inyector_csv.procesar()
             elif motor == "RenPy":
                 InyectorRenPy(self.ruta_juego, self.translator, self.archivo_objetivo).procesar()

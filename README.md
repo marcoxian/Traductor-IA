@@ -25,7 +25,9 @@ No envía nada a internet: los textos del juego, la traducción y el modelo se q
 - **Modelo automático.** Elige el modelo según tenga o no ficha de personajes el juego. Puedes fijar otro para
   cada juego.
 - **Retraducción selectiva.** Si cambias de modelo o mejoras las reglas, `--solo-genero` conserva lo que ya estaba
-  bien y solo vuelve a pedir las frases afectadas.
+  bien y solo vuelve a pedir las frases afectadas. Funciona en RPG Maker y en CSV de idiomas.
+- **Códigos del juego a salvo.** Si el modelo pierde una pausa (`\!`, `\|`, `\.`), se vuelve a poner entre las
+  mismas frases; las celdas entrecomilladas de un CSV conservan su caja de nombre.
 - **Centro de Control.** Aplicación de escritorio con todo el flujo, monitor de progreso en la bandeja del sistema
   y copias de seguridad.
 - **Medidas, no impresiones.** Incluye un banco de pruebas de género (`9_evaluar_genero.py`) para comparar modelos

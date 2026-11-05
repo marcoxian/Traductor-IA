@@ -84,6 +84,24 @@ class TestTexto(unittest.TestCase):
         forzado = forzar_etiquetas(orig, trad)
         self.assertTrue(forzado.startswith(r"\C[1]\C[2]") or forzado.startswith(r"\C[2]\C[1]"))
 
+    def test_limpiar_respuesta_quita_el_eco_de_la_correccion(self):
+        """El modelo devuelve la frase corregida y después repite la entrada de la corrección."""
+        resp = r"Lo siento. \!Me voy. Borrador a corregir: ¡Lo siento! Me voy."
+        self.assertEqual(limpiar_respuesta(resp, r"Sorry. \!I'm leaving."), r"Lo siento. \!Me voy.")
+        self.assertEqual(limpiar_respuesta("Borrador a corregir: Me voy.", "I'm leaving."), "Me voy.")
+
+    def test_forzar_etiquetas_pone_las_pausas_entre_las_mismas_frases(self):
+        """Una pausa de mitad de frase al principio haría pulsar una tecla antes de ver el texto."""
+        self.assertEqual(forzar_etiquetas(r"Yeah... \!Becoming one seems nice...", "Sí... ¡Serlo parece genial..."),
+                         r"Sí... \!¡Serlo parece genial...")
+        self.assertEqual(forzar_etiquetas(r"Fine. \!Seen my sword? \|The silver one.",
+                                          "¡Bien! ¿Has visto mi espada? ¡La de plata!"),
+                         r"¡Bien! \!¿Has visto mi espada? \|¡La de plata!")
+        self.assertEqual(forzar_etiquetas(r"Same. \|None of us.", "Igual. |Ninguno."), r"Igual. \|Ninguno.")
+        # Sin hueco entre frases, o al principio: como siempre
+        self.assertEqual(forzar_etiquetas(r"One. Two. \!Three.", "Uno, dos y tres."), r"Uno, dos y tres. \!")
+        self.assertEqual(forzar_etiquetas(r"\!Wait here.", "Espera aquí."), r"\! Espera aquí.")
+
     def test_separar_prefijo(self):
         txt = r"\N<\C[5]Brad\C[0]>Hola a todos"
         prefijo, cuerpo = separar_prefijo(txt)

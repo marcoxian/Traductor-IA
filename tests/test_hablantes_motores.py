@@ -469,6 +469,53 @@ class TestHablantesCSV(unittest.TestCase):
             self.assertEqual(traductor.llamadas, [["I'm so tired.", "Just narration.", "Hi there!"]])
             self.assertIn("l2;ES:Just narration.;y", ruta.read_text(encoding="utf-8"))
 
+    def test_celda_entre_comillas_conserva_la_caja_de_nombre(self):
+        """El lector del juego no entiende comillas: se quitan para que la caja de nombre siga delante."""
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp) / "locales" / "main.csv"
+            ruta.parent.mkdir(parents=True)
+            ruta.write_text('tag;en;jp\nl1;"\\N<\\C[5]Bob\\C[0]>Call it ""Home."" OK?";x\n', encoding="utf-8")
+            traductor = TraductorConInfo()
+            InyectorCSV(Path(tmp), traductor).procesar()
+            self.assertEqual(traductor.llamadas, [['Call it "Home." OK?']])
+            self.assertEqual(traductor.infos_recibidas, [[InfoLinea(hablante="Bob")]])
+            self.assertIn('l1;\\N<\\C[5]Bob\\C[0]>ES:Call it "Home." OK?;x', ruta.read_text(encoding="utf-8"))
+
+    def test_solo_genero_conserva_lo_ya_traducido_y_retraduce_el_resto(self):
+        """--solo-genero: lo que el traductor acepta de la traducción actual queda igual, salto incluido."""
+
+        class TraductorQueSiembra(TraductorConInfo):
+            def __init__(self):
+                super().__init__()
+                self.sembradas: dict[str, str] = {}
+
+            def sembrar_traduccion(self, original, traduccion, info=None):
+                if "cansado" in traduccion:  # marca de género: que la traduzca el modelo
+                    return False
+                self.sembradas[original] = traduccion
+                return True
+
+            def traducir_textos(self, textos, info=None):
+                super().traducir_textos(textos, info)
+                return [self.sembradas.get(t, "ES:" + t) for t in textos]
+
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = self._csv(tmp)
+            ruta.with_name("main.csv.original").write_text(ruta.read_text(encoding="utf-8"), encoding="utf-8")
+            ruta.write_text("tag;en;jp\n"
+                            "l1;\\N<\\C[3]Ana\\C[0]>Estoy muy cansado.;x\n"
+                            "l2;Solo\\nnarración.;y\n"
+                            "l3;\\N<Bob>Hi there!;z\n", encoding="utf-8")
+            traductor = TraductorQueSiembra()
+            inyector = InyectorCSV(Path(tmp), traductor, reaprovechar_traduccion=True)
+            inyector.procesar()
+            self.assertEqual(traductor.sembradas, {"Just narration.": "Solo narración."})
+            resultado = ruta.read_text(encoding="utf-8")
+            self.assertIn("l1;\\N<\\C[3]Ana\\C[0]>ES:I'm so tired.;x", resultado)
+            self.assertIn("l2;Solo\\nnarración.;y", resultado)  # intacta, con su salto de línea
+            self.assertIn("l3;\\N<Bob>ES:Hi there!;z", resultado)  # seguía en inglés
+            self.assertEqual((inyector.conservadas, inyector.retraducidas), (1, 1))
+
 
 if __name__ == "__main__":
     unittest.main()

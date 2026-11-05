@@ -32,13 +32,38 @@ def hablante_csv(celda: str) -> str | None:
     return hablante_de_caja(celda, solo_al_inicio=True)
 
 
+def quitar_comillas_csv(celda: str) -> tuple[str, bool]:
+    """'"\\N<Ana>Say ""hi""."' -> ('\\N<Ana>Say "hi".', True). Hay juegos que entrecomillan celdas como en un
+    CSV normal, pero su lector no entiende comillas: con ellas delante no se reconoce la caja de nombre y el
+    modelo la pierde. La traducción se escribe sin ellas (es lo que el jugador debe ver)."""
+    if len(celda) >= 2 and celda[0] == '"' and celda[-1] == '"':
+        return celda[1:-1].replace('""', '"'), True
+    return celda, False
+
+
 class InyectorCSV:
     """Traduce archivos CSV de localización celda por celda o en lotes."""
 
-    def __init__(self, ruta_juego: Path, translator: OllamaTranslator, tam_bloque: int = 30):
+    def __init__(self, ruta_juego: Path, translator: OllamaTranslator, tam_bloque: int = 30,
+                 reaprovechar_traduccion: bool = False):
         self.ruta_juego = ruta_juego
         self.translator = translator
         self.tam_bloque = tam_bloque
+        # --solo-genero: las celdas ya traducidas se conservan salvo las que tienen marcas de género, un
+        # sentido equivocado ("cofre" por pecho) o un fallo grave; esas se vuelven a pedir al modelo
+        self.reaprovechar_traduccion = reaprovechar_traduccion
+        self.conservadas = 0
+        self.retraducidas = 0
+
+    @staticmethod
+    def _frase_de_celda(celda: str) -> tuple[str, str, list[str]]:
+        """(prefijo de códigos, frase en una línea, segmentos separados por "\\n" literal) de una celda."""
+        m_pre = PATRON_PREFIJO.match(celda)
+        prefijo = m_pre.group(0) if m_pre else ""
+        sanitizado = sanitizar(celda[len(prefijo):])
+        segmentos = re.split(r"\\n", sanitizado)
+        frase = re.sub(r" {2,}", " ", " ".join(s.strip() for s in segmentos)).strip()
+        return prefijo, frase, segmentos
 
     def procesar(self) -> None:
         todos_csv = list(self.ruta_juego.glob("**/*.csv"))
@@ -88,17 +113,24 @@ class InyectorCSV:
                 prefijos: list[str] = []
                 segmentos_lista: list[list[str]] = []
                 infos: list[InfoLinea | None] = []
+                actuales: list[str | None] = []  # traducción que ya tenía la celda (--solo-genero)
 
                 for i in range(inicio, fin):
                     o_parts, _ = partir(orig_lines[i], delim)
                     if len(o_parts) <= col:
                         continue
-                    orig_text = o_parts[col]
-
                     c_parts, _ = partir(cur_lines[i], delim)
-                    if len(c_parts) == len(o_parts) and c_parts[col] != orig_text:
+                    actual = None
+                    if len(c_parts) == len(o_parts) and c_parts[col] != o_parts[col]:
                         # Ya traducido previamente
-                        continue
+                        if not self.reaprovechar_traduccion:
+                            continue
+                        celda_actual = c_parts[col]
+                        if o_parts[col].startswith('"'):
+                            celda_actual = quitar_comillas_csv(celda_actual)[0].replace('""', '"')
+                        actual = self._frase_de_celda(celda_actual)[1]
+
+                    orig_text = quitar_comillas_csv(o_parts[col])[0]
 
                     m_pre = PATRON_PREFIJO.match(orig_text)
                     prefix = m_pre.group(0) if m_pre else ""
@@ -124,11 +156,17 @@ class InyectorCSV:
                     frase = re.sub(r" {2,}", " ", " ".join(s.strip() for s in segments)).strip()
 
                     hablante = hablante_csv(orig_text)
+                    info = InfoLinea(hablante=hablante) if hablante else None
+                    if actual is not None:
+                        sembrar = getattr(self.translator, "sembrar_traduccion", None)
+                        if actual and sembrar is not None:
+                            sembrar(frase, actual, info)
                     indices.append(i)
                     textos_a_traducir.append(frase)
                     prefijos.append(prefix)
                     segmentos_lista.append(segments)
-                    infos.append(InfoLinea(hablante=hablante) if hablante else None)
+                    infos.append(info)
+                    actuales.append(actual)
 
                 if not textos_a_traducir:
                     continue
@@ -147,6 +185,11 @@ class InyectorCSV:
                     trad_limpia = limpiar_celda(trad, delim, quitar_comillas=False).strip()
                     if not trad_limpia:
                         continue
+                    if actuales[idx_cola] is not None:
+                        if trad_limpia == actuales[idx_cola]:
+                            self.conservadas += 1  # igual que antes: la celda se queda tal cual
+                            continue
+                        self.retraducidas += 1
 
                     trad_limpia = self.translator.perfil.restaurar_nombres(frase_orig, trad_limpia)
                     if len(segments) > 1:
@@ -154,7 +197,7 @@ class InyectorCSV:
 
                     final_text = prefix + trad_limpia
                     o_parts, cr = partir(orig_lines[line_idx], delim)
-                    if final_text == o_parts[col]:
+                    if final_text in (o_parts[col], quitar_comillas_csv(o_parts[col])[0]):
                         continue
 
                     o_parts[col] = final_text
@@ -165,3 +208,6 @@ class InyectorCSV:
                     escribir_lineas(csv_file, bom, cur_lines)
 
             log.info("Archivo CSV guardado al 100%%: %s", csv_file.name)
+            if self.reaprovechar_traduccion:
+                log.info("  ♻ %d celda(s) ya traducidas se conservan; %d cambian.",
+                         self.conservadas, self.retraducidas)

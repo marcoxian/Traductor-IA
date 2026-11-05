@@ -137,6 +137,42 @@ def describir_fallo(faltan: list[str], sobran: list[str]) -> str:
     return "; ".join(partes) or "sin fallos"
 
 
+# Pausas de RPG Maker: \! espera a que se pulse una tecla, \| espera 1 s, \. espera 1/4 s.
+_PAUSAS = ("\\!", "\\|", "\\.")
+# Fin de frase seguido de espacio: "Yeah... " | "¿Qué?» "
+_FIN_DE_FRASE = re.compile(r"[.!?…]+[\"'”»)\]]*\s+")
+
+
+def _colocar_pausas(original: str, traducido: str, pendientes: Counter) -> str:
+    """Las pausas que el modelo perdió a mitad de frase van al mismo hueco entre frases de la traducción.
+
+    'Yeah... \\!Becoming…' + 'Sí... ¡Ser…' -> 'Sí... \\!¡Ser…'. Al principio harían pulsar una tecla antes de
+    ver el texto. Se quedan sin colocar (y siguen pendientes) si la traducción no tiene ese hueco.
+    """
+    huecos = [m.end() for m in _FIN_DE_FRASE.finditer(traducido) if m.end() < len(traducido)]
+    if not huecos:
+        return traducido
+    inserciones: list[tuple[int, str]] = []
+    for m in PATRON_ETIQUETAS.finditer(original):
+        etiqueta = m.group(0)
+        if etiqueta not in _PAUSAS or pendientes[etiqueta] <= 0:
+            continue
+        antes = original[:m.start()]
+        if not tiene_texto_visible(antes) or not tiene_texto_visible(original[m.end():]):
+            continue  # al principio o al final: lo hace forzar_etiquetas
+        n = len(_FIN_DE_FRASE.findall(antes + " "))
+        if n == 0:
+            continue
+        inserciones.append((huecos[min(n, len(huecos)) - 1], etiqueta))
+        pendientes[etiqueta] -= 1
+    for pos, etiqueta in sorted(inserciones, reverse=True):
+        resto = traducido[pos:]
+        if etiqueta == "\\|" and resto.startswith("|"):  # el modelo dejó la barra sin la "\"
+            resto = resto[1:]
+        traducido = traducido[:pos] + etiqueta + resto
+    return traducido
+
+
 def forzar_etiquetas(original: str, traducido: str) -> str:
     """Último recurso: añade las etiquetas que falten (respetando duplicados).
 
@@ -147,6 +183,9 @@ def forzar_etiquetas(original: str, traducido: str) -> str:
     if not faltan:
         return traducido
     pendientes = Counter(faltan)
+    traducido = _colocar_pausas(original, traducido, pendientes)
+    if not +pendientes:
+        return traducido
     mitad = len(original) / 2
     delante: list[str] = []
     detras: list[str] = []
@@ -917,6 +956,10 @@ def limpiar_respuesta(respuesta: str, original: str = "") -> str:
     )
     if "Texto original:" in r and "Tu traducción:" in r:
         r = r.split("Tu traducción:", 1)[-1].strip()
+    # Eco al final de la corrección: "Frase corregida. Borrador a corregir: frase vieja"
+    eco = re.search(r"\s*(?:Borrador a corregir|Texto original)\s*:", r)
+    if eco and eco.start() > 0 and r[:eco.start()].strip():
+        r = r[:eco.start()].strip()
 
     # Evitar bucles de degeneración o tartamudeo infinito del LLM (ej: ¡R-¡R-¡R-... o R-R-R-...)
     r = re.sub(r"([¡¿]?[A-Za-zÁÉÍÓÚáéíóúñÑ]-[¡¿]?){4,}", r"\1\1", r)
