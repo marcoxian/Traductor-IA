@@ -42,6 +42,41 @@ def quitar_comillas_csv(celda: str) -> tuple[str, bool]:
     return celda, False
 
 
+# código de línea sin parámetros (\CL); los de color (\C[2]) van en mitad de frase y no fuerzan saltos
+_CODIGO_DE_LINEA = re.compile(r"\\[A-Z]{1,3}(?![\[A-Za-z])")
+
+
+def ajustar_saltos(traduccion: str, segmentos: list[str]) -> str:
+    r"""Vuelve a poner los saltos ("\n" escrito) y la sangría de la celda original en la traducción.
+
+    - Si cada línea nueva del original empieza con un código (``\n\CL Texto``: \CL centra la línea),
+      ese salto es obligatorio: va justo antes del mismo código en la traducción. Si no estuviera, las dos
+      líneas se pintarían una encima de otra.
+    - Si no, los saltos se reparten por longitud (``reinsertar_saltos``).
+    - La sangría del original (espacios para centrar un aviso) se conserva.
+    """
+    resultado = traduccion
+    codigos = [_CODIGO_DE_LINEA.match(seg.lstrip(" ")) for seg in segmentos[1:]]
+    if codigos and all(codigos):
+        pos = 0
+        for m in codigos:
+            i = resultado.find(m.group(0), pos)
+            if i <= 0:  # la IA perdió el código: reparto normal
+                resultado = reinsertar_saltos(traduccion, segmentos)
+                break
+            antes = resultado[:i].rstrip(" ")
+            if not antes.endswith("\\n"):
+                antes += "\\n"
+            resultado = antes + resultado[i:]
+            pos = len(antes) + len(m.group(0))
+    elif len(segmentos) > 1:
+        resultado = reinsertar_saltos(traduccion, segmentos)
+    sangria = len(segmentos[0]) - len(segmentos[0].lstrip(" ")) if segmentos else 0
+    if sangria >= 2 and not resultado.startswith(" "):
+        resultado = " " * sangria + resultado
+    return resultado
+
+
 class InyectorCSV:
     """Traduce archivos CSV de localización celda por celda o en lotes."""
 
@@ -200,8 +235,7 @@ class InyectorCSV:
                         self.retraducidas += 1
 
                     trad_limpia = self.translator.perfil.restaurar_nombres(frase_orig, trad_limpia)
-                    if len(segments) > 1:
-                        trad_limpia = reinsertar_saltos(trad_limpia, segments)
+                    trad_limpia = ajustar_saltos(trad_limpia, segments)
 
                     final_text = prefix + trad_limpia
                     o_parts, cr = partir(orig_lines[line_idx], delim)

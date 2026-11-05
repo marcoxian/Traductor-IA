@@ -15,7 +15,7 @@ from pathlib import Path
 from unittest import mock
 
 from traductor.motores import rpgmaker as motor_rpg
-from traductor.motores.csv_locales import InyectorCSV, hablante_csv
+from traductor.motores.csv_locales import InyectorCSV, ajustar_saltos, hablante_csv
 from traductor.motores.rpgmaker import (INFO_OPCION, InyectorRPGMaker, codigo_v21, hablante_de_caja,
                                         traductor_acepta_info)
 from traductor.personajes import FichaPersonajes, InfoLinea, Personaje, resolver_linea
@@ -530,6 +530,26 @@ class TestHablantesCSV(unittest.TestCase):
             self.assertIn("l2;Solo\\nnarración.;y", resultado)  # intacta, con su salto de línea
             self.assertIn("l3;\\N<Bob>ES:Hi there!;z", resultado)  # seguía en inglés
             self.assertEqual((inyector.conservadas, inyector.retraducidas), (1, 1))
+
+
+class TestSaltosDeCeldaCSV(unittest.TestCase):
+    B = chr(92)  # barra invertida: las celdas llevan "\n" y "\CL" escritos
+
+    def test_salto_obligatorio_antes_de_codigo_y_sangria(self):
+        b = self.B
+        original = "            Accepted mission" + b + "n" + b + "CL Get rid of sewer rats"
+        segmentos = original.split(b + "n")
+        # la IA junta las dos líneas: sin el salto, el juego pinta una encima de otra
+        self.assertEqual(ajustar_saltos("Misión aceptada " + b + "CL Eliminar ratas", segmentos),
+                         "            Misión aceptada" + b + "n" + b + "CL Eliminar ratas")
+        self.assertEqual(ajustar_saltos("Misión aceptada" + b + "n" + b + "CL Eliminar ratas", segmentos),
+                         "            Misión aceptada" + b + "n" + b + "CL Eliminar ratas")
+
+    def test_sin_codigos_se_reparte_por_longitud(self):
+        b = self.B
+        segmentos = ("Hello there" + b + "nmy friend, how are you today").split(b + "n")
+        self.assertEqual(ajustar_saltos("Hola, amigo mío, ¿cómo estás hoy?", segmentos).count(b + "n"), 1)
+        self.assertEqual(ajustar_saltos("Hola", ["Hello"]), "Hola")
 
 
 if __name__ == "__main__":
