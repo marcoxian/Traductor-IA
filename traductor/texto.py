@@ -985,6 +985,14 @@ def limpiar_respuesta(respuesta: str, original: str = "") -> str:
 
 # --------------------------------------------------------------------------- Control de calidad
 # Palabras inequívocamente inglesas (no coinciden con palabras españolas comunes).
+# Señales de que un texto está en español: tildes, eñe, signos de apertura o palabras muy frecuentes que no
+# existen en inglés ("me", "he", "no" o "a" sí existen y no cuentan).
+_SENAL_ESPANOL = re.compile(
+    r"[áéíóúñÁÉÍÓÚÑ¡¿]|\b(?:de|del|la|las|el|los|que|y|en|es|un|una|unos|por|para|con|su|sus|lo|se|al|pero|"
+    r"como|muy|ya|esto|eso|esta|este|estoy|soy|eres|hay|nos|les|te|tu|mi|mis|yo|ella|ellos)\b",
+    re.IGNORECASE,
+)
+
 _PALABRAS_INGLES = re.compile(
     r"\b(?:"
     r"the|and|you|your|yours|yourself|with|without|from|that|this|these|those|"
@@ -1142,6 +1150,11 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         if len(en_t_reales) >= 3 and total_w > 0 and len(en_t_reales) >= total_w * 0.28:
             problemas.append("ingles_residual")
         elif len(en_t_reales) >= 5:
+            problemas.append("ingles_residual")
+        elif total_w >= 6 and len(en_t_reales) >= 2 and not _SENAL_ESPANOL.search(vis_t) \
+                and _SENAL_ESPANOL.search(vis_o) is None:
+            # La lista de arriba no tiene "in", "a", "like"...: una frase larga sin una sola señal de español
+            # ("In just a few moments, he'd managed to strip...") es inglés aunque no llegue a la proporción
             problemas.append("ingles_residual")
 
     if re.search(

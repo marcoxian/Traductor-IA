@@ -126,7 +126,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | 2 | `2_generar_revision.py` | Hoja CSV con el original, la traducción y los problemas, para revisar en una hoja de cálculo. |
 | 3 | `3_reparar_etiquetas_ia.py` | Repara con la IA las etiquetas de formato rotas de esa hoja. |
 | 4 | `4_aplicar_parches.py` | Inyecta tus correcciones o un diccionario en los archivos del juego. |
-| 5 | `5_traducir_nombres_personajes.py` | Unifica los nombres que aparecen en las cajas de diálogo. |
+| 5 | `5_traducir_nombres_personajes.py` | Unifica los nombres de las cajas de diálogo con `workspace/<juego>/nombres_hablantes.csv` (`ingles;correccion`) y `nombres_propios.txt`. El motor CSV ya usa esa tabla al traducir. |
 | 6 | `6_auditoria_semantica.py` | Corrige falsos amigos (*party* → grupo, *item* → objeto, *save* → guardar…). |
 | 7 | `7_arreglar_partida_rpgmaker.py` | Aplica las correcciones a una partida guardada de RPG Maker (`.rpgsave`) sin empezar de nuevo. |
 | 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido (también sobre una copia del archivo de XUnity). |

@@ -128,6 +128,16 @@ class TestPuertaCalidad(unittest.TestCase):
         self.assertIn("ingles_residual", probs)
         self.assertTrue(tiene_fallo_grave(probs))
 
+    def test_detecta_ingles_sin_senales_de_espanol(self):
+        """Pocas palabras de la lista inglesa, pero ni una señal de español: es inglés."""
+        orig = r"In just a few moments, he'd managed to strip completely naked. \!His rod juts forward."
+        trad = r"In just a few moments, he managed to strip completely naked. \!His rod juts forward."
+        self.assertIn("ingles_residual", evaluar_traduccion(orig, trad))
+        bien = r"En pocos momentos, se había desnudado por completo. \!Su miembro se alza hacia delante."
+        self.assertEqual(evaluar_traduccion(orig, bien), [])
+        sin_tildes = "Bien, vamos a ver si sirve para algo, Tanya."  # español sin tildes: no salta
+        self.assertNotIn("ingles_residual", evaluar_traduccion("Okay, let's see if it helps at all, Tanya.", sin_tildes))
+
     def test_detecta_frase_recortada(self):
         orig = "Did your keen detective instincts lead you here? Or is this just a fortunate mistake? [pic=8]"
         trad = "¿O es solo un error afortunado? [pic=8]"

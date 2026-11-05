@@ -6,58 +6,15 @@ utilizando una tabla de equivalencias (ingles;correccion) y protegiendo los nomb
 from __future__ import annotations
 
 import argparse
-import csv
-import re
 from collections import Counter
 from pathlib import Path
 
 from traductor import config
 from traductor.csv_locales import escribir_lineas, leer_lineas
+from traductor.motores.csv_locales import quitar_comillas_csv
+from traductor.nombres_hablantes import cargar_nombres_propios, cargar_tabla, traducir_nombre
 from traductor.registro import configurar_logging
 from traductor.texto import PATRON_NOMBRE_HABLANTE
-
-
-def cargar_tabla(ruta: Path) -> dict[str, str]:
-    if not ruta.exists():
-        return {}
-    with open(ruta, encoding="utf-8-sig", newline="") as f:
-        return {
-            r["ingles"].strip(): r["correccion"].strip()
-            for r in csv.DictReader(f, delimiter=";")
-            if r.get("ingles") and r.get("correccion")
-        }
-
-
-def cargar_nombres_propios(ruta_archivo: Path | None) -> set[str]:
-    nombres = set()
-    if ruta_archivo and ruta_archivo.exists():
-        for linea in ruta_archivo.read_text(encoding="utf-8-sig").splitlines():
-            nombre = linea.strip()
-            if nombre and not nombre.startswith("#"):
-                nombres.add(nombre)
-    return nombres
-
-
-def traducir_nombre(nombre: str, tabla: dict[str, str], propios: set[str]) -> str | None:
-    n = nombre.strip()
-    if n in tabla:
-        return tabla[n]
-    if n in propios:
-        return n
-    if n.endswith("（？）"):
-        t = traducir_nombre(n[:-3], tabla, propios)
-        return f"{t}（？）" if t else None
-    for sep in ("＆", " & "):
-        if sep in n:
-            partes = [traducir_nombre(p, tabla, propios) for p in n.split(sep)]
-            return None if None in partes else " y ".join(partes)
-    m = re.match(r"^(.+?)['’]s Voice$", n)
-    if m and m.group(1) in propios:
-        return f"Voz de {m.group(1)}"
-    m = re.match(r"^(.+?) ?([A-Z])$", n)
-    if m and m.group(1) in tabla:
-        return f"{tabla[m.group(1)]} {m.group(2)}"
-    return None
 
 
 def main():
@@ -111,7 +68,7 @@ def main():
             if len(o_parts) < 2 or len(c_parts) != len(o_parts):
                 continue
 
-            mo = PATRON_NOMBRE_HABLANTE.match(o_parts[1])
+            mo = PATRON_NOMBRE_HABLANTE.match(quitar_comillas_csv(o_parts[1])[0])
             mc = PATRON_NOMBRE_HABLANTE.match(c_parts[1])
             if not mo or not mc:
                 continue

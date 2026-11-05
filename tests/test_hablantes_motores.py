@@ -469,6 +469,21 @@ class TestHablantesCSV(unittest.TestCase):
             self.assertEqual(traductor.llamadas, [["I'm so tired.", "Just narration.", "Hi there!"]])
             self.assertIn("l2;ES:Just narration.;y", ruta.read_text(encoding="utf-8"))
 
+    def test_caja_de_nombre_usa_la_tabla_de_hablantes(self):
+        """'Man' no está en el glosario, pero sí en la tabla del Paso 5 del juego."""
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp) / "locales" / "main.csv"
+            ruta.parent.mkdir(parents=True)
+            ruta.write_text("tag;en\nl1;\\N<\\C[5]Man\\C[0]>Hi.\nl2;\\N<\\C[5]Guard B\\C[0]>Stop.\n"
+                            "l3;\\N<\\C[5]Zed\\C[0]>Yo.\n", encoding="utf-8")
+            tabla = ({"Man": "Hombre", "Guard": "Guardia"}, frozenset())
+            with mock.patch("traductor.motores.csv_locales.tabla_del_juego", return_value=tabla):
+                InyectorCSV(Path(tmp), TraductorConInfo()).procesar()
+            resultado = ruta.read_text(encoding="utf-8")
+            self.assertIn("l1;\\N<\\C[5]Hombre\\C[0]>ES:Hi.", resultado)
+            self.assertIn("l2;\\N<\\C[5]Guardia B\\C[0]>ES:Stop.", resultado)
+            self.assertIn("l3;\\N<\\C[5]Zed\\C[0]>ES:Yo.", resultado)  # no se sabe: tal cual
+
     def test_celda_entre_comillas_conserva_la_caja_de_nombre(self):
         """El lector del juego no entiende comillas: se quitan para que la caja de nombre siga delante."""
         with tempfile.TemporaryDirectory() as tmp:

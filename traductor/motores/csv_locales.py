@@ -7,6 +7,7 @@ import shutil
 from pathlib import Path
 
 from ..csv_locales import analizar_cabecera, escribir_lineas, leer_lineas, limpiar_celda, partir, unir
+from ..nombres_hablantes import tabla_del_juego, traducir_nombre
 from ..ollama import OllamaTranslator
 from ..personajes import InfoLinea, limpiar_nombre
 from ..texto import (PATRON_CODIGOS, PATRON_NOMBRE_HABLANTE, PATRON_PREFIJO, reinsertar_saltos,
@@ -54,6 +55,9 @@ class InyectorCSV:
         self.reaprovechar_traduccion = reaprovechar_traduccion
         self.conservadas = 0
         self.retraducidas = 0
+
+    def _tabla_hablantes(self) -> tuple[dict[str, str], frozenset[str]]:
+        return tabla_del_juego(getattr(getattr(self.translator, "perfil", None), "juego", None))
 
     @staticmethod
     def _frase_de_celda(celda: str) -> tuple[str, str, list[str]]:
@@ -135,12 +139,16 @@ class InyectorCSV:
                     m_pre = PATRON_PREFIJO.match(orig_text)
                     prefix = m_pre.group(0) if m_pre else ""
 
-                    # Traducir nombre de personaje en el prefijo si coincide con el glosario
+                    # Traducir nombre de personaje en el prefijo: la tabla de hablantes del juego (la del Paso 5:
+                    # "Man" -> "Hombre", "Guard A" -> "Guardia A", nombres propios tal cual) y, si no está, el glosario
                     if prefix:
                         def _traducir_nombre(m):
                             c_in = m.group(1) or ""
                             nombre = m.group(2)
                             c_out = m.group(3) or ""
+                            es = traducir_nombre(nombre, *self._tabla_hablantes())
+                            if es:
+                                return f"\\N<{c_in}{limpiar_celda(es, delim)}{c_out}>"
                             for en, es in self.translator.perfil.glosario.items():
                                 if nombre.lower() == en.lower():
                                     return f"\\N<{c_in}{es}{c_out}>"
