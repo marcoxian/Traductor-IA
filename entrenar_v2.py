@@ -121,6 +121,13 @@ if args.casos_dificiles:
     vistos = set()
     corpus_dificiles = []
     for archivo in sorted(Path("workspace").glob("*/casos_dificiles.jsonl")):
+        # La puerta de calidad acepta reintentos que no siempre están bien ("I'm cumming" -> "Estoy
+        # corriendo"): si hay una versión revisada a mano, se usa esa; si no, se avisa.
+        revisado = archivo.with_name("casos_dificiles_revisados.jsonl")
+        if revisado.exists():
+            archivo = revisado
+        else:
+            print(f"⚠ {archivo.parent.name}: casos difíciles SIN revisar (no hay {revisado.name}).")
         for e in leer_jsonl(archivo):
             clave = (e.get("input"), e.get("instruccion_completa"))
             if clave in vistos or not e.get("input") or not e.get("output"):

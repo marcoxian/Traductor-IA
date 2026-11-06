@@ -195,6 +195,13 @@ class TestVulgares(unittest.TestCase):
         self.assertFalse(f("Fuck my pussy with your cock!", "¡Fóllame el coño con tu polla!"))
         self.assertTrue(f("You took my dildo?", "¿Me robaste mi polla?"))
         self.assertFalse(f("Cum for me, Irene!", "¡Córrete para mí, Irene!"))
+        # "correrse" lleva su pronombre; "correr" a secas es ir deprisa
+        for bien in ("¡Me corro!", "¡Me estoy corriendo!", "Te haré correrte.", "Se corrió dentro.",
+                     "Me voy a correr.", "Quiero que te corras.", "Una buena corrida.", "¡Corriéndome!",
+                     "¡Me c-corro!", "¡M-me corro!"):
+            self.assertFalse(f("I'm cumming!", bien), bien)
+        for mal in ("¡Estoy corriendo!", "¡Te haré correr en un momento!", "¡I-estoy corriendo!!!"):
+            self.assertTrue(f("I'm cumming!", mal), mal)
         self.assertTrue(f("God! Make me cum, baby!", "¡Dios mío... fóllame ya, cariño!"))
         self.assertFalse(f("Good boy. Suckle at my tit.", "Buen chico. Chupa mi pezón."))
         self.assertFalse(f("Yes! What a pussy!", "¡Sí! ¡Qué cobarde!"))                    # insulto: nada

@@ -225,8 +225,13 @@ _VULGARES = (
     _Vulgar("tits", re.compile(r"\btits?\b|\btitties\b", _I), "tetas", r"\btet\w+|\bpech\w+|\bsenos?\b|\bpez[oó]n\w*",
             re.compile(r"\btits\s+up\b|\btit\s+for\s+tat\b|\b(?:blue|great|coal)\s+tits?\b", _I)),
     _Vulgar("boobs", re.compile(r"\bboob(?:s|ies)?\b", _I), "tetas", r"\btet\w+|\bpech\w+|\bsenos?\b"),
+    # "correrse" siempre con su pronombre: "me corro", "córrete", "correrte", "se corrió", "me voy a correr".
+    # "Estoy corriendo" o "te haré correr" son de correr (ir deprisa): no valen.
     _Vulgar("cum", re.compile(r"\bcum(?:s|ming|med)?\b", _I), "",
-            r"\bc[oó]rr\w*|\bsemen\b|\bleche\b|\blefa\b|\beyacul\w*",
+            r"\b(?:me|te|se|nos|os)\s+(?:(?:voy|vas|va|vamos|vais|van|iba|ibas|iban|estoy|estás|está|estamos|"
+            r"estaba|estabas|acabo|acabas|acaba|he|has|ha|hemos|había|habías|vuelvo|vuelves|vuelve|vas)\s+"
+            r"(?:a\s+|de\s+)?)?(?:c-)*c[oó]rr\w*|\bc[oó]rr[eéi]\w*(?:me|te|se|nos|os)\b|\bcorrid[ao]s?\b|"
+            r"\bsemen\b|\bleche\b|\blefa\b|\beyacul\w*",
             re.compile(r"\bcum\s+laude\b|\bsumma\s+cum\b", _I)),
     _Vulgar("blowjob", re.compile(r"\bblow\s?-?jobs?\b", _I), "mamada", r"\bmamad\w*|\bfelaci\w*"),
     _Vulgar("handjob", re.compile(r"\bhand\s?-?jobs?\b", _I), "paja", r"\bpaj\w+|\bmasturb\w*"),
