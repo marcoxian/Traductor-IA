@@ -153,6 +153,21 @@ Al proponer el siguiente paso, o al listar tareas pendientes, di también **con 
 
 Si una tarea mezcla las dos, di cuál parte es de cada modelo.
 
+## Cuándo limpiar la conversación
+
+Avisa al usuario de cuándo conviene `/clear` o abrir una conversación nueva, porque una conversación larga se
+resume y se pierden detalles. Dilo al cerrar una tarea, junto al siguiente paso, en una línea. Conviene:
+
+- **Al terminar un bloque** (commit hecho y subido, o plan actualizado) y que lo siguiente no dependa de lo
+  anterior: otro juego, otro bloque del plan, otro tipo de trabajo.
+- **Antes de una espera larga** (un entrenamiento, una traducción de horas): no hace falta tener todo el contexto
+  mientras se espera, y al volver se retoma desde el plan.
+- **Cuando la conversación ya se ha resumido varias veces** o notes que repites cosas que ya estaban decididas.
+
+No conviene en medio de una corrección a medias ni cuando el siguiente paso usa lo que acabas de descubrir. Antes
+de recomendarlo, deja el estado escrito en `docs/PLAN_MEJORAS_TRADUCCION.md` (qué se hizo, qué queda y las copias
+de seguridad), para que la conversación nueva pueda seguir leyendo solo ese archivo.
+
 ## Trampas del entorno (Windows + Git Bash)
 
 - **Los heredocs de Bash se comen las barras invertidas:** las expresiones regulares y los códigos (`\n`, `\CL`)
