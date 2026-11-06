@@ -235,6 +235,8 @@ class FichaPersonajes:
             self._vocativos.append(((
                 re.compile(rf"^(?:{_INTERJECCIONES_EN}\s*,?\s+)?{patron_nombre}\s*[,!?…]"),
                 re.compile(rf",\s*(?:(?i:my|dear|my dear)\s+)?{patron_nombre}\s*[.!?…~]*\s*$"),
+                # También en mitad del texto, si cierra la frase: "Are you crazy, Ana? You can't..."
+                re.compile(rf",\s*(?:(?i:my|dear|my dear)\s+)?{patron_nombre}\s*[.!?…~]+(?=\s)"),
                 re.compile(rf"(?:^|[.!?…]\s+){_INTERJECCIONES_EN}\s*,?\s+{patron_nombre}"),
             ), p))
 

@@ -129,7 +129,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | 5 | `5_traducir_nombres_personajes.py` | Unifica los nombres de las cajas de diálogo con `workspace/<juego>/nombres_hablantes.csv` (`ingles;correccion`) y `nombres_propios.txt`. El motor CSV ya usa esa tabla al traducir. |
 | 6 | `6_auditoria_semantica.py` | Corrige falsos amigos (*party* → grupo, *item* → objeto, *save* → guardar…). |
 | 7 | `7_arreglar_partida_rpgmaker.py` | Aplica las correcciones a una partida guardada de RPG Maker (`.rpgsave`) sin empezar de nuevo. |
-| 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido (también sobre una copia del archivo de XUnity). |
+| 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido (también sobre una copia del archivo de XUnity). La 2.ª persona que no nombra a quien escucha se marca como `probable` si todos los que están en la escena son del otro género ("¿Estás segura?" a un protagonista hombre); se aplica solo con `--corregir --segunda`, tras revisar el informe. |
 | 9 | `9_evaluar_genero.py` | Banco de pruebas: ¿respeta el modelo el género de quien habla? Condiciones A (sin ficha), B (con pista), C (proceso completo) y D (`--sin-hablante`: sin saber quién habla, como en Unity). |
 
 ---

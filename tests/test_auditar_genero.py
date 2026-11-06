@@ -81,6 +81,97 @@ class TestAuditoriaRPGMaker(unittest.TestCase):
         self.assertEqual(hallazgos, [])
 
 
+class TestSegundaPersonaSinNombrar(unittest.TestCase):
+    """X3: la frase no nombra a quien escucha; se mira quién más está en la escena."""
+
+    @staticmethod
+    def _ficha() -> FichaPersonajes:
+        return FichaPersonajes([
+            Personaje("1Hero", "hombre", "protagonista", codigos=["Mc"]),
+            Personaje("Laura", "mujer", "principal", codigos=["He"]),
+            Personaje("Chloe", "mujer", "principal", codigos=["Ch"]),
+        ])
+
+    def setUp(self):
+        self.tmp = Path(tempfile.mkdtemp())
+        datos = self.tmp / "www" / "data"
+        datos.mkdir(parents=True)
+        pausa = [("The wind blows.", "Sopla el viento.")] * 4   # separa las escenas (nadie habla)
+        frases = [
+            # Escena 1: Laura a solas con el protagonista (hombre)
+            ("HeFrOp.Are you sure?", "HeFrOp.¿Estás segura?"),
+            ("McFrOp.You're crazy.", "McFrOp.Estás loco."),                       # él le habla a ella
+            ("HeFrOp.Don't be silly, girl.", "HeFrOp.No seas tonta, chica."),      # el inglés ya dice 'girl'
+            ("HeFrOp.Don't be so hard on yourself.", "HeFrOp.No seas tan dura contigo misma."),
+            *pausa,
+            # Escena 2: también está Chloe; "¿Estás loca?" puede ir para ella
+            ("HeFrOp.Are you crazy?", "HeFrOp.¿Estás loca?"),
+            ("ChFrOp.Me?", "ChFrOp.¿Yo?"),
+            ("McFrOp.Hi.", "McFrOp.Hola."),
+            *pausa,
+            # Escena 3: habla alguien que no está en la ficha, a solas con el protagonista
+            ("NpFrOp.I'm on break. Cook it yourself.", "NpFrOp.Estoy de descanso. Cocínala tú misma."),
+            ("McFrOp.Fine.", "McFrOp.Vale."),
+        ]
+        comandos_o, comandos_t = [], []
+        for o, t in frases:
+            comandos_o += [_cmd(101, ["", 0, 0, 2]), _cmd(401, [o])]
+            comandos_t += [_cmd(101, ["", 0, 0, 2]), _cmd(401, [t])]
+        (datos / "Map001.json.bak").write_text(json.dumps(_mapa(comandos_o)), encoding="utf-8")
+        self.json = datos / "Map001.json"
+        self.json.write_text(json.dumps(_mapa(comandos_t), ensure_ascii=False), encoding="utf-8")
+
+    def tearDown(self):
+        shutil.rmtree(self.tmp, ignore_errors=True)
+
+    def _textos(self) -> list[str]:
+        datos = json.loads(self.json.read_text(encoding="utf-8"))
+        return [c["parameters"][0] for c in datos["events"][1]["pages"][0]["list"] if c["code"] == 401]
+
+    def test_informe(self):
+        hallazgos, _ = auditoria.auditar_rpgmaker(self.tmp, self._ficha())
+        propuestas = {h.original: (h.tipo, h.propuesta) for h in hallazgos}
+        self.assertEqual(propuestas["Are you sure?"], (auditoria.PROBABLE, "¿Estás seguro?"))
+        self.assertEqual(propuestas["You're crazy."], (auditoria.PROBABLE, "Estás loca."))
+        self.assertEqual(propuestas["Don't be so hard on yourself."],
+                         (auditoria.PROBABLE, "No seas tan duro contigo mismo."))
+        self.assertNotIn("Don't be silly, girl.", propuestas)   # 'girl': va para una chica
+        self.assertNotIn("Are you crazy?", propuestas)          # Chloe también está en la escena
+        self.assertEqual(propuestas["I'm on break. Cook it yourself."],
+                         (auditoria.PROBABLE, "Estoy de descanso. Cocínala tú mismo."))
+        self.assertIn("en la escena: 1Hero (hombre)", hallazgos[0].motivo)
+
+    def test_dudosas_senala_la_escena_con_otra_mujer(self):
+        hallazgos, _ = auditoria.auditar_rpgmaker(self.tmp, self._ficha(), dudosas=True)
+        h = next(h for h in hallazgos if h.original == "Are you crazy?")
+        self.assertEqual((h.tipo, h.propuesta), (auditoria.REVISAR, ""))
+        self.assertIn("Chloe (mujer)", h.motivo)
+
+    def test_solo_se_aplica_con_segunda(self):
+        antes = self._textos()
+        auditoria.auditar_rpgmaker(self.tmp, self._ficha(), corregir=True)
+        self.assertEqual(self._textos(), antes)
+        auditoria.auditar_rpgmaker(self.tmp, self._ficha(), corregir=True, segunda=True)
+        textos = self._textos()
+        self.assertIn("HeFrOp.¿Estás seguro?", textos)
+        self.assertIn("McFrOp.Estás loca.", textos)
+        self.assertIn("HeFrOp.No seas tonta, chica.", textos)
+        self.assertIn("HeFrOp.¿Estás loca?", textos)
+        self.assertIn("NpFrOp.Estoy de descanso. Cocínala tú mismo.", textos)
+        self.assertEqual(auditoria.auditar_rpgmaker(self.tmp, self._ficha())[0], [])
+
+    def test_genero_desconocido_en_la_escena_no_es_probable(self):
+        ficha = self._ficha()
+        ficha.personajes.append(Personaje("Guard", "desconocido", codigos=["Gu"]))
+        ficha.reindexar()
+        ctx = auditoria.resolver_linea(ficha, "Are you sure?", auditoria.InfoLinea(codigo="He"))
+        oyentes = [ficha.buscar("Guard")]
+        h = auditoria.revisar_par(ficha, "Are you sure?", "¿Estás segura?", None, "x", ctx=ctx, oyentes=oyentes)
+        self.assertEqual(h.tipo, auditoria.REVISAR)
+        self.assertEqual(h.propuesta, "¿Estás seguro?")
+        self.assertIn("género desconocido", h.motivo)
+
+
 class TestAuditoriaCSVyXUnity(unittest.TestCase):
     def setUp(self):
         self.tmp = Path(tempfile.mkdtemp())
@@ -165,6 +256,19 @@ class TestAuditoriaCSVyXUnity(unittest.TestCase):
         self.assertEqual(pares["My Jasmine! Did you see her?"], "¡Mi Jasmine! ¿La viste?")
         self.assertEqual(pares["(I'm sure it's Jasmine.)"], "(Estoy segura de que es Jasmine.)")
         self.assertEqual(pares["Hello."], "Hola.")
+
+    def test_csv_segunda_persona_sin_nombrar(self):
+        """Los CSV con caja de nombre también miran quién está en la escena."""
+        ficha = TestSegundaPersonaSinNombrar._ficha()
+        carpeta = self.tmp / "locales"
+        carpeta.mkdir()
+        (carpeta / "main.csv.original").write_text(
+            "Key;English\nk1;\\N<Laura>Are you ready?\nk2;\\N<1Hero>Yes.\n", encoding="utf-8")
+        actual = carpeta / "main.csv"
+        actual.write_text("Key;English\nk1;\\N<Laura>¿Estás lista?\nk2;\\N<1Hero>Sí.\n", encoding="utf-8")
+        hallazgos, _ = auditoria.auditar_csv(self.tmp, ficha, corregir=True, segunda=True)
+        self.assertEqual([(h.tipo, h.propuesta) for h in hallazgos], [(auditoria.PROBABLE, "¿Estás listo?")])
+        self.assertIn("k1;\\N<Laura>¿Estás listo?", actual.read_text(encoding="utf-8"))
 
     def test_dudosas_segunda_persona_sin_destinatario(self):
         """Protagonista mujer (1Hero en la ficha de prueba) y nadie nombrado: '¿Eres nuevo?' se señala

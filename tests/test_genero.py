@@ -122,9 +122,22 @@ class TestSegundaYTerceraPersona(unittest.TestCase):
         self.assertEqual(marcas_genero("¿Estás lista?"), {"2f"})
         self.assertEqual(marcas_genero("Bienvenido a casa."), {"2m"})
         self.assertEqual(marcas_genero("Te doy la bienvenida"), set())
+        self.assertEqual(marcas_genero("Siempre es bienvenido que vuelva."), set())   # impersonal
+        self.assertEqual(corregir_segunda_persona("Siempre es bienvenido que vuelva.", MUJER),
+                         "Siempre es bienvenido que vuelva.")
         self.assertEqual(marcas_genero("Lo hice yo mismo"), {"1m"})
         self.assertEqual(marcas_genero("¡Tengo que estar... tranquilo...!"), {"1m"})
         self.assertEqual(marcas_genero("¿Estás... s-segura?"), {"2f"})
+
+    def test_adjetivos_coordinados(self):
+        self.assertEqual(corregir_primera_persona("Estoy cansada y harta.", HOMBRE), "Estoy cansado y harto.")
+        self.assertEqual(corregir_segunda_persona("¿Estás lista y muy preparada?", HOMBRE),
+                         "¿Estás listo y muy preparado?")
+        self.assertEqual(corregir_segunda_persona("No seas tan dura contigo misma.", HOMBRE),
+                         "No seas tan duro contigo mismo.")
+        # Lo que no es un adjetivo coordinado no se toca
+        self.assertEqual(corregir_primera_persona("Estoy cansada y mi madre preocupada.", HOMBRE),
+                         "Estoy cansado y mi madre preocupada.")
 
     def test_tercera_con_pausa(self):
         self.assertEqual(corregir_tercera_persona("Ana está... muy c-cansado.", "Ana", MUJER),
@@ -154,6 +167,15 @@ class TestFicha(unittest.TestCase):
         ctx = resolver_linea(self.f, "Chloe, are you ready?", InfoLinea(codigo="He"))
         self.assertEqual(ctx.destinatario.nombre, "Chloe")
         self.assertTrue(ctx.destinatario_explicito)
+        # Vocativo en mitad del texto, cerrando una frase
+        for texto in ("Are you crazy, Chloe? You can't keep it.", "It's fine, Chloe. Come in.",
+                      "How about it, my dear Chloe! Ready?"):
+            ctx = resolver_linea(self.f, texto, InfoLinea(codigo="He"))
+            self.assertEqual((ctx.destinatario.nombre, ctx.destinatario_explicito), ("Chloe", True), texto)
+        # Pero no si el nombre sigue la frase (aposición) o no va tras una coma
+        for texto in ("My friend, Chloe, is here.", "I saw Chloe. Then I left."):
+            ctx = resolver_linea(self.f, texto, InfoLinea(codigo="He"))
+            self.assertFalse(ctx.destinatario_explicito, texto)
         ctx = resolver_linea(self.f, "(I wonder where Laura went.)", None)
         self.assertTrue(ctx.pensamiento)
         self.assertEqual(ctx.hablante.nombre, "1Hero")

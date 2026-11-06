@@ -148,7 +148,7 @@ PARES_ADJ_GENERO: tuple[tuple[str, str], ...] = tuple(dict.fromkeys((
     ("tonto", "tonta"), ("estúpido", "estúpida"), ("bueno", "buena"), ("malo", "mala"),
     ("rico", "rica"), ("famoso", "famosa"), ("perfecto", "perfecta"), ("afortunado", "afortunada"),
     ("desafortunado", "desafortunada"), ("cariñoso", "cariñosa"), ("generoso", "generosa"),
-    ("tímido", "tímida"), ("vago", "vaga"),
+    ("tímido", "tímida"), ("vago", "vaga"), ("duro", "dura"),
 )))
 
 _FEM_DE = {m: f for m, f in PARES_ADJ_GENERO}
@@ -302,14 +302,24 @@ def _con_mayusculas_de(modelo: str, palabra: str) -> str:
     return palabra
 
 
+def _cambiar_palabras(texto: str, mapa: dict[str, str]) -> str:
+    return re.sub(rf"{_L}+", lambda w: _con_mayusculas_de(w.group(0), mapa.get(w.group(0).lower(), w.group(0))),
+                  texto)
+
+
 def _cambiar_final(m: re.Match, mapa: dict[str, str], grupo_adj: str = "adj") -> str:
+    """Cambia el adjetivo del grupo ``grupo_adj`` y, si el patrón los recoge (grupo 'coord'), los que
+    van coordinados detrás: "cansada y harta" -> "cansado y harto"."""
     adj = m.group(grupo_adj)
     nuevo = mapa.get(adj.lower())
     if not nuevo:
         return m.group(0)
-    inicio, fin = m.span(grupo_adj)
     base = m.start(0)
     texto = m.group(0)
+    if "coord" in m.re.groupindex and m.group("coord"):
+        inicio, fin = m.span("coord")
+        texto = texto[: inicio - base] + _cambiar_palabras(m.group("coord"), mapa) + texto[fin - base:]
+    inicio, fin = m.span(grupo_adj)
     return texto[: inicio - base] + _con_mayusculas_de(adj, nuevo) + texto[fin - base:]
 
 
@@ -319,8 +329,13 @@ _SOLO_CONTEXTO = (r"(?=\s*(?:[.,;:!?…)\"»”'~]|$|\s+(?:aquí|ahí|allí|en\b
 
 
 def _patron(verbos: str, adjetivos: str) -> re.Pattern:
+    # Adjetivos coordinados detrás del primero ("lista y preparada"). Solo con "y/e/o/u/ni", no con
+    # comas: en "¿Estás lista, guapa?" lo de detrás de la coma es un vocativo y va aparte.
+    coord = (rf"(?:\s+(?:y|e|o|u|ni)\s+(?:(?:tan|muy|más|bastante|algo|un\s+poco)\s+)?"
+             rf"(?:{adjetivos})(?!{_L}))")
     return re.compile(
-        rf"(?<!{_L})(?P<verbo>{verbos}){_ADV}{_ANTES_ADJ}(?P<adj>{adjetivos})(?!{_L}){_TRAS_ADJ}",
+        rf"(?<!{_L})(?P<verbo>{verbos}){_ADV}{_ANTES_ADJ}(?P<adj>{adjetivos})(?!{_L})"
+        rf"(?P<coord>{coord}*){_TRAS_ADJ}",
         re.IGNORECASE,
     )
 
@@ -425,6 +440,8 @@ _VOC_FORMAS = {  # formas INCORRECTAS a buscar según el género correcto
 _FIN_VOC = r"(?=\s*(?:[.!?…,;:)\"»”'~]|$))"
 # "dar la bienvenida" es un sustantivo (siempre femenino): no se toca.
 _NO_ES_SALUDO = r"(?<!la\s)(?<!una\s)(?<!su\s)(?<!tu\s)(?<!mi\s)(?<!nuestra\s)(?<!vuestra\s)(?<!esa\s)(?<!esta\s)"
+# "siempre es bienvenido que vuelva": impersonal, no habla de nadie.
+_NO_IMPERSONAL = r"(?!\s+que\b)"
 
 
 def _patrones_vocativo(genero: str) -> list[re.Pattern]:
@@ -436,8 +453,8 @@ def _patrones_vocativo(genero: str) -> list[re.Pattern]:
         # "¡Guapa!" / "Querida, ..." al principio de frase
         re.compile(rf"(?:^|(?<=[¡¿])|(?<=[.!?…]\s))(?:mi\s+)?(?P<adj>{formas})(?!{_L})(?=\s*[,!?…])",
                    re.IGNORECASE),
-        # "bienvenida" en singular como saludo (no "dar la bienvenida")
-        re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}(?P<adj>{bienvenida})(?!{_L})", re.IGNORECASE),
+        # "bienvenida" en singular como saludo (no "dar la bienvenida" ni el impersonal "es bienvenido que")
+        re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}(?P<adj>{bienvenida})(?!{_L}){_NO_IMPERSONAL}", re.IGNORECASE),
     ]
 
 
@@ -593,8 +610,8 @@ _DET1_YO = {
 }
 _DET2 = {HOMBRE: _patron(_V2, _ADJ_MASC), MUJER: _patron(_V2, _ADJ_FEM)}
 _DET_BIENVENIDO = {
-    HOMBRE: re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}bienvenido(?!{_L})", re.IGNORECASE),
-    MUJER: re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}bienvenida(?!{_L})", re.IGNORECASE),
+    HOMBRE: re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}bienvenido(?!{_L}){_NO_IMPERSONAL}", re.IGNORECASE),
+    MUJER: re.compile(rf"(?<!{_L}){_NO_ES_SALUDO}bienvenida(?!{_L}){_NO_IMPERSONAL}", re.IGNORECASE),
 }
 # Para detectar "yo mismo" (masculino) se usa el patrón que busca "mismo", que es el de MUJER.
 _DET_MISMO_1P = {HOMBRE: _MISMO_1P[MUJER], MUJER: _MISMO_1P[HOMBRE]}
