@@ -19,6 +19,8 @@ Dos usos (con la ficha ``workspace/<juego>/personajes.json`` del juego del que s
      protagonista hombre no tiene: alguien que le habla a una protagonista MUJER.
    - DOBLE: protagonista y hablante invertidos (un hombre que le habla a una mujer, desde las
      frases en que una mujer le habla a un hombre).
+   No hay espejo si el contenido fija el sexo (anatomía, sexo) o hay un sustantivo de persona que la
+   concordancia no invierte ("I'm a maid" -> "soy una criada").
 
 Sin ``--reparar`` ni ``--generar`` solo muestra cuántas líneas cambiarían (no escribe nada).
 
@@ -115,6 +117,33 @@ def _ingles_fija_genero(en: str, p: Personaje) -> bool:
     return False
 
 
+# Anatomía y sexo: el contenido fija el sexo de quien habla o escucha ("my dick", "I'm so wet").
+# Invertirlo enseñaría a una protagonista con pene o a un hombre "mojado".
+_SEXO_EN = re.compile(
+    r"\b(?:cock|dick|penis|pecker|balls|pussy|cunt|clit|tits|titties|boobs|breasts?|nipples?|womb|pregnant|"
+    r"cum(?:s|ming|med)?|erection|hard-on|wet|stuffed)\b|\b(?:so|too)\s+full\b"
+    # "I'm still hard", "you're hard as a rock" (pero no "hard on her", "a hard time", "hard to say")
+    r"|\b(?:I['’]m|I\s+am|you['’]re|you\s+are|be|being|stay|still|get|getting|got|nice\s+and|so|as)\s+"
+    r"(?:so\s+|still\s+|already\s+|as\s+)?hard\b(?!\s+(?:on|to|time|work|enough)\b)", re.IGNORECASE)
+_APOS = "['’]"
+# Sustantivo de persona: "I'm a maid" -> "soy una criada", "you're a brave sailor" -> "eres un marinero
+# valiente". La concordancia invierte los adjetivos, pero no el sustantivo ni su artículo: el espejo
+# quedaría a medias ("eres un marinero valiente" dicho a una mujer).
+_PREDICADO_YO = re.compile(rf"\b(?:I\s+am|I{_APOS}m|myself)\s+(?:a|an)\b", re.IGNORECASE)
+_PREDICADO_TU = re.compile(rf"\b(?:you\s+are|you{_APOS}re|yourself)\s+(?:a|an)\b|\b(?:asshole|bastard|son of a bitch)\b",
+                           re.IGNORECASE)
+
+
+def _contenido_fija_genero(en: str, habla_invertido: bool, escucha_invertido: bool) -> bool:
+    """True si el inglés hace imposible invertir el género sin cambiar el sentido: anatomía o sexo en la
+    frase, o un sustantivo de persona para quien habla ("I'm a maid") o escucha ("you're a sailor")."""
+    if _SEXO_EN.search(en):
+        return True
+    if habla_invertido and _PREDICADO_YO.search(en):
+        return True
+    return escucha_invertido and bool(_PREDICADO_TU.search(en))
+
+
 def _marcas_de(marcas: set[str], persona: str) -> set[str]:
     return {m for m in marcas if m.startswith(persona)}
 
@@ -151,6 +180,8 @@ def ejemplo_invertido(ficha: FichaPersonajes, nombres: Iterable[str], en: str, e
     escucha_invertido = d is not None and d.nombre in nombres
     if d is None and _marcas_de(marcas, "2") and any(p is not h for p in invertidos):
         return None  # "¿estás listo?" sin saber a quién: podría ser a alguien invertido
+    if _contenido_fija_genero(en, habla_invertido, escucha_invertido):
+        return None
     salida = es
     if habla_invertido:
         salida = corregir_primera_persona(salida, _opuesto(h.genero), en)
@@ -196,8 +227,8 @@ def ejemplo_espejo(ficha: FichaPersonajes, en: str, es: str, info: InfoLinea | N
     if h is None or h.genero not in (HOMBRE, MUJER):
         return None
     letra, letra_op = ("m", "f") if h.genero == HOMBRE else ("f", "m")
-    if f"1{letra}" not in marcas_genero(es) or _ingles_fija_genero(en, h):
-        return None  # "I'm a good girl" no puede decirlo un hombre
+    if f"1{letra}" not in marcas_genero(es) or _ingles_fija_genero(en, h) or _contenido_fija_genero(en, True, False):
+        return None  # "I'm a good girl" no puede decirlo un hombre, ni "I'm so wet!"
     opuesto = MUJER if h.genero == HOMBRE else HOMBRE
     salida = corregir_primera_persona(es, opuesto, en)
     marcas = marcas_genero(salida)

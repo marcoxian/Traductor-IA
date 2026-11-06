@@ -174,6 +174,32 @@ class TestEspejoProtagonista(unittest.TestCase):
         neutra = [e for e in ejemplos if e["output"] == "Vamos a la playa." and "1Hero (mujer)" in e["instruccion_completa"]]
         self.assertEqual(len(neutra), 1)
 
+    def test_sin_espejo_si_el_contenido_fija_el_sexo(self):
+        registros = [
+            {"input": "AlFrOp.Oh! I'm so wet!", "output": "AlFrOp.¡Oh! ¡Estoy tan mojada!"},           # anatomía
+            {"input": "HeFrOp.I'm ready. Look at my dick!", "output": "HeFrOp.Estoy listo. ¡Mira mi polla!"},
+            {"input": "AlFrOp.I'm sure you're a brave sailor.",
+             "output": "AlFrOp.Estoy segura de que eres un marinero valiente."},                    # sustantivo
+            {"input": "AlFrOp.I am a maid. I'm ready.", "output": "AlFrOp.Soy una criada. Estoy lista."},
+            {"input": "AlFrOp.I'm ready.", "output": "AlFrOp.Estoy lista."},                         # control
+        ]
+        self.corpus.write_text("".join(json.dumps(r, ensure_ascii=False) + "\n" for r in registros), encoding="utf-8")
+        _, ejemplos = self._generar(proporcion_neutros=0)
+        espejos = [e for e in ejemplos if e["contexto"] != "genero_hablante"]
+        entradas = {e["input"] for e in espejos}
+        self.assertNotIn("Oh! I'm so wet!", entradas)
+        self.assertNotIn("I'm ready. Look at my dick!", entradas)
+        # "soy una criada" dicho por un hombre: ni espejo del hablante ni doble; a la protagonista mujer, sí
+        criada = {e["contexto"] for e in espejos if "maid" in e["input"]}
+        self.assertEqual(criada, {"genero_protagonista_espejo"})
+        # "eres un marinero": no a la protagonista mujer, pero sí el espejo de quien habla (Ana hombre)
+        marinero = [e for e in espejos if "sailor" in e["input"]]
+        self.assertEqual([e["contexto"] for e in marinero], ["genero_hablante_espejo"])
+        self.assertEqual(marinero[0]["output"], "Estoy seguro de que eres un marinero valiente.")
+        self.assertIn("I'm ready.", entradas)
+        # Los originales se quedan
+        self.assertIn("¡Oh! ¡Estoy tan mojada!", {e["output"] for e in ejemplos})
+
     def test_desactivable(self):
         stats, ejemplos = self._generar(proporcion_neutros=1.0, espejo_protagonista=False)
         self.assertFalse(any("1Hero (mujer)" in e["instruccion_completa"] and e["contexto"] != "genero_hablante_espejo"
