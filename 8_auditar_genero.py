@@ -41,8 +41,9 @@ from pathlib import Path
 
 from traductor import config, xunity
 from traductor.csv_locales import analizar_cabecera, escribir_lineas, leer_lineas, partir, unir
-from traductor.genero import (HOMBRE, MUJER, contradice_genero, corregir_segunda_persona, es_genero_marcado,
-                               marcas_genero, personas_con_genero_en)
+from traductor.genero import (HOMBRE, MUJER, contradice_genero, corregir_plural, corregir_segunda_persona,
+                               es_genero_marcado, marcas_genero, marcas_plural, personas_con_genero_en,
+                               plural_a_medias)
 from traductor.motores.rpgmaker import InyectorRPGMaker
 from traductor.personajes import (ContextoLinea, FichaPersonajes, InfoLinea, Personaje, aplicar_concordancia,
                                   resolver_linea, ruta_ficha)
@@ -165,6 +166,49 @@ def _segunda_sin_nombrar(ctx: ContextoLinea, original: str, traducido: str, oyen
     return (PROBABLE if seguro and propuesta else REVISAR), propuesta, motivo
 
 
+def _plural_en_escena(ctx: ContextoLinea, original: str, traducido: str,
+                      oyentes: list[Personaje]) -> tuple[str, str, str] | None:
+    """Plural de grupo ("nosotras", "¿estáis listos?") según quién está en la escena.
+
+    El grupo de "nosotros" es quien habla más los de la escena; el de "vosotros", los de la escena menos
+    quien habla. Solo es "probable" si son al menos dos, todos con género conocido e iguales, y la
+    traducción usa el contrario. Si el inglés ya dice el género ("you girls"), no se toca.
+    """
+    h = ctx.hablante
+    if h is None or ctx.pensamiento:
+        return None
+    marcas = marcas_plural(traducido)
+    if not marcas:
+        return None
+    otros = [p for p in oyentes if p.nombre != h.nombre]
+    d = ctx.destinatario
+    if d is not None and d.nombre != h.nombre and all(p.nombre != d.nombre for p in otros):
+        otros.insert(0, d)
+    en_ingles = personas_con_genero_en(original)
+    for persona, pronombre in (("1", "nosotros"), ("2", "vosotros")):
+        formas = [g for g, letra in ((HOMBRE, "m"), (MUJER, "f")) if f"{persona}{letra}" in marcas]
+        if len(formas) != 1 or formas[0] in en_ingles:
+            continue
+        forma = formas[0]
+        grupo = ([h] if persona == "1" else []) + otros
+        if len(grupo) < 2 or not all(es_genero_marcado(p.genero) for p in grupo):
+            continue
+        generos = {p.genero for p in grupo}
+        if len(generos) != 1 or forma in generos:
+            continue
+        genero = generos.pop()
+        propuesta = corregir_plural(traducido, genero, persona)
+        if propuesta == traducido:
+            continue
+        correcto = "masculino" if genero == HOMBRE else "femenino"
+        etiquetas = ", ".join(p.etiqueta() for p in grupo[:5])
+        motivo = f"habla {h.etiqueta()}; '{pronombre}' en la escena: {etiquetas}: el plural va en {correcto}"
+        if plural_a_medias(propuesta, genero, persona):
+            return REVISAR, propuesta, motivo + " (la propuesta queda a medias: revísala)"
+        return PROBABLE, propuesta, motivo
+    return None
+
+
 def revisar_par(ficha: FichaPersonajes, original: str, traducido: str, info: InfoLinea | None,
                 archivo: str, dudosas: bool = False, ctx: ContextoLinea | None = None,
                 oyentes: list[Personaje] | None = None) -> Hallazgo | None:
@@ -213,7 +257,8 @@ def revisar_par(ficha: FichaPersonajes, original: str, traducido: str, info: Inf
         return Hallazgo(archivo, REVISAR, nombre, original, traducido, "",
                         f"{_motivo(ctx)}: la 2.ª persona tiene el género contrario")
     if oyentes is not None:
-        r = _segunda_sin_nombrar(ctx, original, traducido, oyentes, dudosas)
+        r = (_segunda_sin_nombrar(ctx, original, traducido, oyentes, dudosas)
+             or _plural_en_escena(ctx, original, traducido, oyentes))
         if r is not None:
             return Hallazgo(archivo, r[0], nombre, original, traducido, r[1], r[2])
     return None

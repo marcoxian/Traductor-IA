@@ -129,7 +129,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | 5 | `5_traducir_nombres_personajes.py` | Unifica los nombres de las cajas de diálogo con `workspace/<juego>/nombres_hablantes.csv` (`ingles;correccion`) y `nombres_propios.txt`. El motor CSV ya usa esa tabla al traducir. |
 | 6 | `6_auditoria_semantica.py` | Corrige falsos amigos (*party* → grupo, *item* → objeto, *save* → guardar…). |
 | 7 | `7_arreglar_partida_rpgmaker.py` | Aplica las correcciones a una partida guardada de RPG Maker (`.rpgsave`) sin empezar de nuevo. |
-| 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido (también sobre una copia del archivo de XUnity). La 2.ª persona que no nombra a quien escucha se marca como `probable` si todos los que están en la escena son del otro género ("¿Estás segura?" a un protagonista hombre); se aplica solo con `--corregir --segunda`, tras revisar el informe. |
+| 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido (también sobre una copia del archivo de XUnity). La 2.ª persona que no nombra a quien escucha se marca como `probable` si todos los que están en la escena son del otro género ("¿Estás segura?" a un protagonista hombre); se aplica solo con `--corregir --segunda`, tras revisar el informe. Lo mismo con el plural de grupo ("vosotros dos" a dos chicas → "vosotras dos"). |
 | 9 | `9_evaluar_genero.py` | Banco de pruebas: ¿respeta el modelo el género de quien habla? Condiciones A (sin ficha), B (con pista), C (proceso completo) y D (`--sin-hablante`: sin saber quién habla, como en Unity). |
 
 ---
@@ -163,7 +163,10 @@ Maker) y `glosario_adulto.json`.
 
 - **Concordancia de género.** Con la ficha, el prompt indica quién habla y a quién («Habla Ana (mujer).
   Probablemente se dirige al protagonista (hombre).»). Después se corrige la 1.ª persona, la 2.ª cuando se nombra a
-  quien escucha y la 3.ª con nombre. Las reglas son conservadoras: ante la duda, no se toca.
+  quien escucha y la 3.ª con nombre. El plural de grupo («nosotras», «estáis listos») solo cuando es seguro: si
+  habla un hombre, «nosotros» va en masculino; si se nombra a un hombre que escucha, «vosotros» también; y si el
+  inglés dice que el grupo son quien habla y quien escucha («both of us»), va en el género de los dos. Las reglas
+  son conservadoras: ante la duda, no se toca.
 - **Palabras con dos sentidos** (`traductor/ambiguas.py`). Pistas como «her chest», «stab you in the chest»,
   «treasure chest», «open the chest» o «get it off your chest» (frase hecha). Solo decide cuando el contexto es
   claro, y solo cambia la caché de esas frases.

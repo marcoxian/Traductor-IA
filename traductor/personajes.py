@@ -43,9 +43,9 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Iterable
 
-from .genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, convencion_de, corregir_primera_persona,
-                     corregir_segunda_persona, corregir_tercera_persona, es_genero_marcado,
-                     normalizar_genero)
+from .genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, convencion_de, corregir_plural,
+                     corregir_primera_persona, corregir_segunda_persona, corregir_tercera_persona,
+                     es_genero_marcado, normalizar_genero, personas_con_genero_en)
 
 log = logging.getLogger(__name__)
 
@@ -634,6 +634,35 @@ def resolver_linea(ficha: FichaPersonajes | None, texto: str, info: InfoLinea | 
                          mencionados=mencionados, pensamiento=pensamiento)
 
 
+# "Nosotros" que son exactamente quien habla y quien escucha. "Join us" o "we" a secas no valen: el
+# grupo puede incluir a otros ("Join us, Ana" = únete a nosotros, que ya estamos aquí).
+_EN_LOS_DOS = re.compile(r"\b(?:both of us|the two of us|we both|us both|we two|us two|you and (?:I|me)|"
+                         r"me and you|between (?:you and me|us two))\b", re.IGNORECASE)
+
+
+def _concordar_plural(texto: str, original: str, ctx: ContextoLinea) -> str:
+    """Plural de grupo, solo en los casos seguros (un grupo con un hombre va en masculino):
+
+    - Habla un hombre: "nosotras"/"estamos listas" -> masculino (él está en el grupo).
+    - Se nombra a un hombre que escucha: "vosotras"/"¿estáis listas?" -> masculino.
+    - Se nombra a quien escucha y el inglés dice que el grupo son los dos ("both of us", "you and I"):
+      "nosotros" va en el género de la pareja ("Ana, las dos lo sabemos").
+    """
+    h, d = ctx.hablante, ctx.destinatario
+    explicito = d is not None and ctx.destinatario_explicito and d is not h
+    if h is not None and h.genero == HOMBRE:
+        texto = corregir_plural(texto, HOMBRE, "1")
+    if explicito and d.genero == HOMBRE:
+        texto = corregir_plural(texto, HOMBRE, "2")
+    if explicito and not ctx.pensamiento and _EN_LOS_DOS.search(original or ""):
+        if d.genero == HOMBRE:
+            texto = corregir_plural(texto, HOMBRE, "1")
+        elif (h is not None and h.genero == MUJER and d.genero == MUJER
+              and HOMBRE not in personas_con_genero_en(original)):
+            texto = corregir_plural(texto, MUJER, "1")
+    return texto
+
+
 def aplicar_concordancia(traducido: str, original: str, ctx: ContextoLinea | None) -> str:
     """Corrige de forma determinista el género de la traducción con lo que se sabe de la línea.
 
@@ -650,6 +679,7 @@ def aplicar_concordancia(traducido: str, original: str, ctx: ContextoLinea | Non
     d = ctx.destinatario
     if d is not None and ctx.destinatario_explicito and d is not h and es_genero_marcado(d.genero):
         res = corregir_segunda_persona(res, d.genero)
+    res = _concordar_plural(res, original, ctx)
     nombrados = list(ctx.mencionados)
     if d is not None and ctx.destinatario_explicito:
         nombrados.append(d)

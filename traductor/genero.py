@@ -487,6 +487,160 @@ def corregir_segunda_persona(texto: str, genero: str) -> str:
     return _fuera_de_comillas(texto, _corregir)
 
 
+# --------------------------------------------------------------------------- Plural de grupo
+# Un grupo va en femenino solo si TODAS son mujeres; con un solo hombre, en masculino.
+# "persona" = '1' (nosotros: quien habla y los suyos) o '2' (vosotros: a quienes se habla).
+_PL_A_FEM = {m + "s": f + "s" for m, f in PARES_ADJ_GENERO}
+_PL_A_FEM.update({"solos": "solas", "juntos": "juntas"})
+_PL_A_MASC = {f: m for m, f in _PL_A_FEM.items()}
+_PL_MAPA = {HOMBRE: _PL_A_MASC, MUJER: _PL_A_FEM}
+_PL_ADJ = {HOMBRE: "|".join(sorted(_PL_A_MASC, key=len, reverse=True)),   # formas femeninas (a corregir
+           MUJER: "|".join(sorted(_PL_A_FEM, key=len, reverse=True))}    # si el grupo es de hombres)
+_V1P = (
+    r"estamos|estábamos|estuvimos|estaremos|estaríamos|estemos|estuviéramos|hemos estado|habíamos estado|"
+    r"somos|éramos|fuimos|seremos|seríamos|seamos|fuéramos|hemos sido|"
+    r"nos sentimos|nos sentíamos|nos sentiremos|nos sentiríamos|nos quedamos|nos quedábamos|nos quedaremos|"
+    r"nos hemos quedado|nos vemos|nos veíamos|nos pusimos|nos ponemos|nos hemos puesto|nos volvimos|"
+    r"nos hemos vuelto|parecemos|parecíamos|seguimos|seguíamos|andamos|vamos a estar|vamos a quedarnos|"
+    r"vamos a ser|podemos estar|podríamos estar|deberíamos estar|tenemos que estar|estamos siendo"
+)
+_V2P = (
+    r"estáis|estabais|estuvisteis|estaréis|estaríais|estéis|estuvierais|habéis estado|habíais estado|"
+    r"sois|erais|fuisteis|seréis|seríais|seáis|fuerais|habéis sido|"
+    r"os sentís|os sentíais|os sentiréis|os quedáis|os quedasteis|os habéis quedado|os veis|os veíais|"
+    r"os pusisteis|os ponéis|os habéis puesto|os volvisteis|os habéis vuelto|parecéis|parecíais|seguís|"
+    r"andáis|vais a estar|vais a ser|podéis estar|podríais estar|deberíais estar|tenéis que estar"
+)
+_P_PL = {(p, g): _patron(v, _PL_ADJ[g]) for p, v in (("1", _V1P), ("2", _V2P)) for g in (HOMBRE, MUJER)}
+_RAIZ_PRON = {"1": "nosotr", "2": "vosotr"}
+# "nosotras (mismas)", "todas nosotras": el pronombre dice la persona sin dudas.
+_P_PRON = {p: re.compile(rf"(?<!{_L})(?:(?P<todos>tod(?:os|as))\s+)?(?P<pron>{r}(?:os|as))(?!{_L})"
+                         rf"(?:(?P<sep>\s+)(?P<mismos>mism(?:os|as))(?!{_L}))?", re.IGNORECASE)
+           for p, r in _RAIZ_PRON.items()}
+# Verbos y pronombres que marcan la persona de una cláusula ("trabajamos juntas", "os vais los dos").
+_VERBO_1P = re.compile(rf"(?<!{_L})(?:{_L}{{2,}}(?:amos|emos|imos)|nos|nosotr(?:os|as))(?!{_L})", re.IGNORECASE)
+_NO_VERBO_1P = {"mismos", "primos", "ramos", "remos", "tomos", "plomos", "amos", "temos"}
+_VERBO_2P = re.compile(rf"(?<!{_L})(?:{_L}+(?:áis|éis|ais|eis)|sois|vais|os|vosotr(?:os|as))(?!{_L})",
+                       re.IGNORECASE)
+_NO_VERBO_2P = {"seis", "jamais"}
+_VERBO_3P = re.compile(r"\b(?:están|estaban|estarán|estarían|estuvieron|son|eran|serán|serían|fueron|"
+                       r"parecen|parecían|siguen|seguían|quedan|quedaron|van|iban)\b", re.IGNORECASE)
+# Palabras sueltas del grupo. "juntos/solos" solo detrás de un verbo o de "nos/os/todos" ("trabajamos
+# juntas", no "las manos juntas"); "ambos/los dos" solo si no les sigue un sustantivo ("ambas cosas").
+_SUELTAS_JUNTOS = re.compile(rf"(?P<prev>{_L}+)\s+(?P<adj>junt(?:os|as)|sol(?:os|as))(?!{_L})", re.IGNORECASE)
+_PREV_JUNTOS = re.compile(r"\w+(?:amos|emos|imos|áis|éis|ais|eis|ar|er|ir|ndo|aron|ieron)|nos|os|todos|"
+                          r"todas|estar|ser|más|muy|tan|siempre|ya", re.IGNORECASE)   # palabra entera
+_SUELTAS_AMBOS = re.compile(
+    rf"(?<!{_L})(?P<adj>amb(?:os|as)|(?:los|las)\s+dos)(?!{_L})"
+    rf"(?=\s*(?:[.,;:!?…)\"»”'~]|$)|\s+(?:no|nos|os|lo|la|le|te|me|se|ya|juntos|juntas|solos|solas|"
+    rf"{_L}+(?:amos|emos|imos|áis|éis))(?!{_L}))", re.IGNORECASE)
+_CLAUSULA = re.compile(r"[^.!?…,;:¿¡()\"«»“”]+")
+
+
+def _persona_de_clausula(clausula: str) -> str | None:
+    """'1' o '2' si la cláusula tiene verbos de esa persona del plural y no de la otra ni de la 3.ª."""
+    if _VERBO_3P.search(clausula):
+        return None
+    uno = any(m.group(0).lower() not in _NO_VERBO_1P for m in _VERBO_1P.finditer(clausula))
+    dos = any(m.group(0).lower() not in _NO_VERBO_2P for m in _VERBO_2P.finditer(clausula))
+    if uno == dos:
+        return None
+    return "1" if uno else "2"
+
+
+def _final_plural(viejo: str, genero: str) -> str:
+    """Terminación 'os'/'as' del ``genero``, con las mayúsculas de ``viejo``."""
+    fin = "os" if genero == HOMBRE else "as"
+    return fin.upper() if viejo.isupper() else fin
+
+
+def _cambiar_palabra(palabra: str, genero: str) -> str:
+    """'juntas' -> 'juntos', 'las dos' -> 'los dos', 'ambas' -> 'ambos' (o al revés)."""
+    m = re.fullmatch(r"([lL])(os|as|OS|AS)(\s+\w+)", palabra)
+    if m:
+        return m.group(1) + _final_plural(m.group(2), genero) + m.group(3)
+    return palabra[:-2] + _final_plural(palabra[-2:], genero)
+
+
+def corregir_plural(texto: str, genero: str, persona: str) -> str:
+    """Pone en ``genero`` el plural de ``persona`` ('1' nosotros, '2' vosotros): adjetivos tras el verbo
+    ("estamos listas"), pronombres ("nosotras mismas") y "juntos/solos/ambos/los dos" en cláusulas de esa
+    persona ("Si trabajamos juntas" -> "juntos"). No toca la 3.ª persona ni lo que va entre comillas."""
+    if not texto or genero not in (HOMBRE, MUJER) or persona not in ("1", "2"):
+        return texto
+    mapa = _PL_MAPA[genero]
+
+    def _pron(m: re.Match) -> str:
+        res, base = m.group(0), m.start()
+        for grupo in ("mismos", "pron", "todos"):   # de atrás adelante: las posiciones no se mueven
+            if m.group(grupo):
+                ini, fin = m.start(grupo) - base, m.end(grupo) - base
+                res = res[:ini] + _cambiar_palabra(res[ini:fin], genero) + res[fin:]
+        return res
+
+    def _clausula(m: re.Match) -> str:
+        trozo = m.group(0)
+        if _persona_de_clausula(trozo) != persona:
+            return trozo
+
+        def _junto(mj: re.Match) -> str:
+            prev = mj.group("prev")
+            if not _PREV_JUNTOS.fullmatch(prev) or prev.lower() in _NO_VERBO_1P:
+                return mj.group(0)
+            adj = mj.group("adj")
+            return mj.group(0)[: mj.start("adj") - mj.start()] + _cambiar_palabra(adj, genero)
+
+        trozo = _SUELTAS_JUNTOS.sub(_junto, trozo)
+        return _SUELTAS_AMBOS.sub(lambda ma: _cambiar_palabra(ma.group("adj"), genero), trozo)
+
+    def _corregir(trozo: str) -> str:
+        res = _P_PL[(persona, genero)].sub(lambda m: _cambiar_final(m, mapa), trozo)
+        res = _P_PRON[persona].sub(_pron, res)
+        return _CLAUSULA.sub(_clausula, res)
+
+    return _fuera_de_comillas(texto, _corregir)
+
+
+def _restos_plural(persona: str, genero: str) -> tuple[re.Pattern, ...]:
+    malo = "as" if genero == HOMBRE else "os"     # terminación del género equivocado
+    bueno = "os" if genero == HOMBRE else "as"
+    clitico = "nos" if persona == "1" else "os"
+    verbos = _V1P if persona == "1" else _V2P
+    return (
+        _patron(verbos, rf"{_L}{{2,}}{malo}"),                                    # "sois muy creativos"
+        re.compile(rf"(?<!{_L}){_RAIZ_PRON[persona]}{bueno}\s+(?:dos\s+)?(?:{_L}+\s+)?{_L}{{2,}}{malo}(?!{_L})",
+                   re.IGNORECASE),                                                  # "vosotras todos"
+        re.compile(rf"(?<!{_L}){clitico}\s+{_L}+\s+(?:como\s+)?{_L}{{2,}}{malo}(?!{_L})", re.IGNORECASE),
+    )                                                                               # "os sintáis como desnudos"
+
+
+_RESTO_PL = {(p, g): _restos_plural(p, g) for p in ("1", "2") for g in (HOMBRE, MUJER)}
+
+
+def plural_a_medias(texto: str, genero: str, persona: str) -> bool:
+    """True si, tras ``corregir_plural``, queda algo con pinta del otro género que la lista no conoce
+    ("Vosotras dos sois muy creativos", "vosotras todos"). Sirve para no dar por buena una propuesta;
+    ante la duda dice que sí (la frase pasa a revisarse a mano)."""
+    return any(p.search(texto) for p in _RESTO_PL[(persona, genero)])
+
+
+_PISTA_PLURAL = re.compile(rf"(?<!{_L})(?:nosotr|vosotr|junt|sol|amb|l[oa]s\s+dos|{_L}+[oa]s)", re.IGNORECASE)
+
+
+def marcas_plural(texto: str) -> set[str]:
+    """Marcas de género del plural de grupo: subconjunto de {'1m', '1f', '2m', '2f'}.
+    '1f' = "nosotras"/"estamos listas"/"trabajamos juntas"; '2m' = "vosotros"/"¿estáis listos?"..."""
+    if not texto or not _PISTA_PLURAL.search(texto):
+        return set()
+    marcas: set[str] = set()
+    for persona in ("1", "2"):
+        if corregir_plural(texto, HOMBRE, persona) != texto:
+            marcas.add(f"{persona}f")
+        if corregir_plural(texto, MUJER, persona) != texto:
+            marcas.add(f"{persona}m")
+    return marcas
+
+
 # --------------------------------------------------------------------------- 3.ª persona con nombre
 _PARES_TITULO = (
     ("amigo", "amiga"), ("novio", "novia"), ("vecino", "vecina"), ("compañero", "compañera"),

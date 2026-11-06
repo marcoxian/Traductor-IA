@@ -6,9 +6,9 @@ import tempfile
 import unittest
 from pathlib import Path
 
-from traductor.genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, corregir_primera_persona,
-                              corregir_segunda_persona, corregir_tercera_persona, marcas_genero,
-                              normalizar_genero, personas_con_genero_en)
+from traductor.genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, corregir_plural, corregir_primera_persona,
+                              corregir_segunda_persona, corregir_tercera_persona, marcas_genero, marcas_plural,
+                              normalizar_genero, personas_con_genero_en, plural_a_medias)
 from traductor.personajes import (FichaPersonajes, InfoLinea, Personaje, aplicar_concordancia,
                                   es_pensamiento, resolver_linea)
 
@@ -139,6 +139,36 @@ class TestSegundaYTerceraPersona(unittest.TestCase):
         self.assertEqual(corregir_primera_persona("Estoy cansada y mi madre preocupada.", HOMBRE),
                          "Estoy cansado y mi madre preocupada.")
 
+    def test_plural_de_grupo(self):
+        casos = [
+            # (texto, género del grupo, persona, esperado)
+            ("Si trabajamos juntas, podemos.", HOMBRE, "1", "Si trabajamos juntos, podemos."),
+            ("Si trabajamos juntos, podemos.", MUJER, "1", "Si trabajamos juntas, podemos."),
+            ("Tenemos el lugar para nosotros…", MUJER, "1", "Tenemos el lugar para nosotras…"),
+            ("Nosotras mismas lo haremos.", HOMBRE, "1", "Nosotros mismos lo haremos."),
+            ("Todas nosotras estamos listas.", HOMBRE, "1", "Todos nosotros estamos listos."),
+            ("ESTAMOS LISTAS.", HOMBRE, "1", "ESTAMOS LISTOS."),
+            ("Hemos estado ocupadas y cansadas.", HOMBRE, "1", "Hemos estado ocupados y cansados."),
+            ("Las dos no estamos buscando nada.", HOMBRE, "1", "Los dos no estamos buscando nada."),
+            ("Ambas queremos saberlo.", HOMBRE, "1", "Ambos queremos saberlo."),
+            ("¿Estáis listas?", HOMBRE, "2", "¿Estáis listos?"),
+            ("Vosotros dos estáis jodidos.", MUJER, "2", "Vosotras dos estáis jodidas."),
+            # Lo que no es del grupo no se toca
+            ("Rezamos con las manos juntas.", HOMBRE, "1", "Rezamos con las manos juntas."),
+            ("Podemos hacer ambas cosas.", HOMBRE, "1", "Podemos hacer ambas cosas."),
+            ("Ana y Eva están trabajando juntas.", HOMBRE, "1", "Ana y Eva están trabajando juntas."),
+            ("¿Estáis listas?", HOMBRE, "1", "¿Estáis listas?"),                 # otra persona
+            ("Dijo: «nosotras estamos listas».", HOMBRE, "1", "Dijo: «nosotras estamos listas»."),
+        ]
+        for texto, genero, persona, esperado in casos:
+            self.assertEqual(corregir_plural(texto, genero, persona), esperado, texto)
+        self.assertEqual(marcas_plural("¿Estáis listas? Nosotros sí."), {"1m", "2f"})
+        self.assertEqual(marcas_plural("Las manos juntas."), set())
+        # Propuesta a medias: "creativo" no está en la lista
+        self.assertTrue(plural_a_medias("Vosotras dos sois muy creativos.", MUJER, "2"))
+        self.assertTrue(plural_a_medias("Vosotras todos sois así.", MUJER, "2"))
+        self.assertFalse(plural_a_medias("Vosotras dos estáis jodidas.", MUJER, "2"))
+
     def test_tercera_con_pausa(self):
         self.assertEqual(corregir_tercera_persona("Ana está... muy c-cansado.", "Ana", MUJER),
                          "Ana está... muy c-cansada.")
@@ -194,6 +224,25 @@ class TestFicha(unittest.TestCase):
                          "Chloe, ¿estás lista? Bradley está cansado.")
         ctx = resolver_linea(self.f, "I'm ready!", InfoLinea(es_opcion=True))
         self.assertEqual(aplicar_concordancia("¡Estoy lista!", "I'm ready!", ctx), "¡Estoy listo!")
+
+    def test_concordancia_plural(self):
+        def concordar(original, traducido, info):
+            return aplicar_concordancia(traducido, original, resolver_linea(self.f, original, info))
+        # Habla un hombre: el "nosotros" lleva un hombre
+        self.assertEqual(concordar("We're ready.", "Estamos listas.", InfoLinea(codigo="Br")), "Estamos listos.")
+        # ...pero el "vosotros" puede ser de chicas
+        self.assertEqual(concordar("You two are ready.", "Vosotras dos estáis listas.", InfoLinea(codigo="Br")),
+                         "Vosotras dos estáis listas.")
+        # Se nombra a un hombre que escucha: "vosotros" lo incluye
+        self.assertEqual(concordar("Bradley, are you two ready?", "Bradley, ¿estáis listas?", InfoLinea(codigo="He")),
+                         "Bradley, ¿estáis listos?")
+        # Dos mujeres y el inglés dice que el grupo son ellas dos
+        self.assertEqual(concordar("Chloe, we both know it. We're alone.", "Chloe, ambos lo sabemos. Estamos solos.",
+                                   InfoLinea(codigo="He")),
+                         "Chloe, ambas lo sabemos. Estamos solas.")
+        # "Join us": el grupo puede incluir a otros (a un hombre): no se toca
+        self.assertEqual(concordar("Join us, Chloe.", "Únete a nosotros, Chloe.", InfoLinea(codigo="He")),
+                         "Únete a nosotros, Chloe.")
 
     def test_pensamiento(self):
         self.assertTrue(es_pensamiento("<i>(I'm sure it's a trap.)</i>"))

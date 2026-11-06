@@ -160,6 +160,30 @@ class TestSegundaPersonaSinNombrar(unittest.TestCase):
         self.assertIn("NpFrOp.Estoy de descanso. Cocínala tú mismo.", textos)
         self.assertEqual(auditoria.auditar_rpgmaker(self.tmp, self._ficha())[0], [])
 
+    def test_plural_segun_la_escena(self):
+        """S2: el protagonista (hombre) habla a Laura y Chloe: "vosotros dos" va en femenino."""
+        ficha = self._ficha()
+        ctx = auditoria.resolver_linea(ficha, "You two are fucked up.", auditoria.InfoLinea(codigo="Mc"))
+        oyentes = [ficha.buscar("Laura"), ficha.buscar("Chloe")]
+        h = auditoria.revisar_par(ficha, "You two are fucked up.", "Vosotros dos estáis jodidos.", None, "x",
+                                  ctx=ctx, oyentes=oyentes)
+        self.assertEqual((h.tipo, h.propuesta), (auditoria.PROBABLE, "Vosotras dos estáis jodidas."))
+        self.assertIn("el plural va en femenino", h.motivo)
+        # Propuesta a medias ("creativo" no está en la lista): solo para revisar
+        h = auditoria.revisar_par(ficha, "You two are creative.", "Vosotros dos sois muy creativos.", None, "x",
+                                  ctx=ctx, oyentes=oyentes)
+        self.assertEqual(h.tipo, auditoria.REVISAR)
+        # Si en la escena también hay un hombre, no se sabe a quiénes habla: no se toca
+        ficha.personajes.append(Personaje("Bradley", "hombre", codigos=["Br"]))
+        ficha.reindexar()
+        h = auditoria.revisar_par(ficha, "You two are fucked up.", "Vosotros dos estáis jodidos.", None, "x",
+                                  ctx=ctx, oyentes=oyentes + [ficha.buscar("Bradley")])
+        self.assertIsNone(h)
+        # "you boys": el inglés da la razón a la traducción (habla a otros que no están en la escena)
+        ctx = auditoria.resolver_linea(ficha, "You boys are crazy.", auditoria.InfoLinea(codigo="Mc"))
+        self.assertIsNone(auditoria.revisar_par(ficha, "You boys are crazy.", "Vosotros estáis locos.", None,
+                                                "x", ctx=ctx, oyentes=oyentes))
+
     def test_genero_desconocido_en_la_escena_no_es_probable(self):
         ficha = self._ficha()
         ficha.personajes.append(Personaje("Guard", "desconocido", codigos=["Gu"]))
