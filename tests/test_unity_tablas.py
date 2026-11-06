@@ -7,7 +7,8 @@ import unittest
 from pathlib import Path
 
 from traductor import xunity
-from traductor.motores.unity_tablas import (elegir, genero_de_quien_habla, leer_tabla, pretraducir_tablas)
+from traductor.motores.unity_tablas import (PistasTablas, elegir, genero_de_quien_escucha, genero_de_quien_habla,
+                                            leer_tabla, pretraducir_tablas)
 from traductor.personajes import FichaPersonajes, InfoLinea, Personaje
 
 CSV = ('ID,ZH,EN,JA,ua,ru\r\n'
@@ -63,6 +64,37 @@ class TestPistaDeSexo(unittest.TestCase):
 
     def test_si_se_contradicen_no_hay_pista(self):
         self.assertIsNone(genero_de_quien_habla({"ru": "Я сделала это.", "ua": "Я зробив це."}))
+
+    def test_sexo_de_quien_escucha(self):
+        """"Tú" en ruso/ucraniano: el pasado y el adjetivo corto dicen el sexo de quien escucha."""
+        self.assertEqual(genero_de_quien_escucha({"ru": "Ты уверена, что уходишь?"}), "mujer")
+        self.assertEqual(genero_de_quien_escucha({"ru": "Ты хорошо поработал!"}), "hombre")
+        self.assertEqual(genero_de_quien_escucha({"ru": "Почему ты разделась?"}), "mujer")
+        self.assertEqual(genero_de_quien_escucha({"ua": "Ти впевнена?"}), "mujer")
+        self.assertEqual(genero_de_quien_escucha({"ua": "Ти не правий."}), None)   # "правий" no está: sin pista
+        self.assertEqual(genero_de_quien_escucha({"ru": "Ты должен идти.", "ua": "Ти повинен іти."}), "hombre")
+        self.assertIsNone(genero_de_quien_escucha({"ru": "Я устала."}))           # habla de sí: no es "tú"
+        self.assertIsNone(genero_de_quien_escucha({"ru": "Ты сделала это.", "ua": "Ти зробив це."}))  # se contradicen
+        # Quien habla y quien escucha a la vez
+        celdas = {"ru": "Я рада, что ты пришёл."}
+        self.assertEqual((genero_de_quien_habla(celdas), genero_de_quien_escucha(celdas)), ("mujer", "hombre"))
+
+
+class TestPistasTablas(unittest.TestCase):
+    def test_busca_por_frase_y_normalizada(self):
+        csv = ('ID,EN,ru\n'
+               '1,"Are you sure?","Ты уверена?"\n'
+               '2,"<b>Why are you naked?</b>","Почему ты разделась?"\n'
+               '3,"I did it.","Я сделала это."\n'
+               '4,"You did it.","Ты сделал это."\n'
+               '5,"You did it.","Ты сделала это."\n')     # misma frase a los dos sexos: sin pista
+        pistas = PistasTablas([leer_tabla("t", csv)])
+        self.assertEqual(pistas.genero_oyente("Are you sure?"), "mujer")
+        self.assertEqual(pistas.genero_oyente("Why are you naked?"), "mujer")   # sin la etiqueta
+        self.assertIsNone(pistas.genero_oyente("You did it."))
+        self.assertEqual(pistas.info("I did it."), InfoLinea(hablante=None, genero="mujer"))
+        self.assertIsNone(pistas.info("Are you sure?"))
+        self.assertEqual(pistas.escena("Are you sure?"), ())
 
 
 class TraductorFalso:

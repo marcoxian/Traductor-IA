@@ -52,16 +52,50 @@ _PISTAS = {"ru": (_RU_ELLA, _RU_EL), "rus": (_RU_ELLA, _RU_EL), "russian": (_RU_
            "ukrainian": (_UA_ELLA, _UA_EL)}
 
 
+# Lo mismo con "tú" (ты / ти): el sexo de quien ESCUCHA ("ты готов" se le dice a él, "ты готова" a ella).
+_RU_TU_ELLA = re.compile(
+    r"\bты\b(?:\s+\w+){0,3}?\s+\w{2,}(?:ла|лась)\b"
+    r"|\bты\s+(?:\w+\s+)?(?:рада|готова|должна|уверена|довольна|согласна|счастлива|права|одна|сама|"
+    r"красива|глупа|умна|влюблена|свободна|больна|голодна|нужна)\b",
+    re.IGNORECASE)
+_RU_TU_EL = re.compile(
+    r"\bты\b(?:\s+\w+){0,3}?\s+\w{2,}(?:[аеиоуыяю]л|лся|ёл|ел)\b"
+    r"|\bты\s+(?:\w+\s+)?(?:рад|готов|должен|уверен|доволен|согласен|счастлив|прав|один|сам|"
+    r"красив|глуп|умён|умен|влюблён|влюблен|свободен|болен|голоден|нужен)\b",
+    re.IGNORECASE)
+_UA_TU_ELLA = re.compile(
+    r"\bти\b(?:\s+\w+){0,3}?\s+\w{2,}(?:ла|лася)\b"
+    r"|\bти\s+(?:\w+\s+)?(?:рада|готова|повинна|впевнена|задоволена|згодна|щаслива|сама|одна)\b",
+    re.IGNORECASE)
+_UA_TU_EL = re.compile(
+    r"\bти\b(?:\s+\w+){0,3}?\s+\w{2,}(?:[аеиоуі]в|вся)\b"
+    r"|\bти\s+(?:\w+\s+)?(?:радий|готовий|повинен|впевнений|задоволений|згоден|щасливий|сам|один)\b",
+    re.IGNORECASE)
+_PISTAS_TU = {"ru": (_RU_TU_ELLA, _RU_TU_EL), "rus": (_RU_TU_ELLA, _RU_TU_EL), "russian": (_RU_TU_ELLA, _RU_TU_EL),
+              "ua": (_UA_TU_ELLA, _UA_TU_EL), "uk": (_UA_TU_ELLA, _UA_TU_EL), "ukr": (_UA_TU_ELLA, _UA_TU_EL),
+              "ukrainian": (_UA_TU_ELLA, _UA_TU_EL)}
+
+
 def _genero_en(texto: str, ella: re.Pattern, el: re.Pattern) -> str | None:
     f, m = bool(ella.search(texto)), bool(el.search(texto))
     return "mujer" if f and not m else "hombre" if m and not f else None
 
 
-def genero_de_quien_habla(celdas: dict[str, str]) -> str | None:
-    """'hombre'/'mujer' si las traducciones rusa/ucraniana de la fila lo dejan claro (y no se contradicen)."""
-    votos = {_genero_en(t, *_PISTAS[c]) for c, t in celdas.items() if c in _PISTAS and t}
+def _votar(celdas: dict[str, str], pistas: dict[str, tuple[re.Pattern, re.Pattern]]) -> str | None:
+    votos = {_genero_en(t, *pistas[c]) for c, t in celdas.items() if c in pistas and t}
     votos.discard(None)
     return votos.pop() if len(votos) == 1 else None
+
+
+def genero_de_quien_habla(celdas: dict[str, str]) -> str | None:
+    """'hombre'/'mujer' si las traducciones rusa/ucraniana de la fila lo dejan claro (y no se contradicen)."""
+    return _votar(celdas, _PISTAS)
+
+
+def genero_de_quien_escucha(celdas: dict[str, str]) -> str | None:
+    """'hombre'/'mujer' de la persona a la que se habla ("ты готов" / "ты готова"), si el ruso/ucraniano lo
+    deja claro y no se contradicen."""
+    return _votar(celdas, _PISTAS_TU)
 
 
 # --------------------------------------------------------------------------- lectura de tablas
@@ -72,6 +106,7 @@ class TablaTexto:
     filas: list[list[str]]
     col_en: int
     entradas: list[tuple[str, str | None]] = field(default_factory=list)  # (inglés, sexo de quien habla)
+    oyentes: dict[str, str | None] = field(default_factory=dict)          # inglés -> sexo de quien escucha
 
     @property
     def es_dialogo(self) -> bool:
@@ -116,17 +151,21 @@ def leer_tabla(nombre: str, contenido: str) -> TablaTexto | None:
             continue
         celdas = {cab[i]: fila[i] for i in range(min(len(cab), len(fila)))}
         genero = genero_de_quien_habla(celdas)
+        oyente = genero_de_quien_escucha(celdas)
         # Una pausa del juego en mitad de la frase ("...culture,{wc} so she..."): el juego enseña cada
         # trozo por separado y XUnity los ve sueltos, así que también se traduce cada trozo
         trozos = [p.strip() for p in _PAUSA.split(texto)] if _PAUSA.search(texto) else []
         for frase in [texto] + [p for p in trozos if _texto_visible_ingles(p)]:
-            if frase in vistos:  # la misma frase dicha por personas de distinto sexo: sin pista
+            if frase in vistos:  # la misma frase dicha por/a personas de distinto sexo: sin pista
                 i = vistos[frase]
                 if tabla.entradas[i][1] != genero:
                     tabla.entradas[i] = (frase, None)
+                if tabla.oyentes.get(frase) != oyente:
+                    tabla.oyentes[frase] = None
                 continue
             vistos[frase] = len(tabla.entradas)
             tabla.entradas.append((frase, genero))
+            tabla.oyentes[frase] = oyente
     return tabla if tabla.entradas else None
 
 
@@ -197,6 +236,41 @@ def _unico_por_genero(ficha) -> dict[str, str]:
         return {}
     del_mismo = [p for p in ficha.personajes if p.genero == prota.genero]
     return {prota.genero: prota.nombre} if len(del_mismo) == 1 else {}
+
+
+class PistasTablas:
+    """Lo que las columnas rusa/ucraniana dicen de cada frase inglesa: sexo de quien habla y de quien escucha.
+
+    Sirve a la auditoría de género (``8_auditar_genero.py``) con la misma interfaz que ``TablaHablantes``
+    (``info`` y ``escena``) más ``genero_oyente``. Busca la frase tal cual o normalizada (sin etiquetas ni
+    comillas tipográficas), como llega de XUnity. Si una frase sale con pistas distintas, no hay pista."""
+
+    def __init__(self, tablas: list[TablaTexto], ficha=None):
+        from ..unity_dialogos import _normalizar
+        self._normalizar = _normalizar
+        self._unico = _unico_por_genero(ficha)
+        self._hablante: dict[str, str | None] = {}
+        self._oyente: dict[str, str | None] = {}
+        for tabla in tablas:
+            for frase, genero in tabla.entradas:
+                for destino, valor in ((self._hablante, genero), (self._oyente, tabla.oyentes.get(frase))):
+                    for clave in {frase, _normalizar(frase)}:
+                        destino[clave] = valor if destino.get(clave, valor) == valor else None
+
+    def __len__(self) -> int:
+        return sum(1 for v in self._hablante.values() if v) + sum(1 for v in self._oyente.values() if v)
+
+    def _buscar(self, tabla: dict[str, str | None], texto: str) -> str | None:
+        return tabla[texto] if texto in tabla else tabla.get(self._normalizar(texto))
+
+    def info(self, texto: str) -> InfoLinea | None:
+        return _info(self._buscar(self._hablante, texto), self._unico)
+
+    def escena(self, texto: str) -> tuple:
+        return ()   # las tablas no dicen quién más está en la conversación
+
+    def genero_oyente(self, texto: str) -> str | None:
+        return self._buscar(self._oyente, texto)
 
 
 def _info(genero: str | None, unico: dict[str, str]) -> InfoLinea | None:

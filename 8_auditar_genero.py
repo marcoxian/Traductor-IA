@@ -213,20 +213,42 @@ def _plural_en_escena(ctx: ContextoLinea, original: str, traducido: str,
     return None
 
 
+def _segunda_por_pista(ctx: ContextoLinea, traducido: str, genero_oyente: str) -> tuple[str, str, str] | None:
+    """2.ª persona cuando otra traducción del juego (ruso/ucraniano: "ты готов"/"ты готова") dice el sexo de
+    quien escucha. Es una pista fuerte, pero de otro traductor: "probable", no automático."""
+    if ctx.pensamiento or genero_oyente not in (HOMBRE, MUJER):
+        return None
+    forma = _forma_segunda(traducido)
+    if forma is None or forma == genero_oyente:
+        return None
+    propuesta = corregir_segunda_persona(traducido, genero_oyente)
+    correcto = "masculino" if genero_oyente == HOMBRE else "femenino"
+    motivo = f"la traducción rusa/ucraniana le habla a un{'' if genero_oyente == HOMBRE else 'a'} " \
+             f"{'hombre' if genero_oyente == HOMBRE else 'mujer'}: la 2.ª persona va en {correcto}"
+    if propuesta == traducido or _forma_segunda(propuesta) == forma:
+        return REVISAR, "", motivo + " (no se sabe corregir entera)"
+    return PROBABLE, propuesta, motivo
+
+
 def revisar_par(ficha: FichaPersonajes, original: str, traducido: str, info: InfoLinea | None,
                 archivo: str, dudosas: bool = False, ctx: ContextoLinea | None = None,
-                oyentes: list[Personaje] | None = None) -> Hallazgo | None:
+                oyentes: list[Personaje] | None = None, genero_oyente: str | None = None) -> Hallazgo | None:
     """Compara una línea original con su traducción. None si no hay nada que señalar.
 
     Con ``dudosas`` también señala (para revisar a mano, sin corregir) las líneas SIN hablante
     conocido cuya 1.ª persona tiene el género contrario al del protagonista: puede que las diga él/ella.
     ``ctx``: la línea ya resuelta (si no, se resuelve aquí). ``oyentes``: quienes hablan cerca
     (``hablantes_cerca``); sin ellos no se revisa la 2.ª persona que no nombra a quien escucha.
+    ``genero_oyente``: sexo de quien escucha según otra traducción del juego (``PistasTablas``).
     """
     if not traducido or traducido == original:
         return None
     if ctx is None:
         ctx = resolver_linea(ficha, original, info)
+    pista = _segunda_por_pista(ctx, traducido, genero_oyente) if genero_oyente else None
+    nombre = ctx.hablante.nombre if ctx.hablante is not None else ""
+    if pista is not None and (ctx.hablante is None or ctx.vacio):
+        return Hallazgo(archivo, pista[0], nombre, original, traducido, pista[1], pista[2])
     if ctx.hablante is None and oyentes is not None:
         # Quien habla no está en la ficha ("NPC", "Clerk"...) o es un texto sin hablante: en 2.ª persona
         # casi siempre va para el protagonista, pero solo es "probable" si nadie más en la escena encaja.
@@ -249,9 +271,10 @@ def revisar_par(ficha: FichaPersonajes, original: str, traducido: str, info: Inf
     if ctx.vacio:
         return None
     propuesta = aplicar_concordancia(traducido, original, ctx)
-    nombre = ctx.hablante.nombre if ctx.hablante is not None else ""
     if propuesta != traducido:
         return Hallazgo(archivo, CORREGIBLE, nombre, original, traducido, propuesta, _motivo(ctx))
+    if pista is not None:
+        return Hallazgo(archivo, pista[0], nombre, original, traducido, pista[1], pista[2])
     h = ctx.hablante
     if h is not None and h.genero_conocido and contradice_genero(traducido, "1", h.genero):
         return Hallazgo(archivo, REVISAR, nombre, original, traducido, "",
@@ -271,11 +294,11 @@ def revisar_par(ficha: FichaPersonajes, original: str, traducido: str, info: Inf
 def revisar_linea(ficha: FichaPersonajes, original: str, traducido: str, info: InfoLinea | None,
                   archivo: str, dudosas: bool = False, perfil_nombres=None,
                   contexto: str = "", ctx: ContextoLinea | None = None,
-                  oyentes: list[Personaje] | None = None) -> list[Hallazgo]:
+                  oyentes: list[Personaje] | None = None, genero_oyente: str | None = None) -> list[Hallazgo]:
     """``revisar_par`` y, con ``perfil_nombres`` (un ``config.Perfil``), también restaura los nombres
     protegidos que la traducción perdió ("Jasmine" traducido como "Jazmín"). 0, 1 o 2 hallazgos:
     si la línea es dudosa de género Y tiene un nombre que restaurar, salen los dos."""
-    h = revisar_par(ficha, original, traducido, info, archivo, dudosas, ctx, oyentes)
+    h = revisar_par(ficha, original, traducido, info, archivo, dudosas, ctx, oyentes, genero_oyente)
     hallazgos = [h] if h is not None else []
     if perfil_nombres is not None and traducido and traducido != original:
         base = h.propuesta if h is not None and h.tipo in (CORREGIBLE, PROBABLE) else traducido
@@ -502,8 +525,10 @@ def auditar_xunity(ruta_txt: Path, ficha: FichaPersonajes, corregir: bool = Fals
                 presentes = [_personaje_de(ficha, h) for h in hablantes.escena(original)]
                 presentes = [p for p in presentes if p is not None]
                 oyentes = presentes if presentes else None   # sin escena conocida no se adivina quién escucha
+            pista_oyente = getattr(hablantes, "genero_oyente", None)
             hs = revisar_linea(ficha, original, traducido, info, ruta_txt.name, dudosas, perfil_nombres,
-                               _contexto(originales, i) if i is not None else "", ctx, oyentes)
+                               _contexto(originales, i) if i is not None else "", ctx, oyentes,
+                               pista_oyente(original) if pista_oyente is not None else None)
             hallazgos.extend(hs)
             propuesta = _propuesta(hs, segunda)
             if propuesta is not None:
@@ -584,6 +609,14 @@ def main(argv: list[str] | None = None) -> int:
         tabla = TablaHablantes.cargar(ruta_tabla(juego))
         if len(tabla):
             log.info("Quién habla en Unity: %d frases con hablante (%s)", len(tabla), ruta_tabla(juego).name)
+        else:
+            # Sin objetos Dialogue: quizá las tablas de texto del juego traen ruso/ucraniano, que dicen el
+            # sexo de quien habla y de quien escucha
+            from traductor.motores.unity_tablas import PistasTablas, extraer_tablas
+            pistas = PistasTablas(extraer_tablas(ruta_juego), ficha)
+            if len(pistas):
+                log.info("Pistas de sexo de las tablas del juego (ruso/ucraniano): %d", len(pistas))
+                tabla = pistas
         for txt in archivos_xunity:
             h, a = auditar_xunity(txt, ficha, corregir=args.corregir, dudosas=args.dudosas,
                                   perfil_nombres=perfil_nombres, hablantes=tabla if len(tabla) else None,
