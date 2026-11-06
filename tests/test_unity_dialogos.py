@@ -59,6 +59,21 @@ class TestTabla(unittest.TestCase):
             self.assertEqual(t.info("Yo."), InfoLinea(hablante=None, genero="mujer"))
             self.assertEqual(len(TablaHablantes.cargar(Path(tmp) / "no_existe.json")), 0)
 
+    def test_escenas_se_guardan_y_se_leen(self):
+        """Quiénes hablan en la conversación de cada frase (para saber quién más escucha)."""
+        ana, guardia, eva = Hablante("Ana", "mujer"), Hablante("Guard", "hombre"), Hablante("", "mujer")
+        with tempfile.TemporaryDirectory() as tmp:
+            ruta = Path(tmp) / "hablantes_unity.json"
+            guardar_tabla(ruta, {"Hi.": guardia}, {"Hi.": (ana, guardia), "<b>You two</b> run.": (ana, eva)})
+            t = TablaHablantes.cargar(ruta)
+            self.assertEqual(t.escena("Hi."), (ana, guardia))
+            self.assertEqual(set(t.escena("you two  run.")), {ana, eva})  # aunque cambien las etiquetas
+            self.assertEqual(t.escena("Otra frase."), ())
+            # Un archivo antiguo, sin escenas, se sigue leyendo
+            guardar_tabla(ruta, {"Hi.": guardia})
+            self.assertEqual(TablaHablantes.cargar(ruta).escena("Hi."), ())
+            self.assertEqual(TablaHablantes.cargar(ruta).info("Hi."), InfoLinea(hablante="Guard", genero="hombre"))
+
 
 def _ficha() -> FichaPersonajes:
     return FichaPersonajes(personajes=[Personaje("Ana", "mujer", "protagonista"), Personaje("Max", "neutro")])

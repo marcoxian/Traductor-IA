@@ -640,6 +640,11 @@ _EN_LOS_DOS = re.compile(r"\b(?:both of us|the two of us|we both|us both|we two|
                          r"me and you|between (?:you and me|us two))\b", re.IGNORECASE)
 
 
+def es_los_dos(original: str) -> bool:
+    """True si el inglés dice que el grupo del "nosotros" son quien habla y quien escucha."""
+    return bool(_EN_LOS_DOS.search(original or ""))
+
+
 def _concordar_plural(texto: str, original: str, ctx: ContextoLinea) -> str:
     """Plural de grupo, solo en los casos seguros (un grupo con un hombre va en masculino):
 

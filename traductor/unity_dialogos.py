@@ -99,13 +99,22 @@ def _clave_archivo(nombre: str) -> str:
 def extraer_hablantes(ruta_juego: Path) -> dict[str, Hablante]:
     """Lee los archivos del juego y devuelve ``{frase inglesa: Hablante}``. Las frases que dicen personajes
     distintos se quedan sin hablante (salvo que todos sean del mismo género)."""
+    return leer_dialogos(ruta_juego)[0]
+
+
+def leer_dialogos(ruta_juego: Path) -> tuple[dict[str, Hablante], dict[str, tuple[Hablante, ...]]]:
+    """Como ``extraer_hablantes`` y además, para cada frase, quiénes hablan en su conversación (el objeto
+    ``Dialogue`` donde sale): ``{frase: (Hablante, ...)}``. Sirve para saber quién más está en la escena y
+    puede estar escuchando. Si una frase sale en varias conversaciones, se juntan todos."""
     try:
         import UnityPy
     except ImportError:
         log.info("UnityPy no está instalado: no se puede saber quién habla en este juego de Unity.")
-        return {}
+        return {}, {}
     personajes: dict[tuple[str, int], tuple[str, str | None]] = {}
-    pendientes: list[tuple[str, str, str | None, int, str]] = []  # texto, speaker, archivo destino, path_id, sustituto
+    # texto, speaker, archivo destino, path_id, sustituto, número de conversación
+    pendientes: list[tuple[str, str, str | None, int, str, int]] = []
+    conversaciones = 0
     for ruta in _archivos_de_datos(ruta_juego):
         try:
             env = UnityPy.load(str(ruta))
@@ -124,6 +133,7 @@ def extraer_hablantes(ruta_juego: Path) -> dict[str, Hablante]:
                 if datos:
                     personajes[(_clave_archivo(obj.assets_file.name), obj.path_id)] = datos
             elif clase == "Dialogue":
+                conversaciones += 1
                 for texto, speaker, fid, pid, sustituto in lineas_de_dialogo(obj.get_raw_data()):
                     destino = None
                     if pid:
@@ -132,23 +142,33 @@ def extraer_hablantes(ruta_juego: Path) -> dict[str, Hablante]:
                                        else _clave_archivo(obj.assets_file.externals[fid - 1].path))
                         except IndexError:
                             destino = None
-                    pendientes.append((texto, speaker, destino, pid, sustituto))
+                    pendientes.append((texto, speaker, destino, pid, sustituto, conversaciones))
 
     candidatos: dict[str, set[Hablante]] = defaultdict(set)
-    for texto, speaker, destino, pid, sustituto in pendientes:
+    por_conversacion: dict[int, set[Hablante]] = defaultdict(set)
+    conversaciones_de: dict[str, set[int]] = defaultdict(set)
+    for texto, speaker, destino, pid, sustituto, n in pendientes:
         nombre, genero = personajes.get((destino, pid), (None, None)) if destino else (None, None)
         nombre = sustituto or speaker or nombre
         if nombre:
-            candidatos[texto].add(Hablante(nombre, genero))
+            h = Hablante(nombre, genero)
+            candidatos[texto].add(h)
+            por_conversacion[n].add(h)
+        conversaciones_de[texto].add(n)
     tabla: dict[str, Hablante] = {}
     for texto, opciones in candidatos.items():
         if len(opciones) == 1:
             tabla[texto] = next(iter(opciones))
         elif len({h.genero for h in opciones}) == 1 and next(iter(opciones)).genero:
             tabla[texto] = Hablante("", next(iter(opciones)).genero)  # varios, pero del mismo género
+    escenas: dict[str, tuple[Hablante, ...]] = {}
+    for texto, numeros in conversaciones_de.items():
+        presentes = {h for n in numeros for h in por_conversacion[n]}
+        if presentes:
+            escenas[texto] = tuple(sorted(presentes, key=lambda h: (h.nombre, h.genero or "")))
     log.info("🗣 Quién habla en Unity: %d personajes y %d frases con hablante leídos del juego.",
              len(personajes), len(tabla))
-    return tabla
+    return tabla, escenas
 
 
 # --------------------------------------------------------------------------- Tabla guardada
@@ -157,10 +177,18 @@ def ruta_tabla(juego: str) -> Path:
     return config.carpeta_juego(juego) / NOMBRE_ARCHIVO
 
 
-def guardar_tabla(ruta: Path, tabla: dict[str, Hablante]) -> None:
+def guardar_tabla(ruta: Path, tabla: dict[str, Hablante],
+                  escenas: dict[str, tuple[Hablante, ...]] | None = None) -> None:
     datos = {t: {"hablante": h.nombre, "genero": h.genero} for t, h in sorted(tabla.items())}
+    contenido: dict = {"version": 2 if escenas else 1, "frases": datos}
+    if escenas:
+        # Cada personaje se escribe una vez y las escenas apuntan a su posición
+        personajes = sorted({h for hs in escenas.values() for h in hs}, key=lambda h: (h.nombre, h.genero or ""))
+        posicion = {h: i for i, h in enumerate(personajes)}
+        contenido["personajes"] = [[h.nombre, h.genero] for h in personajes]
+        contenido["escenas"] = {t: [posicion[h] for h in hs] for t, hs in sorted(escenas.items())}
     ruta.parent.mkdir(parents=True, exist_ok=True)
-    ruta.write_text(json.dumps({"version": 1, "frases": datos}, ensure_ascii=False, indent=1), encoding="utf-8")
+    ruta.write_text(json.dumps(contenido, ensure_ascii=False, indent=1), encoding="utf-8")
 
 
 def preparar_tabla(juego: str | None, ruta_juego: Path, *, rehacer: bool = False) -> Path | None:
@@ -171,10 +199,10 @@ def preparar_tabla(juego: str | None, ruta_juego: Path, *, rehacer: bool = False
     ruta = ruta_tabla(juego)
     if ruta.exists() and not rehacer:
         return ruta
-    tabla = extraer_hablantes(ruta_juego)
+    tabla, escenas = leer_dialogos(ruta_juego)
     if not tabla:
         return None
-    guardar_tabla(ruta, tabla)
+    guardar_tabla(ruta, tabla, escenas)
     log.info("🗣 Guardado %s", ruta)
     return ruta
 
@@ -189,12 +217,16 @@ def _normalizar(texto: str) -> str:
 class TablaHablantes:
     """Busca quién dice una frase tal como llega de XUnity (con o sin etiquetas de formato)."""
 
-    def __init__(self, frases: dict[str, Hablante]):
+    def __init__(self, frases: dict[str, Hablante], escenas: dict[str, tuple[Hablante, ...]] | None = None):
         self._exactas = frases
         normalizadas: dict[str, set[Hablante]] = defaultdict(set)
         for texto, h in frases.items():
             normalizadas[_normalizar(texto)].add(h)
         self._normalizadas = {k: next(iter(v)) for k, v in normalizadas.items() if len(v) == 1}
+        self._escenas = escenas or {}
+        self._escenas_norm: dict[str, set[Hablante]] = defaultdict(set)
+        for texto, hs in self._escenas.items():
+            self._escenas_norm[_normalizar(texto)].update(hs)
 
     def __len__(self) -> int:
         return len(self._exactas)
@@ -204,14 +236,27 @@ class TablaHablantes:
         if ruta is None or not Path(ruta).exists():
             return cls({})
         try:
-            datos = json.loads(Path(ruta).read_text(encoding="utf-8")).get("frases", {})
+            contenido = json.loads(Path(ruta).read_text(encoding="utf-8"))
         except (OSError, ValueError) as e:
             log.warning("No se pudo leer %s: %s", ruta, e)
             return cls({})
-        return cls({t: Hablante(d.get("hablante") or "", d.get("genero")) for t, d in datos.items()})
+        datos = contenido.get("frases", {})
+        frases = {t: Hablante(d.get("hablante") or "", d.get("genero")) for t, d in datos.items()}
+        personajes = [Hablante(n or "", g) for n, g in contenido.get("personajes", [])]
+        escenas: dict[str, tuple[Hablante, ...]] = {}
+        for t, indices in contenido.get("escenas", {}).items():
+            escenas[t] = tuple(personajes[i] for i in indices if 0 <= i < len(personajes))
+        return cls(frases, escenas)
 
     def buscar(self, texto: str) -> Hablante | None:
         return self._exactas.get(texto) or self._normalizadas.get(_normalizar(texto))
+
+    def escena(self, texto: str) -> tuple[Hablante, ...]:
+        """Quiénes hablan en la conversación donde sale la frase (vacío si no se sabe)."""
+        exacta = self._escenas.get(texto)
+        if exacta is not None:
+            return exacta
+        return tuple(sorted(self._escenas_norm.get(_normalizar(texto), ()), key=lambda h: (h.nombre, h.genero or "")))
 
     def info(self, texto: str) -> InfoLinea | None:
         h = self.buscar(texto)
