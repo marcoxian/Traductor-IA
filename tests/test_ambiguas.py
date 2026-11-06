@@ -204,22 +204,56 @@ class TestVulgares(unittest.TestCase):
             self.assertTrue(f("I'm cumming!", mal), mal)
         self.assertTrue(f("God! Make me cum, baby!", "¡Dios mío... fóllame ya, cariño!"))
         self.assertFalse(f("Good boy. Suckle at my tit.", "Buen chico. Chupa mi pezón."))
-        self.assertFalse(f("Yes! What a pussy!", "¡Sí! ¡Qué cobarde!"))                    # insulto: nada
+        self.assertFalse(f("Ha! You're a pussy!", "¡Ja! ¡Eres un cobarde!"))               # insulto: nada
         nota = ambiguas.nota_reintento(f("Eat that pussy, Kim.", "Llévate esa pija, Kim."))
         self.assertIn("'pussy' es 'coño'", nota)
 
     def test_insultos(self):
         """Los insultos se traducen con un insulto igual de vulgar ("nenaza", "capullo"), no con el órgano."""
         insultos = lambda t: {d.palabra: d.termino for d in ambiguas.decidir(t) if d.sentido == "insulto"}
-        self.assertEqual(insultos("Yes! What a pussy!"), {"pussy": "nenaza"})
+        self.assertEqual(insultos("Ugh. You're such a pussy."), {"pussy": "nenaza"})
         self.assertEqual(insultos("Don't be a dick."), {"dick": "capullo"})
         self.assertEqual(insultos("Eat that pussy."), {})
         f = ambiguas.sentido_equivocado
-        self.assertTrue(f("Yes! What a pussy!", "¡Sí! Qué coño de pija más grande..."))   # caso real
+        self.assertTrue(f("Quit being a pussy, Rolo.", "Deja de ser un coño, Rolo."))
         self.assertFalse(f("Ugh. You’re a pussy.", "¡Vaya... qué gallina eres!"))
         self.assertFalse(f("Don't be a dick.", "No seas capullo."))
-        self.assertIn(("pussy", "nenaza"), ambiguas.terminos("Yes! What a pussy!"))
-        self.assertIn("insulto", ambiguas.nota_reintento(f("Yes! What a pussy!", "¡Qué coño!")))
+        self.assertIn(("pussy", "nenaza"), ambiguas.terminos("You little pussy!"))
+        self.assertIn("insulto", ambiguas.nota_reintento(f("You little pussy!", "¡Qué coño!")))
+
+    def test_insulto_o_cuerpo(self):
+        """Y3 (c): "What a pussy!" depende de la escena; con verbo o a quien escucha, siempre insulto."""
+        sentidos = lambda t: {d.palabra: d.sentido for d in ambiguas.decidir(t)}
+        # Con verbo o a quien escucha: insulto, con lo que haya alrededor
+        self.assertEqual(sentidos("You're a pussy, and you're soaking wet from the rain."), {"pussy": "insulto"})
+        self.assertEqual(sentidos("Stop acting like a dick about it."), {"dick": "insulto"})
+        self.assertEqual(sentidos("Total dick move, Brann."), {"dick": "insulto"})
+        # Exclamación: deciden las pistas de la frase
+        self.assertEqual(sentidos("Mmm, so wet... What a pussy!"), {"pussy": "vulgar"})
+        self.assertEqual(sentidos("What a pussy! I want to lick it all night."), {"pussy": "vulgar"})
+        self.assertEqual(sentidos("Wow, she has such a pussy!"), {"pussy": "vulgar"})
+        self.assertEqual(sentidos("He ran away again? What a pussy!"), {"pussy": "insulto"})
+        self.assertEqual(sentidos("What a dick! He laughed at her."), {"dick": "insulto"})
+        self.assertEqual(sentidos("Such a dick... Suck it slowly."), {"dick": "vulgar"})
+        # Sin pistas, o con las dos: dudosa
+        self.assertEqual(sentidos("Yes! What a pussy!"), {"pussy": "dudoso"})
+        self.assertEqual(sentidos("What a dick!"), {"dick": "dudoso"})
+        self.assertEqual(sentidos("So wet, but scared? What a pussy!"), {"pussy": "dudoso"})
+        # Seguida de un sustantivo no es insulto
+        self.assertEqual(sentidos("You're a real pussy slayer."), {"pussy": "vulgar"})
+        self.assertEqual(sentidos("Is that a dick pic?"), {"dick": "vulgar"})
+        # Dudosa: no va al glosario y vale tanto el insulto como la parte del cuerpo
+        self.assertEqual(ambiguas.terminos("Yes! What a pussy!"), [])
+        f = ambiguas.sentido_equivocado
+        self.assertFalse(f("Yes! What a pussy!", "¡Sí! ¡Qué nenaza!"))
+        self.assertFalse(f("Yes! What a pussy!", "¡Sí! ¡Qué coño!"))
+        self.assertFalse(f("What a dick!", "¡Qué capullo!"))
+        self.assertFalse(f("What a dick!", "¡Qué polla!"))
+        fallos = f("Yes! What a pussy!", "¡Sí! ¡Qué polla!")                              # ni lo uno ni lo otro
+        self.assertEqual([d.sentido for d in fallos][:1], ["dudoso"])
+        nota = ambiguas.nota_reintento(fallos)
+        self.assertIn("'nenaza'", nota)
+        self.assertIn("'coño'", nota)
 
     def test_glosario_del_usuario(self):
         import json

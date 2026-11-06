@@ -153,10 +153,10 @@ def limpiar_ejemplos(lista, nombre):
     from traductor import ambiguas
     from traductor.texto import quitar_cola_pegada
     def sentido_mal(en, t):  # "chest"/"safe" al revés (las palabras vulgares se cuentan aparte)
-        return [d for d in ambiguas.sentido_equivocado(en, t) if d.sentido not in ("vulgar", "insulto")]
+        return [d for d in ambiguas.sentido_equivocado(en, t) if d.sentido not in ambiguas.SENTIDOS_VULGARES]
 
     def vulgar_mal(en, t):
-        return [d for d in ambiguas.sentido_equivocado(en, t) if d.sentido in ("vulgar", "insulto")]
+        return [d for d in ambiguas.sentido_equivocado(en, t) if d.sentido in ambiguas.SENTIDOS_VULGARES]
 
     limpios, corregidos, quitados, latam, vulgares = [], 0, 0, 0, 0
     for e in lista:

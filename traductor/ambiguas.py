@@ -31,7 +31,7 @@ class Decision:
     """Sentido elegido para una palabra de la frase original."""
 
     palabra: str     # "chest", "safe", "chest of drawers"
-    sentido: str     # "cofre", "pecho", "frase_hecha", "comoda", "caja_fuerte"
+    sentido: str     # "cofre", "pecho", "frase_hecha", "comoda", "caja_fuerte", "vulgar", "insulto", "dudoso"...
     termino: str     # traducción que se pide en el glosario ("" = ninguna: solo se comprueba)
     motivo: str      # pista que lo decidió (para depurar y para los tests)
 
@@ -241,19 +241,80 @@ _VULGARES = (
 )
 _VULGAR_POR_CLAVE = {v.clave: v for v in _VULGARES}
 # Insultos: se traducen con un insulto igual de vulgar (el usuario: "así lo quiso el juego"), no con el órgano.
-# clave -> (patrón, clave en glosario_adulto.json, traducción por defecto, formas que valen)
+# Y3 (c): "What a pussy!" es un insulto ("¡Qué nenaza!") o, en una escena de sexo, admiración ("¡Qué coño!").
+# - Con verbo ("you're a pussy", "don't be a dick", "acting like a dick") o a quien escucha ("you pussy!"):
+#   siempre insulto. Seguida de un sustantivo ("pussy slayer", "dick pic"), nunca.
+# - Exclamación ("What a pussy!", "Such a dick!"): decide la propia frase. Con pistas de sexo ("so wet", "lick",
+#   "cock"...) es la parte del cuerpo; con pistas de cobardía ("ran away", "scared") o de mala persona ("rude",
+#   "jerk"), insulto. Sin pistas, o con las dos, es DUDOSA: no se pide palabra en el glosario (el modelo decide
+#   con la frase anterior) y se acepta tanto el insulto como la parte del cuerpo.
+SENTIDOS_VULGARES = ("vulgar", "insulto", "dudoso")
+
+
+@dataclass(frozen=True)
+class _Insulto:
+    clave: str             # clave en glosario_adulto.json
+    defecto: str           # traducción por defecto
+    bien: str              # formas españolas que valen (regex)
+    siempre: re.Pattern    # con verbo o a quien escucha: insulto seguro
+    exclamacion: re.Pattern  # "What a pussy!": lo decide el resto de la frase
+    pistas: re.Pattern     # pistas de insulto (cobardía, mala persona)
+
+
+_COPULA = r"(?:be|being|been|['’]re|['’]s|is|are|was|were|am|acting\s+like|act\s+like|acts\s+like)"
+# Detrás de la palabra: fin de frase, puntuación o una palabra que no la convierte en sustantivo compuesto
+# ("pussy slayer", "dick pic", "pussy juice" no son insultos).
+_FIN_INSULTO = (r"(?=\s*(?:[.!?,…;:)\"”'’~]|$)|\s+(?:and|or|but|who|like|for|if|when|than|to|about|anyway|too|"
+                r"man|dude|bro|now|again|right|huh|eh)\b)")
+
+
+def _patrones_insulto(palabra: str, adjetivos: str, extra: str = "") -> tuple[re.Pattern, re.Pattern]:
+    adj = rf"(?:(?:{adjetivos})\s+)?"
+    siempre = re.compile(rf"\b{_COPULA}\s+(?:such\s+)?a\s+{adj}{palabra}{_FIN_INSULTO}|"
+                         rf"\byou\s+{adj}{palabra}{_FIN_INSULTO}{extra}", _I)
+    exclamacion = re.compile(rf"\b(?:what|such)\s+a\s+{adj}{palabra}{_FIN_INSULTO}", _I)
+    return siempre, exclamacion
+
+
 _INSULTOS = {
-    "pussy": (re.compile(r"\b(?:be|being|been|such|what|['’]re|['’]s|is|are|was|were|am)\s+a\s+(?:little\s+|"
-                         r"fucking\s+|total\s+|real\s+)?pussy\b(?!\s+(?:juice|lips|hole|is|was))|\byou\s+(?:little\s+|"
-                         r"fucking\s+)?pussy\s*(?:[.!?,…]|$)", _I),
-              "pussy (insulto)", "nenaza",
-              r"\bnenaz\w*|\bgallin\w*|\bcagad\w*|\bcobarde\w*|\bmaric\w*|\bmiedic\w*|\bblandeng\w*|\bcaguet\w*"),
-    "dick": (re.compile(r"\b(?:be|being|been|such|what|['’]re|['’]s|is|are|was|were|am|acting\s+like|act\s+like)\s+a\s+"
-                        r"(?:real\s+|total\s+|complete\s+|fucking\s+)?dick\b(?!\s+(?:in|inside|pic|picture))|"
-                        r"\byou\s+(?:stupid\s+|little\s+|fucking\s+)?dick\s*(?:[.!?,…]|$)|\bdick\s+move\b", _I),
-             "dick (insulto)", "capullo",
-             r"\bcapull\w*|\bgilipoll\w*|\bimb[eé]cil\w*|\bcabr[oó]n\w*|\bidiota\w*|\bpringad\w*|\bcretin\w*|\bmam[oó]n\w*"),
+    "pussy": _Insulto(
+        "pussy (insulto)", "nenaza",
+        r"\bnenaz\w*|\bgallin\w*|\bcagad\w*|\bcobarde\w*|\bmaric\w*|\bmiedic\w*|\bblandeng\w*|\bcaguet\w*",
+        *_patrones_insulto("pussy", "little|fucking|total|real|complete"),
+        re.compile(r"\b(?:scared|afraid|fear\w*|chicken\w*|coward\w*|wimp\w*|wuss\w*|sissy|crybaby|cry|crying|"
+                   r"cries|cried|whin\w*|quit\w*|weak\w*|loser|faint\w*|hid|hide|hiding|flinch\w*|trembl\w*)\b|"
+                   r"\b(?:run(?:s|ning)?|ran)\s+(?:away|off)\b|\b(?:give|gave|giving)\s+up\b|\bman\s+up\b|"
+                   r"\bgrow\s+a\s+pair\b|\b(?:back|backed|backing|chicken|chickened)\s+(?:out|down)\b", _I)),
+    "dick": _Insulto(
+        "dick (insulto)", "capullo",
+        r"\bcapull\w*|\bgilipoll\w*|\bimb[eé]cil\w*|\bcabr[oó]n\w*|\bidiota\w*|\bpringad\w*|\bcretin\w*|\bmam[oó]n\w*",
+        *_patrones_insulto("dick", "real|total|complete|fucking|stupid|little", r"|\bdick\s+move\b"),
+        re.compile(r"\b(?:jerk|asshole|rude|mean|selfish|prick|bastard|douche\w*|arrogant|liar|lied|lying|"
+                   r"cheat\w*|insult\w*|ignor\w*|dumped|stole|steal\w*|move)\b|\blaugh\w*\s+at\b", _I)),
 }
+# Pistas de sexo para la exclamación ("What a pussy! So wet...", "Mmm, lick it... what a dick!"). Se buscan en
+# la frase SIN la exclamación (la palabra misma no cuenta). "have such a pussy" / "what a dick he has": el cuerpo.
+_PISTAS_SEXO = re.compile(
+    r"\b(?:wet|wetter|tight|tighter|juicy|pink|soak\w*|dripping|delicious|tasty|taste\w*|lick\w*|eat|eating|eats|"
+    r"suck\w*|spread\w*|finger\w*|cocks?|dicks?|puss(?:y|ies)|cum\w*|moan\w*|stretch\w*|throb\w*|inside|horny|"
+    r"naked|nude|ride|riding|thrust\w*|beautiful|gorgeous|lovely|sexy)\b|\bso\s+good\b|"
+    r"\bfeels?\s+(?:so\s+)?(?:good|great|amazing|incredible)\b|\bfuck\s+(?:me|it|her|him|that|this)\b", _I)
+_POSESION = re.compile(r"\b(?:have|has|had|got)\s+(?:such|what)\s+a\b", _I)
+
+
+def _insulto_o_cuerpo(ins: _Insulto, texto: str) -> str | None:
+    """"insulto", "cuerpo", "dudoso" o None (no es ninguna de las formas de insulto)."""
+    if ins.siempre.search(texto):
+        return "insulto"
+    m = ins.exclamacion.search(texto)
+    if m is None:
+        return None
+    resto = texto[:m.start()] + " " + texto[m.end():]
+    sexo = bool(_PISTAS_SEXO.search(resto) or _POSESION.search(texto))
+    insulto = bool(ins.pistas.search(resto))
+    if sexo != insulto:
+        return "cuerpo" if sexo else "insulto"
+    return "dudoso"
 # "Dick" como nombre: con mayúscula en mitad de la frase, seguido de otro nombre ("Dick Grayson") o con genitivo
 # ("Dick's Diner", un restaurante, también al empezar la frase).
 _NOMBRE_DICK = re.compile(r"(?<![.!?…]\s)(?<!^)\bDick\b|\bDick(?:['’]s)?\s+[A-Z]|\bDick['’]s\b")
@@ -288,7 +349,7 @@ def terminos_adultos() -> dict[str, str]:
     """Traducción elegida para cada palabra vulgar (glosarios/glosario_adulto.json; si falta, la de por defecto).
     Un valor vacío desactiva esa palabra."""
     elegidas = {v.clave: v.defecto for v in _VULGARES}
-    elegidas.update({clave: defecto for _, clave, defecto, _ in _INSULTOS.values()})
+    elegidas.update({ins.clave: ins.defecto for ins in _INSULTOS.values()})
     try:
         datos = json.loads(ARCHIVO_ADULTO.read_text(encoding="utf-8"))
     except (OSError, ValueError):
@@ -310,10 +371,16 @@ def _decidir_vulgares(texto: str) -> list[Decision]:
             continue  # "Call CLIT support!", "Try CUM cola!": sigla o marca en una frase normal, no la palabra
         if v.clave == "dick" and _NOMBRE_DICK.search(texto) and not re.search(r"\bdicks?\b", texto):
             continue  # "Dick Grayson", "Dick's Diner": un nombre (si además sale "dick" en minúscula, cuenta)
-        if v.clave in _INSULTOS and _INSULTOS[v.clave][0].search(texto):
-            termino = elegidas.get(_INSULTOS[v.clave][1], _INSULTOS[v.clave][2])
+        ins = _INSULTOS.get(v.clave)
+        sentido = _insulto_o_cuerpo(ins, texto) if ins is not None else None
+        if sentido == "insulto":
+            termino = elegidas.get(ins.clave, ins.defecto)
             if termino:
                 decisiones.append(Decision(v.clave, "insulto", termino, "insulto"))
+            continue
+        if sentido == "dudoso":
+            if elegidas.get(ins.clave, ins.defecto) or elegidas.get(v.clave, v.defecto):
+                decisiones.append(Decision(v.clave, "dudoso", "", "insulto o parte del cuerpo, según la escena"))
             continue
         termino = elegidas.get(v.clave, v.defecto)
         if termino == "" and v.defecto:  # el usuario la ha desactivado
@@ -367,8 +434,18 @@ _TETAS_EN = re.compile(r"\b(?:tits?|titties|boobs?|boobies|jugs|melons|knockers|
 def _bien_vulgar(clave: str, termino: str, insulto: bool = False) -> re.Pattern:
     """Formas que valen para una palabra vulgar (o su insulto): las de siempre y la que haya elegido el usuario."""
     extra = "|" + r"\b" + re.escape(termino) if termino else ""
-    base = _INSULTOS[clave][3] if insulto else _VULGAR_POR_CLAVE[clave].bien
+    base = _INSULTOS[clave].bien if insulto else _VULGAR_POR_CLAVE[clave].bien
     return re.compile(base + extra, _I)
+
+
+def _bien_de(d: Decision) -> re.Pattern:
+    """Formas que valen para una decisión vulgar; si es dudosa, las del insulto y las de la parte del cuerpo."""
+    if d.sentido != "dudoso":
+        return _bien_vulgar(d.palabra, d.termino, d.sentido == "insulto")
+    elegidas = terminos_adultos()
+    cuerpo = _bien_vulgar(d.palabra, elegidas.get(d.palabra, ""))
+    insulto = _bien_vulgar(d.palabra, elegidas.get(_INSULTOS[d.palabra].clave, ""), True)
+    return re.compile(cuerpo.pattern + "|" + insulto.pattern, _I)
 
 
 def sentido_equivocado(original: str, traduccion: str) -> list[Decision]:
@@ -379,8 +456,8 @@ def sentido_equivocado(original: str, traduccion: str) -> list[Decision]:
         return []
     fallos = []
     for d in decidir(original):
-        if d.sentido in ("vulgar", "insulto"):
-            if not _bien_vulgar(d.palabra, d.termino, d.sentido == "insulto").search(traduccion):
+        if d.sentido in SENTIDOS_VULGARES:
+            if not _bien_de(d).search(traduccion):
                 fallos.append(d)  # suavizada, inventada o con otra parte del cuerpo
             continue
         bien, mal = _SENTIDOS_ES[d.sentido]
@@ -445,6 +522,12 @@ def nota_reintento(fallos: list[Decision]) -> str:
         if d.sentido == "insulto":
             partes.append(f"'{d.palabra}' aquí es un insulto: tradúcelo con un insulto igual de vulgar, como "
                           f"'{d.termino}', no con una parte del cuerpo.")
+        elif d.sentido == "dudoso":
+            ins = _INSULTOS[d.palabra]
+            organo = terminos_adultos().get(d.palabra) or _VULGAR_POR_CLAVE[d.palabra].defecto
+            partes.append(f"'{d.palabra}' puede ser un insulto ('{ins.defecto}') o la parte del cuerpo "
+                          f"('{organo}'): mira la frase anterior para saber cuál; no lo suavices ni lo cambies "
+                          "por otra palabra.")
         elif d.sentido == "vulgar":
             partes.append(f"'{d.palabra}' es '{d.termino}' (vulgar, como en el original): no lo suavices ni lo "
                           "cambies por otra palabra." if d.termino else

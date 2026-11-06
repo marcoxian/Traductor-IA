@@ -172,7 +172,9 @@ Maker) y `glosario_adulto.json`.
   claro, y solo cambia la caché de esas frases.
 - **Vocabulario adulto** (`glosarios/glosario_adulto.json`). Cada palabra lleva la traducción que prefieras; un
   valor vacío la desactiva. No se aplica en insultos ni en otros sentidos (el gallo, nombres propios, frases
-  hechas).
+  hechas). «You're a pussy» o «don't be a dick» son siempre insultos; la exclamación («What a pussy!») la decide
+  la frase: con pistas de sexo es la parte del cuerpo, con pistas de cobardía o de mala persona es un insulto, y
+  sin pistas se acepta cualquiera de los dos y decide el modelo con la frase anterior.
 - **Coletillas pegadas.** Quita restos en inglés pegados al final de la traducción que algunos corpus de
   entrenamiento enseñan («ESTRELLAConstellation name (optional)»).
 - **Nombres.** Restaura los nombres protegidos que el modelo deforma, sin pisar nunca un nombre que esté tal cual en
