@@ -828,3 +828,75 @@ def personas_con_genero_en(texto: str) -> set[str]:
     if not texto:
         return set()
     return {genero for genero, patron in _EN_PERSONA.items() if patron.search(texto)}
+
+
+# --------------------------------------------------------------------------- Forma neutra
+# Sin saber quién habla ni a quién, el género de "Estoy segura" es una apuesta. Muchas frases tienen una
+# forma neutra natural en España ("Seguro que…", "¿Todo listo?", "No te cortes"): sirven para enseñar al
+# modelo a no adivinar cuando no hay pista. Solo frases hechas muy frecuentes; el resto no se toca.
+_INI = (r"(?P<ini>(?:^|(?<=[.!?¡¿…,;:—~\"«(]))\s*"
+        r"(?:(?:y|pero|bueno|vale|pues|sí|oh|ah|eh|mm+|vaya|ya)(?:,|\.\.\.|…)?\s+)?)")
+_FIN = r"(?=\s*(?:[.!?…,;:)\"»”~]|$))"
+_ADV_SEGURO = r"(?P<adv>(?:muy|bastante|completamente|totalmente|del\s+todo)\s+)?"
+_PREGUNTA = r"(?P<ini>¿\s*(?:(?:y|pero|de\s+verdad|en\s+serio),?\s+)?)"
+
+
+def _neutra(plantilla: str):
+    """Sustitución que respeta la mayúscula inicial de lo sustituido. ``{adv}`` = adverbio leído."""
+    def sustituir(m: re.Match) -> str:
+        grupos = m.groupdict()
+        ini = grupos.get("ini") or ""
+        adv = (grupos.get("adv") or "").lower()
+        intenso = adv.strip() in ("muy", "tan", "bastante")
+        texto = plantilla.format(adv=adv, mucho=" mucho" if intenso else "", cosas="mucho" if intenso else "cosas")
+        nucleo = m.group(0)[len(ini):]
+        return ini + _con_mayusculas_de(nucleo[:1], texto)
+    return sustituir
+
+
+def _r(patron: str) -> re.Pattern:
+    return re.compile(patron, re.IGNORECASE)
+
+
+_NEUTRAS: list[tuple[re.Pattern, object]] = [
+    # "No estoy segura de que funcione / de si…" -> "No tengo claro que funcione / si…"
+    (_r(_INI + rf"no\s+estoy\s+{_ADV_SEGURO}segur[oa]\s+de\s+(?=(?:que|si|qu[ée]|c[oó]mo|cu[aá]nd\w*|"
+        r"d[oó]nde|qui[eé]n\w*)\b)"), _neutra("no tengo {adv}claro ")),
+    (_r(_INI + rf"no\s+estoy\s+{_ADV_SEGURO}segur[oa](?:\s+de\s+(?:eso|esto|ello))?" + _FIN),
+     _neutra("no lo tengo {adv}claro")),
+    # "Estoy segura de que vendrá" -> "Seguro que vendrá"
+    (_r(_INI + rf"(?:ahora\s+)?estoy\s+{_ADV_SEGURO}segur[oa]\s+de\s+que\b"), _neutra("seguro que")),
+    (_r(_INI + rf"estoy\s+{_ADV_SEGURO}segur[oa]" + _FIN), _neutra("seguro")),
+    # "¿Estás seguro de que quieres salir?" -> "¿Seguro que quieres salir?"; "¿Estás segura?" -> "¿Seguro?"
+    (_r(_PREGUNTA + rf"estás\s+{_ADV_SEGURO}segur[oa]\s+de\s+que\b"), _neutra("seguro que")),
+    (_r(_PREGUNTA + rf"estás\s+{_ADV_SEGURO}segur[oa](?:\s+de\s+(?:eso|esto|ello))?(?=\s*\?)"), _neutra("seguro")),
+    # "Estoy lista (para…)" -> "Todo listo (para…)"; "¿Estás listo?" -> "¿Todo listo?"
+    (_r(_INI + r"(?:ya\s+)?estoy\s+list[oa]" + _FIN), _neutra("todo listo")),
+    (_r(_PREGUNTA + r"(?:ya\s+)?estás\s+list[oa]" + _FIN), _neutra("todo listo")),
+    (_r(r"\bcuando\s+estés\s+list[oa]\b"), _neutra("cuando quieras")),
+    (_r(_INI + r"no\s+seas\s+(?:tan\s+)?tímid[oa]\b"), _neutra("no te cortes")),
+    (_r(r"\bcuida(?:te)?\s+(?:de\s+)?ti\s+mism[oa]\b"), _neutra("cuídate")),
+    (_r(r"\bpor\s+mí\s+mism[oa]\b"), _neutra("por mi cuenta")),
+    (_r(r"\bpor\s+ti\s+mism[oa]\b"), _neutra("por tu cuenta")),
+    (_r(r"\bpara\s+mí\s+mism[oa]\b"), _neutra("para mí")),
+    (_r(r"\byo\s+mism[oa]\b"), _neutra("yo")),
+    # "Estoy preocupada por ti" -> "Me preocupas"
+    (_r(r"\bestoy\s+(?P<adv>(?:muy|tan|bastante|un\s+poco)\s+)?preocupad[oa]\s+por\s+ti\b"),
+     _neutra("me preocupas{mucho}")),
+    (_r(r"\bestoy\s+(?P<adv>(?:muy|bastante)\s+)?ocupad[oa]" + _FIN), _neutra("tengo {cosas} que hacer")),
+]
+
+
+def neutralizar_genero(texto: str) -> str | None:
+    """La misma frase sin marcas de género en 1.ª y 2.ª persona del singular, o None si alguna no tiene
+    una forma neutra conocida. Sin marcas, devuelve el texto tal cual.
+
+    "Estoy segura de que vendrá." -> "Seguro que vendrá."; "¿Estás listo?" -> "¿Todo listo?";
+    "Estoy cansada." -> None (no hay forma neutra natural).
+    """
+    if not marcas_genero(texto):
+        return texto
+    nuevo = texto
+    for patron, sustituto in _NEUTRAS:
+        nuevo = patron.sub(sustituto, nuevo)
+    return None if marcas_genero(nuevo) else nuevo

@@ -8,9 +8,49 @@ from pathlib import Path
 
 from traductor.genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, corregir_plural, corregir_primera_persona,
                               corregir_segunda_persona, corregir_tercera_persona, marcas_genero, marcas_plural,
-                              normalizar_genero, personas_con_genero_en, plural_a_medias)
+                              neutralizar_genero, normalizar_genero, personas_con_genero_en, plural_a_medias)
 from traductor.personajes import (FichaPersonajes, InfoLinea, Personaje, aplicar_concordancia,
                                   es_pensamiento, resolver_linea)
+
+
+class TestNeutralizar(unittest.TestCase):
+    """Formas neutras para entrenar sin pista de hablante: no adivinar el género."""
+
+    def test_formas_neutras(self):
+        casos = {
+            "Estoy segura de que vendrá.": "Seguro que vendrá.",
+            "No estoy seguro de que funcione.": "No tengo claro que funcione.",
+            "No estoy muy segura.": "No lo tengo muy claro.",
+            "¿Estás seguro de que quieres salir?": "¿Seguro que quieres salir?",
+            "¿Estás segura?": "¿Seguro?",
+            "Sí, estoy seguro.": "Sí, seguro.",
+            "Estoy lista.": "Todo listo.",
+            "¿Ya estás listo?": "¿Todo listo?",
+            "Avísame cuando estés lista.": "Avísame cuando quieras.",
+            "No seas tímida, Ana.": "No te cortes, Ana.",
+            "Cuida de ti mismo.": "Cuídate.",
+            "Lo hice yo mismo.": "Lo hice yo.",
+            "Lo encontré por mí misma.": "Lo encontré por mi cuenta.",
+            "Estoy muy preocupada por ti.": "Me preocupas mucho.",
+            "Estoy muy ocupado.": "Tengo mucho que hacer.",
+        }
+        for original, esperado in casos.items():
+            with self.subTest(original):
+                self.assertEqual(neutralizar_genero(original), esperado)
+                self.assertEqual(marcas_genero(esperado), set())
+
+    def test_sin_forma_neutra_devuelve_none(self):
+        for texto in ("Estoy cansada.", "Creo que estoy lista para irme.", "Estoy preocupado por los niños."):
+            with self.subTest(texto):
+                self.assertIsNone(neutralizar_genero(texto))
+
+    def test_sin_marcas_no_cambia(self):
+        self.assertEqual(neutralizar_genero("Vamos a la playa."), "Vamos a la playa.")
+        self.assertEqual(neutralizar_genero(""), "")
+
+    def test_respeta_la_mayuscula_y_el_resto_de_la_frase(self):
+        self.assertEqual(neutralizar_genero("Bueno, estoy segura de que Ana vendrá. Estoy lista."),
+                         "Bueno, seguro que Ana vendrá. Todo listo.")
 
 
 class TestInglesConGenero(unittest.TestCase):

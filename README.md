@@ -231,7 +231,11 @@ python 9_evaluar_genero.py --modelo IA_Traductora_v2    # mídelo antes de usarl
 ```
 
 - Los datos de entrenamiento son tuyos (`datasets/`, privado). `herramientas_extra/dataset_genero.py` genera
-  ejemplos con la pista de quién habla, y sus espejos, a partir de un corpus con hablantes.
+  ejemplos con la pista de quién habla, y sus espejos (no los hace si el inglés fija el sexo: anatomía,
+  «I'm a maid»…), a partir de un corpus con hablantes.
+- Los ejemplos SIN pista de hablante que tienen género en 1.ª o 2.ª persona («Estoy segura») pasan a una forma
+  neutra («Seguro que…», «¿Todo listo?») o se quitan, para que el modelo no aprenda a adivinar. Se desactiva
+  con `--sin-neutros`.
 - Al cargar los datos, `entrenar_v2.py` corrige o descarta los ejemplos que enseñan fallos conocidos: sentido
   equivocado de *chest*, coletillas pegadas, vocabulario que no es de España, palabras vulgares suavizadas.
 - Las frases que el traductor arregla en un reintento se guardan en `workspace/<juego>/casos_dificiles.jsonl`.

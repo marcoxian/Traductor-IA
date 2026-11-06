@@ -39,6 +39,8 @@ parser.add_argument("--solo-datos", action="store_true",
                     help="Preparar y resumir el dataset (con ejemplos de prompt) sin cargar el modelo ni la GPU")
 parser.add_argument("--casos-dificiles", action="store_true",
                     help="Incluir workspace/*/casos_dificiles.jsonl (frases que el modelo falló y arregló en un reintento)")
+parser.add_argument("--sin-neutros", action="store_true",
+                    help="No pasar a forma neutra los ejemplos sin pista de hablante que tienen género (U3)")
 args, _ = parser.parse_known_args()
 
 modelo_candidato = Path(args.base) if args.base else Path("modelos/modelo_exportado_v2")
@@ -184,9 +186,38 @@ def limpiar_ejemplos(lista, nombre):
     return limpios
 
 
+# U3: sin pista de quién habla, "Estoy segura" es una apuesta de género que el modelo aprendería como regla
+# (D10: sin ficha fallaba más que v1, que deja más frases neutras). Los ejemplos SIN pista con género en
+# 1.ª o 2.ª persona se pasan a su forma neutra ("Seguro que…", "¿Todo listo?"); si no la tienen, se quitan.
+# Los de género con pista (instruccion_completa) no se tocan: ahí el género sí lo decide la pista.
+def neutralizar_sin_pista(lista, nombre):
+    from traductor.genero import neutralizar_genero
+    resultado, neutros, quitados = [], 0, 0
+    for e in lista:
+        es = e.get("output")
+        if e.get("instruccion_completa") or not isinstance(es, str):
+            resultado.append(e)
+            continue
+        neutro = neutralizar_genero(es)
+        if neutro is None:
+            quitados += 1
+        elif neutro != es:
+            resultado.append({**e, "output": neutro})
+            neutros += 1
+        else:
+            resultado.append(e)
+    if neutros or quitados:
+        print(f"Sin pista de {nombre}: {neutros} pasados a forma neutra, {quitados} quitados (género sin forma neutra).")
+    return resultado
+
+
 glosario = limpiar_ejemplos(glosario, ruta_glosario.name)
 corpus_extra = limpiar_ejemplos(corpus_extra, "corpus de videojuegos")
 general = limpiar_ejemplos(general, "dataset_base_general (muestra)")
+if not args.sin_neutros:
+    glosario = neutralizar_sin_pista(glosario, ruta_glosario.name)
+    corpus_extra = neutralizar_sin_pista(corpus_extra, "corpus de videojuegos")
+    general = neutralizar_sin_pista(general, "dataset_base_general (muestra)")
 
 ejemplos = (glosario * REPETIR_GLOSARIO) + (corpus_extra * REPETIR_CORPUS) + general
 random.shuffle(ejemplos)
