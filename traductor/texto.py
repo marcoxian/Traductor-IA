@@ -12,7 +12,8 @@ from collections import Counter
 from functools import lru_cache
 from pathlib import Path
 
-# genero.py no importa nada del paquete: no hay ciclo de importación.
+# genero.py y espana.py no importan nada del paquete: no hay ciclo de importación.
+from .espana import a_espanol_de_espana
 from .genero import corregir_primera_persona, es_genero_marcado
 
 # --------------------------------------------------------------------------- Regex
@@ -806,6 +807,9 @@ def postprocesar_traduccion(texto: str, original: str = "") -> str:
     r = re.sub(r"\bhicimos sexo\b", "tuvimos sexo", r, flags=re.IGNORECASE)
     r = re.sub(r"\bllamar a nosotros\b", "llamarnos", r, flags=re.IGNORECASE)
 
+    # 6d. Vocabulario de Latinoamérica que se cambia sin riesgo ("enojado" -> "enfadado", "apúrate" -> "date prisa")
+    r = a_espanol_de_espana(r, original)
+
     # 7. Signos dobles de apertura desemparejados al cerrar (ej: "¡¿Qué haces!" -> "¡¿Qué haces?!")
     r = re.sub(r"(¡¿[^?!¡¿]+)!(\s*)$", r"\1?!\2", r)
     r = re.sub(r"(¿¡[^?!¡¿]+)\?(\s*)$", r"\1!?\2", r)
@@ -1057,6 +1061,10 @@ _ECO_PERSONAJES = re.compile(
     r"\((?:hombre|mujer|neutro|desconocido)\)"
 )
 
+# Eco del historial del modo seguro: el prompt lleva las frases anteriores como "[original -> traducción]"
+# y a veces el modelo devuelve una de ellas en vez de traducir la frase nueva.
+_ECO_HISTORIAL = re.compile(r"^\s*\[[^\]]*\s->\s")
+
 # Pesos de gravedad (para elegir el mejor candidato entre reintentos).
 _PESO_PROBLEMA = {
     "vacia": 100,
@@ -1068,9 +1076,17 @@ _PESO_PROBLEMA = {
     "longitud_corta": 50,
     "nombre_perdido": 40,
     "sentido_equivocado": 40,   # "chest" de cuerpo traducido "cofre" (ver traductor.ambiguas)
+    "numeros": 40,              # "Afecto+178" -> "Afecto+96", "Tienes:5" -> "Tienes:"
     "longitud_larga": 35,
     "etiquetas": 15,
+    "ustedes": 5,               # "ustedes" con confianza: en España es "vosotros" (solo aviso, ver abajo)
 }
+
+# Problemas leves que merecen otro intento (con su nota): si ningún intento los arregla se acepta la mejor
+# versión, porque pueden ser falsos avisos ("24/7" -> "24 horas"). "ustedes" NO está: medido con v4 en 25
+# frases reales, al pedirle "vosotros" deja de decir "ustedes" en 20, pero 7 salen peor ("¿Qué piensan tú
+# dos?", "podéis irte cuando quieráis"). Se queda como aviso para el repaso a mano y para los datos de v6.
+PROBLEMAS_LEVES_REINTENTO = frozenset({"numeros"})
 
 # Problemas graves: si persisten tras los reintentos NO se guarda en la caché (se reintentará en otra sesión).
 PROBLEMAS_GRAVES = frozenset({
@@ -1120,6 +1136,9 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
       - ``longitud_corta``: frase mutilada (< 42 % de la longitud original en frases de ≥ 35 car.).
       - ``longitud_larga``: alucinación o fusión de lotes (> 2.8x de la longitud original).
       - ``etiquetas``: faltan o sobran etiquetas de formato respecto al original.
+      - ``numeros`` (leve): faltan, cambian o sobran cifras ("Cum 100000 inside" -> "Córrete dentro").
+      - ``ustedes`` (aviso, sin reintento): "ustedes" sin que el inglés sea formal; en España, con
+        confianza, es "vosotros".
     """
     if not tiene_texto_visible(original):
         return []
@@ -1162,7 +1181,8 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         r"Usa esta conversaci[oó]n para entender el contexto|traduce [UÚ]NICAMENTE la frase del Input",
         traducido,
         re.IGNORECASE,
-    ) or (_ECO_PERSONAJES.search(traducido) and not _ECO_PERSONAJES.search(original)):
+    ) or (_ECO_PERSONAJES.search(traducido) and not _ECO_PERSONAJES.search(original)) \
+            or (_ECO_HISTORIAL.search(traducido) and "->" not in original):
         problemas.append("eco_prompt")
 
     if (_PATRON_FUGA_SCRIPTS.search(vis_t) and not _PATRON_FUGA_SCRIPTS.search(vis_o)) or (
@@ -1189,7 +1209,110 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
     if not ok_tags:
         problemas.append("etiquetas")
 
+    faltan, sobran = numeros_cambiados(original, traducido)
+    if faltan or sobran:
+        problemas.append("numeros")
+    if _USTEDES.search(vis_t) and not _USTEDES.search(vis_o) and not _TRATO_FORMAL_EN.search(vis_o):
+        problemas.append("ustedes")
+
     return problemas
+
+
+# --------------------------------------------------------------------------- Números
+# Cifras del texto visible. "100,000" y "100.000" son el mismo número; "1.5" y "1,5" dan [1, 5] los dos.
+_NUMERO = re.compile(r"(?<![\d.,])\d{1,3}(?:([.,])\d{3}(?:\1\d{3})*)?(?!\d)|\d+")
+
+# El número escrito con letras también vale ("2 teams" -> "dos equipos", "five times" -> "5 veces").
+# Ordinales y múltiplos incluidos ("1st" -> "primer", "x2" -> "doble"). Comparación sin tildes.
+_NUM_ES = {
+    1: "un|una|uno|primer|primera|primero|primeras|primeros", 2: "dos|segund[oa]s?|doble|dobles|par",
+    3: "tres|tercer|tercer[oa]s?|triple", 4: "cuatro|cuart[oa]s?|cuadruple", 5: "cinco|quint[oa]s?|quintuple",
+    6: "seis|sext[oa]s?", 7: "siete|septim[oa]s?", 8: "ocho|octav[oa]s?|octuple", 9: "nueve|noven[oa]s?",
+    10: "diez|decim[oa]s?|decena", 11: "once", 12: "doce|docena", 13: "trece", 14: "catorce", 15: "quince",
+    16: "dieciseis", 17: "diecisiete", 18: "dieciocho", 19: "diecinueve", 20: "veinte|vigesim[oa]s?",
+    21: "veintiun|veintiuna|veintiuno", 22: "veintidos", 23: "veintitres", 24: "veinticuatro", 25: "veinticinco",
+    26: "veintiseis", 27: "veintisiete", 28: "veintiocho", 29: "veintinueve", 30: "treinta|trigesim[oa]s?",
+    40: "cuarenta|cuadragesim[oa]s?", 50: "cincuenta|quincuagesim[oa]s?", 60: "sesenta", 70: "setenta",
+    80: "ochenta", 90: "noventa", 100: "cien|ciento|centenar|centesim[oa]s?", 1000: "mil", 1_000_000: "millon",
+}
+_NUM_EN = {
+    0: "zero|no|none", 1: "one|once|first|single", 2: "two|second|twice|double|couple|pair", 3: "three|third|thrice|triple",
+    4: "four|fourth|quadruple", 5: "five|fifth", 6: "six|sixth", 7: "seven|seventh", 8: "eight|eighth|octuple",
+    9: "nine|ninth", 10: "ten|tenth", 11: "eleven", 12: "twelve|dozen", 13: "thirteen", 14: "fourteen",
+    15: "fifteen", 16: "sixteen", 17: "seventeen", 18: "eighteen", 19: "nineteen", 20: "twenty", 30: "thirty",
+    40: "forty", 50: "fifty", 60: "sixty", 70: "seventy", 80: "eighty", 90: "ninety", 100: "hundred",
+    1000: "thousand", 1_000_000: "million",
+}
+_UNIDADES_ES = ("un|una|uno", "dos", "tres", "cuatro", "cinco", "seis", "siete", "ocho", "nueve")
+
+
+def _formas_numero(n: int, idioma: str) -> str | None:
+    """Regex (sin tildes) con las formas escritas de ``n`` ("treinta y dos", "thirty-two"), o None."""
+    tabla = _NUM_ES if idioma == "es" else _NUM_EN
+    if n in tabla:
+        return tabla[n]
+    if 31 <= n <= 99 and n % 10 and n - n % 10 in tabla:
+        decena = tabla[n - n % 10].split("|")[0]
+        if idioma == "es":
+            return rf"{decena}\s+y\s+(?:{_UNIDADES_ES[n % 10 - 1]})"
+        return rf"{decena}[-\s]?{_NUM_EN[n % 10].split('|')[0]}"
+    return None
+
+
+def _dicho_con_letras(n: int, texto: str, idioma: str) -> bool:
+    formas = _formas_numero(n, idioma)
+    return formas is not None and re.search(rf"(?<![^\W\d_])(?:{formas})(?![^\W\d_])", _plano(texto)) is not None
+
+
+def _con_multiplicador(n: int, texto: str) -> bool:
+    """True si ``texto`` dice "``n`` thousand/million" o "``n`` mil/millones" ("50 thousand", "1,5 millones")."""
+    return re.search(rf"(?<!\d){n}(?:[.,]\d+)?\s*(?:thousand|million|mil|millon|millones)\b", _plano(texto)) is not None
+
+
+def _numeros(texto: str) -> Counter:
+    visible = PATRON_CODIGOS.sub(" ", texto or "")
+    return Counter(int(re.sub(r"[.,]", "", m.group(0))) for m in _NUMERO.finditer(visible))
+
+
+def numeros_del_original(original: str) -> list[str]:
+    """Las cifras del original tal y como se escriben (para la nota del reintento)."""
+    visible = PATRON_CODIGOS.sub(" ", original or "")
+    return list(dict.fromkeys(m.group(0) for m in _NUMERO.finditer(visible)))
+
+
+def numeros_cambiados(original: str, traducido: str) -> tuple[list[int], list[int]]:
+    """Cifras del original que faltan en la traducción y cifras de la traducción que no están en el original.
+
+    No cuentan como fallo: el número escrito con letras ("2 teams" -> "dos equipos"; "five times" ->
+    "5 veces"), los ceros que se caen de una hora ("11:00" -> "las 11") ni "50 thousand" -> "50.000".
+    Sí cuentan "Afecto+178" -> "Afecto+96", "Tienes:5" -> "Tienes:" y "1Hero" inventado.
+    """
+    del_original, de_traduccion = _numeros(original), _numeros(traducido)
+    if del_original == de_traduccion:
+        return [], []
+    faltan = list((del_original - de_traduccion).elements())
+    sobran = list((de_traduccion - del_original).elements())
+    for f in list(faltan):  # "50 thousand" -> "50.000"; "1000000" -> "1 millón"
+        for s in sobran:
+            if (s in (f * 1000, f * 1_000_000) and _con_multiplicador(f, original)) \
+                    or (f in (s * 1000, s * 1_000_000) and _con_multiplicador(s, traducido)):
+                faltan.remove(f)
+                sobran.remove(s)
+                break
+    faltan = [n for n in faltan if n != 0 and not _dicho_con_letras(n, traducido, "es")]
+    sobran = [n for n in sobran if not _dicho_con_letras(n, original, "en")]
+    return faltan, sobran
+
+
+# --------------------------------------------------------------------------- "ustedes"
+# En España "ustedes" es solo de respeto; con confianza se dice "vosotros/vosotras". El modelo lo usa por
+# los datos de Latinoamérica. Si el inglés trata con respeto ("ladies", "sir", "Your Majesty"), vale.
+_USTEDES = re.compile(r"(?<![^\W\d_])ustedes(?![^\W\d_])", re.IGNORECASE)
+_TRATO_FORMAL_EN = re.compile(
+    r"\b(?:ladies|gentlem[ae]n|sirs?|madam|ma['’]?am|mesdames|customers?|guests?|clients?|passengers?|"
+    r"majesty|majesties|highness(?:es)?|excellency|lordships?|ladyships?|esteemed|honou?red|distinguished|"
+    r"officers?|señores|señoras)\b",
+    re.IGNORECASE)
 
 
 # Nombres de personaje genéricos que SÍ se traducen ("Guard" -> "Guardia"): no se exige conservarlos.
@@ -1321,6 +1444,7 @@ _GUIA_REINTENTO = {
     "longitud_larga": "Traduce únicamente la frase indicada, sin añadir explicaciones ni texto extra.",
     "etiquetas": "Conserva exactamente las etiquetas de formato del original.",
     "nombre_perdido": "Conserva los nombres propios de los personajes tal y como aparecen en el original.",
+    "numeros": "Conserva exactamente las cifras del original: no cambies, quites ni añadas ningún número.",
 }
 
 

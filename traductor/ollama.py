@@ -45,6 +45,7 @@ from .genero import HOMBRE, MUJER, marcas_genero
 from .personajes import ContextoLinea, InfoLinea, aplicar_concordancia, resolver_linea
 from .registro import AZUL, RESET, VERDE
 from .texto import (
+    PROBLEMAS_LEVES_REINTENTO,
     comparar_etiquetas,
     describir_fallo,
     evaluar_traduccion,
@@ -54,6 +55,7 @@ from .texto import (
     limpiar_respuesta,
     nombres_perdidos,
     nota_reintento,
+    numeros_del_original,
     postprocesar_traduccion,
     quitar_cola_pegada,
     quitar_etiquetas_inventadas,
@@ -781,6 +783,8 @@ class OllamaTranslator:
                     nota = f"{nota} Nombres que deben aparecer: {', '.join(ultimos_perdidos)}.".strip()
                 if "sentido_equivocado" in ultimos_problemas and ultimos_equivocados:
                     nota = f"{nota} {ambiguas.nota_reintento(ultimos_equivocados)}".strip()
+                if "numeros" in ultimos_problemas and numeros_del_original(texto):
+                    nota = f"{nota} Cifras del original: {', '.join(numeros_del_original(texto))}.".strip()
                 if nota:
                     instruccion = f"{instruccion} IMPORTANTE: {nota}"
             temp = 0.1 if intento == 1 else min(0.45, 0.15 + 0.15 * (intento - 1))
@@ -811,9 +815,10 @@ class OllamaTranslator:
                 ultimos_perdidos = perdidos
                 ultimos_equivocados = equivocados
 
-            # "nombre_perdido" y "sentido_equivocado" no son graves: se reintenta mientras queden intentos
-            # y, si no se arregla, se acepta la mejor versión (con el cambio seguro cofre -> pecho).
-            leve_pendiente = bool(perdidos or equivocados) and intento < self.reintentos_calidad
+            # "nombre_perdido", "sentido_equivocado" y "numeros" no son graves: se reintenta mientras queden
+            # intentos y, si no se arregla, se acepta la mejor versión (con el cambio seguro cofre -> pecho).
+            leves = bool(perdidos or equivocados or PROBLEMAS_LEVES_REINTENTO.intersection(problemas))
+            leve_pendiente = leves and intento < self.reintentos_calidad
             if not tiene_fallo_grave(problemas) and not leve_pendiente:
                 if equivocados:
                     candidato = ambiguas.forzar_sentido(texto, candidato)
@@ -824,7 +829,7 @@ class OllamaTranslator:
                         self.estadisticas["reintentadas_calidad"] += 1
                     if "sentido_equivocado" in primeros_problemas:
                         self.estadisticas["sentido_corregido"] += 1
-                if intento > 1 and not perdidos and not equivocados:
+                if intento > 1 and not leves:
                     self._guardar_caso_dificil(texto, candidato, terminos, ficha_linea,
                                                primer_candidato, primeros_problemas)
                 self._recordar(texto, candidato, ctx)
@@ -1026,7 +1031,8 @@ class OllamaTranslator:
             # original nombra), se retraduce individualmente, con sus reintentos.
             perdio_nombre = ficha is not None and bool(
                 nombres_perdidos(final, ficha.nombres_en(original), self.perfil.terminos_para(original)))
-            if tiene_fallo_grave(evaluar_traduccion(original, final)) or perdio_nombre \
+            problemas = evaluar_traduccion(original, final)
+            if tiene_fallo_grave(problemas) or perdio_nombre or PROBLEMAS_LEVES_REINTENTO.intersection(problemas) \
                     or self._sentido_mal(original, final):
                 log.debug("Frase de lote con fallo de calidad; retraduciendo individualmente: %s", original[:50])
                 final = self._traducir_unidad(original, ctx=ctx)

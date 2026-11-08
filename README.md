@@ -165,8 +165,16 @@ Maker) y `glosario_adulto.json`.
   Probablemente se dirige al protagonista (hombre).»). Después se corrige la 1.ª persona, la 2.ª cuando se nombra a
   quien escucha y la 3.ª con nombre. El plural de grupo («nosotras», «estáis listos») solo cuando es seguro: si
   habla un hombre, «nosotros» va en masculino; si se nombra a un hombre que escucha, «vosotros» también; y si el
-  inglés dice que el grupo son quien habla y quien escucha («both of us»), va en el género de los dos. Las reglas
-  son conservadoras: ante la duda, no se toca.
+  inglés dice que el grupo son quien habla y quien escucha («both of us»), va en el género de los dos. También los
+  sustantivos de persona tras «ser» que en inglés no tienen género («I'm an expert» → «Soy una experta», «soy su
+  socia», «la elegida»). Las reglas son conservadoras: ante la duda, no se toca.
+- **Cifras.** Si la traducción pierde, cambia o inventa un número («Charm+178» → «Encanto+96», «You have:5» →
+  «Tienes:»), se reintenta diciendo al modelo las cifras del original. Un número escrito con letras («2 teams» →
+  «dos equipos») vale.
+- **Español de España** (`traductor/espana.py`). Cambia el vocabulario de Latinoamérica que se puede cambiar sin
+  riesgo: «enojado» → «enfadado», «lindo» → «bonito», «apúrate» → «date prisa» y «te extraño» → «te echo de
+  menos» (solo si el inglés dice *hurry* o *miss*). «Ustedes» con confianza solo se avisa, porque arreglarlo pide
+  conjugar los verbos y en España también es de respeto.
 - **Palabras con dos sentidos** (`traductor/ambiguas.py`). Pistas como «her chest», «stab you in the chest»,
   «treasure chest», «open the chest» o «get it off your chest» (frase hecha). Solo decide cuando el contexto es
   claro, y solo cambia la caché de esas frases.

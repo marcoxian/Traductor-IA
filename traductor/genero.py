@@ -402,11 +402,136 @@ def _aplicar_ambiguas(texto: str, patron: re.Pattern, mapa: dict[str, str]) -> s
     return "".join(trozos)
 
 
+# --------------------------------------------------------------------------- Sustantivos de persona
+# "Soy un experto", "soy su socio", "eres la elegida": sustantivos que en inglés no tienen género ("expert",
+# "partner", "chosen one") y en español sí. Solo detrás de "ser" en 1.ª o 2.ª persona, y cambiando con
+# ellos el artículo y los adjetivos de delante ("un buen amigo" -> "una buena amiga"). Quedan fuera los que
+# el inglés ya marca ("brother", "boyfriend", "king"), los invariables ("guía", "piloto", "líder") y
+# "amo/ama" ("el ama" lleva artículo masculino).
+PARES_SUST_GENERO: tuple[tuple[str, str], ...] = (
+    ("amigo", "amiga"), ("compañero", "compañera"), ("socio", "socia"), ("invitado", "invitada"),
+    ("vecino", "vecina"), ("alumno", "alumna"), ("maestro", "maestra"), ("discípulo", "discípula"),
+    ("experto", "experta"), ("novato", "novata"), ("adulto", "adulta"), ("niño", "niña"), ("humano", "humana"),
+    ("explorador", "exploradora"), ("luchador", "luchadora"), ("guerrero", "guerrera"), ("cazador", "cazadora"),
+    ("jugador", "jugadora"), ("ganador", "ganadora"), ("perdedor", "perdedora"), ("creador", "creadora"),
+    ("salvador", "salvadora"), ("protector", "protectora"), ("defensor", "defensora"),
+    ("investigador", "investigadora"), ("embajador", "embajadora"), ("controlador", "controladora"),
+    ("seguidor", "seguidora"), ("admirador", "admiradora"), ("doctor", "doctora"), ("médico", "médica"),
+    ("ciudadano", "ciudadana"), ("fugitivo", "fugitiva"), ("mercenario", "mercenaria"), ("dueño", "dueña"),
+    ("propietario", "propietaria"), ("jefe", "jefa"), ("encargado", "encargada"), ("empleado", "empleada"),
+    ("cocinero", "cocinera"), ("secretario", "secretaria"), ("técnico", "técnica"), ("heredero", "heredera"),
+    ("elegido", "elegida"), ("enemigo", "enemiga"), ("esclavo", "esclava"), ("sirviente", "sirvienta"),
+    ("criado", "criada"), ("prisionero", "prisionera"), ("pasajero", "pasajera"), ("extranjero", "extranjera"),
+    ("desconocido", "desconocida"), ("voluntario", "voluntaria"), ("favorito", "favorita"),
+    ("pervertido", "pervertida"), ("asesino", "asesina"), ("ladrón", "ladrona"), ("guardián", "guardiana"),
+    ("súbdito", "súbdita"),
+)
+# Sin sustantivo detrás ("soy el único que lo sabe", "fui la primera en llegar").
+_PARES_SUST_SOLOS = (("único", "única"), ("primero", "primera"), ("último", "última"))
+_PARES_DET = (("un", "una"), ("el", "la"), ("nuestro", "nuestra"), ("vuestro", "vuestra"), ("este", "esta"),
+              ("ese", "esa"), ("aquel", "aquella"), ("algún", "alguna"), ("ningún", "ninguna"), ("otro", "otra"),
+              ("todo un", "toda una"))
+_PARES_PRE = (("buen", "buena"), ("mal", "mala"), ("primer", "primera"), ("verdadero", "verdadera"),
+              ("auténtico", "auténtica"), ("nuevo", "nueva"), ("único", "única"), ("último", "última"),
+              ("propio", "propia"), ("querido", "querida"), ("perfecto", "perfecta"), ("pequeño", "pequeña"),
+              ("viejo", "vieja"), ("segundo", "segunda"), ("futuro", "futura"), ("mero", "mera"), ("digno", "digna"))
+_DET_INVARIABLES = ("mi", "tu", "su")
+_PRE_INVARIABLES = ("gran", "mejor", "peor", "fiel", "leal", "mayor", "menor", "humilde", "simple")
+# Entre el verbo y el artículo: "soy solo un niño", "ya soy toda una adulta".
+_RELLENO_SER = r"(?:\s+(?:solo|sólo|tan\s+solo|solamente|realmente|ya|también|tampoco|todavía|aún|casi|"
+_RELLENO_SER += r"literalmente|oficialmente|técnicamente|simplemente|básicamente|ahora)){0,2}"
+_SER_1_SEGURAS = (r"soy|fui|seré|he\s+sido|habré\s+sido|sigo\s+siendo|voy\s+a\s+ser|quiero\s+ser|puedo\s+ser|"
+                  r"debo\s+ser|tengo\s+que\s+ser|necesito\s+ser|me\s+convertí\s+en|me\s+he\s+convertido\s+en|"
+                  r"me\s+convertiré\s+en|me\s+voy\s+a\s+convertir\s+en")
+_SER_1_AMBIGUAS = r"era|sería|sea|fuera|fuese|había\s+sido|habría\s+sido|iba\s+a\s+ser"
+_SER_2 = (r"eres|eras|fuiste|serás|serías|seas|fueras|fueses|has\s+sido|habías\s+sido|sigues\s+siendo|"
+          r"vas\s+a\s+ser|puedes\s+ser|debes\s+ser|tienes\s+que\s+ser|te\s+convertiste\s+en|"
+          r"te\s+has\s+convertido\s+en|te\s+convertirás\s+en")
+
+
+def _alternativa(palabras) -> str:
+    return "|".join(sorted((re.escape(p).replace(r"\ ", r"\s+") for p in palabras), key=len, reverse=True))
+
+
+def _mapa_hacia(genero: str, pares) -> dict[str, str]:
+    """Del género contrario a ``genero``: {"un": "una", ...} para MUJER, {"una": "un", ...} para HOMBRE."""
+    return {m: f for m, f in pares} if genero == MUJER else {f: m for m, f in pares}
+
+
+# Un mapa por parte de la frase: "primera" es "primer" delante del sustantivo y "primero" sola.
+_SUST_MAPA = {g: {"det": _mapa_hacia(g, _PARES_DET), "pre": _mapa_hacia(g, _PARES_PRE),
+                  "sust": _mapa_hacia(g, PARES_SUST_GENERO), "solo": _mapa_hacia(g, _PARES_SUST_SOLOS),
+                  "post": _MAPA[g]} for g in (HOMBRE, MUJER)}
+
+
+def _patron_sustantivo(verbos: str, genero: str) -> re.Pattern:
+    """Busca, detrás de ``verbos``, un sustantivo de persona en el género CONTRARIO a ``genero``."""
+    det = _alternativa(list(_mapa_hacia(genero, _PARES_DET)) + list(_DET_INVARIABLES))
+    pre = _alternativa(list(_mapa_hacia(genero, _PARES_PRE)) + list(_PRE_INVARIABLES))
+    sust = _alternativa(_mapa_hacia(genero, PARES_SUST_GENERO))
+    solos = _alternativa(_mapa_hacia(genero, _PARES_SUST_SOLOS))
+    adj = _ADJ_MASC if genero == MUJER else _ADJ_FEM
+    return re.compile(
+        rf"(?<!{_L})(?P<verbo>{verbos}){_RELLENO_SER}\s+(?:(?P<det>{det})\s+)?(?P<pre>(?:(?:{pre})\s+){{0,2}})"
+        rf"(?:(?P<sust>{sust})(?!{_L})(?:\s+(?P<post>{adj})(?!{_L}))?"
+        rf"|(?P<solo>{solos})(?!{_L})(?=\s*(?:[.,;:!?…)\"»”'~]|$|\s+(?:que|en|de|del|al|a|con|capaz)\b)))",
+        re.IGNORECASE,
+    )
+
+
+_P1_SUST_SEG = {g: _patron_sustantivo(_SER_1_SEGURAS, g) for g in (HOMBRE, MUJER)}
+_P1_SUST_AMB = {g: _patron_sustantivo(_SER_1_AMBIGUAS, g) for g in (HOMBRE, MUJER)}
+_P2_SUST = {g: _patron_sustantivo(_SER_2, g) for g in (HOMBRE, MUJER)}
+
+
+def _cambiar_sustantivo(m: re.Match, genero: str) -> str:
+    """Pone en ``genero`` el artículo, los adjetivos de delante, el sustantivo y el adjetivo de detrás."""
+    texto = m.group(0)
+    base = m.start(0)
+    for grupo in ("post", "sust", "solo", "pre", "det"):  # de derecha a izquierda: los índices no se mueven
+        if not m.group(grupo):
+            continue
+        mapa = _SUST_MAPA[genero][grupo]
+        inicio, fin = m.start(grupo) - base, m.end(grupo) - base
+        trozo = texto[inicio:fin]
+        if grupo == "pre":
+            nuevo = re.sub(rf"{_L}+", lambda w: _con_mayusculas_de(w.group(0), mapa.get(w.group(0).lower(), w.group(0))),
+                           trozo)
+        else:
+            clave = re.sub(r"\s+", " ", trozo.lower())
+            nuevo = _con_mayusculas_de(trozo, mapa.get(clave, trozo)) if clave in mapa else trozo
+        texto = texto[:inicio] + nuevo + texto[fin:]
+    return texto
+
+
+def corregir_sustantivos(texto: str, genero: str, persona: str = "1", original: str | None = None) -> str:
+    """Sustantivos de persona tras "ser" ("Soy un experto" -> "Soy una experta" si habla una mujer).
+    ``persona`` '1' (quien habla) o '2' (a quien se habla). Las formas ambiguas de 1.ª ("era un niño")
+    solo si el ``original`` está claramente en primera persona y no hay otro sujeto delante."""
+    if not texto or genero not in (HOMBRE, MUJER):
+        return texto
+    if persona == "2":
+        return _P2_SUST[genero].sub(lambda m: _cambiar_sustantivo(m, genero), texto)
+    res = _P1_SUST_SEG[genero].sub(lambda m: _cambiar_sustantivo(m, genero), texto)
+    if original is not None and _original_en_primera_persona(original):
+        trozos: list[str] = []
+        ultimo = 0
+        for m in _P1_SUST_AMB[genero].finditer(res):
+            previo = res[max(0, m.start() - 40):m.start()]
+            trozos.append(res[ultimo:m.start()])
+            trozos.append(m.group(0) if _hay_sujeto_3p(previo) else _cambiar_sustantivo(m, genero))
+            ultimo = m.end()
+        trozos.append(res[ultimo:])
+        res = "".join(trozos)
+    return res
+
+
 def corregir_primera_persona(texto: str, genero: str, original: str | None = None) -> str:
     """Ajusta los adjetivos que quien habla dice de sí mismo/a ("estoy cansada" -> "estoy cansado").
 
     ``original`` (inglés) permite corregir también las formas verbales ambiguas ("estaba", "era"...)
-    cuando el original está claramente en primera persona del singular.
+    cuando el original está claramente en primera persona del singular. También los sustantivos de
+    persona ("soy un experto" -> "soy una experta"; ver ``corregir_sustantivos``).
     """
     if not texto or genero not in (HOMBRE, MUJER):
         return texto
@@ -419,6 +544,7 @@ def corregir_primera_persona(texto: str, genero: str, original: str | None = Non
         if ambiguas:
             res = _aplicar_ambiguas(res, _P1_AMB[genero], mapa)
             res = _aplicar_ambiguas(res, _P1_SOLO_AMB[genero], _MAPA_SOLO[genero])
+        res = corregir_sustantivos(res, genero, "1", original)
         return _cambiar_mismo(res, _MISMO_1P[genero], genero)
 
     return _fuera_de_comillas(texto, _corregir)
@@ -481,6 +607,7 @@ def corregir_segunda_persona(texto: str, genero: str) -> str:
     def _corregir(trozo: str) -> str:
         res = _P2[genero].sub(lambda m: _cambiar_final(m, mapa), trozo)
         res = _P2_SOLO[genero].sub(lambda m: _cambiar_final(m, _MAPA_SOLO[genero]), res)
+        res = corregir_sustantivos(res, genero, "2")
         res = _cambiar_mismo(res, _MISMO_2P[genero], genero)
         return corregir_vocativos(res, genero)
 
@@ -770,6 +897,9 @@ _DET_BIENVENIDO = {
 # Para detectar "yo mismo" (masculino) se usa el patrón que busca "mismo", que es el de MUJER.
 _DET_MISMO_1P = {HOMBRE: _MISMO_1P[MUJER], MUJER: _MISMO_1P[HOMBRE]}
 _DET_MISMO_2P = {HOMBRE: _MISMO_2P[MUJER], MUJER: _MISMO_2P[HOMBRE]}
+# Igual con los sustantivos: "soy un experto" lo encuentra el patrón que corrige hacia MUJER.
+_DET_SUST_1P = {HOMBRE: _P1_SUST_SEG[MUJER], MUJER: _P1_SUST_SEG[HOMBRE]}
+_DET_SUST_2P = {HOMBRE: _P2_SUST[MUJER], MUJER: _P2_SUST[HOMBRE]}
 
 
 def marcas_genero(texto: str) -> set[str]:
@@ -783,9 +913,11 @@ def marcas_genero(texto: str) -> set[str]:
         return set()
     marcas: set[str] = set()
     for genero, letra in ((HOMBRE, "m"), (MUJER, "f")):
-        if _DET1[genero].search(texto) or _DET1_YO[genero].search(texto) or _DET_MISMO_1P[genero].search(texto):
+        if _DET1[genero].search(texto) or _DET1_YO[genero].search(texto) or _DET_MISMO_1P[genero].search(texto) \
+                or _DET_SUST_1P[genero].search(texto):
             marcas.add(f"1{letra}")
-        if _DET2[genero].search(texto) or _DET_BIENVENIDO[genero].search(texto) or _DET_MISMO_2P[genero].search(texto):
+        if _DET2[genero].search(texto) or _DET_BIENVENIDO[genero].search(texto) or _DET_MISMO_2P[genero].search(texto) \
+                or _DET_SUST_2P[genero].search(texto):
             marcas.add(f"2{letra}")
     return marcas
 
