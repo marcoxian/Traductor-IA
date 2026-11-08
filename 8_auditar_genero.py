@@ -612,8 +612,9 @@ def main(argv: list[str] | None = None) -> int:
         else:
             # Sin objetos Dialogue: quizá las tablas de texto del juego traen ruso/ucraniano, que dicen el
             # sexo de quien habla y de quien escucha
-            from traductor.motores.unity_tablas import PistasTablas, extraer_tablas
-            pistas = PistasTablas(extraer_tablas(ruta_juego), ficha)
+            from traductor.motores.unity_tablas import AjustesTablas, PistasTablas, extraer_tablas
+            ajustes_tablas = AjustesTablas.del_juego(juego)
+            pistas = PistasTablas(extraer_tablas(ruta_juego, ajustes_tablas), ficha, ajustes_tablas)
             if len(pistas):
                 log.info("Pistas de sexo de las tablas del juego (ruso/ucraniano): %d", len(pistas))
                 tabla = pistas

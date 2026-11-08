@@ -143,7 +143,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | `glosario_bd.json` | Nombres de objetos, habilidades… de RPG Maker, traducidos una vez para que el inventario y los diálogos digan lo mismo (se crea solo; puedes corregirlo) |
 | `contexto.txt` | Tono y ambientación; las líneas con `#` se ignoran |
 | `nombres_protegidos.json` | Nombres que el modelo deforma (nombre -> expresión regular) |
-| `ajustes.json` | Modelo de ese juego (`{"modelo": "auto"}` o uno concreto) |
+| `ajustes.json` | Modelo de ese juego (`{"modelo": "auto"}` o uno concreto) y, en Unity, `tablas_unity` (ver `--pretraducir`) |
 | `cache/` | Caché de traducciones por modelo |
 
 Archivos **globales y privados** en `glosarios/`, a partir de sus plantillas `*.ejemplo.json`:
@@ -216,7 +216,25 @@ el proxy solo traduce lo que el juego monta al vuelo («Día 3», «Ánimo 50 %�
 - Si la tabla trae ruso o ucraniano, sirve de pista del sexo de quien habla: en esos idiomas el pasado cambia
   con el sexo («я увидел» lo dice él, «я увидела» lo dice ella). Así «I'm sure» sale «estoy segura» cuando
   habla una chica, aunque el juego no diga quién habla.
+- Se leen los `.assets`, los `level*` y también `data.unity3d` (juegos que lo empaquetan todo en un archivo).
 - Se guarda cada 50 frases; si se corta, se puede relanzar y lo hecho sale de la caché.
+- Lo propio de cada juego va en `ajustes.json` del perfil, sección `tablas_unity` (todo opcional):
+
+  ```json
+  "tablas_unity": {
+    "omitir": ["tabla_vieja*"],
+    "columna_hablante": {"TextData*": 1},
+    "hablantes": {"莉莉": "Lily", "主角": "Protagonist", "？？？": ""},
+    "variables": {"{flag=Flag_Heroine}": "Lily"}
+  }
+  ```
+
+  - `omitir`: tablas que el juego no enseña.
+  - `columna_hablante` y `hablantes`: en qué columna dice la tabla quién habla y a qué personaje de la ficha
+    corresponde cada valor (`""` = nadie de la ficha). Si la pista rusa de una línea contradice al personaje,
+    gana la pista.
+  - `variables`: códigos que el juego cambia por un nombre antes de enseñar la frase. XUnity ve la frase ya
+    cambiada, así que se traduce con el nombre puesto.
 
 ---
 

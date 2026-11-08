@@ -89,12 +89,13 @@ tests/                  unittest; tests/datos/ con archivos de prueba inventados
 - **CSV de idiomas:** columna de español.
 - **Unity:**
   - `inyectar_unity()` escribe `AutoTranslatorConfig.ini` (Endpoint=CustomTranslate) e instala el plugin.
-  - Con `--pretraducir`, `unity_tablas.py` traduce las tablas `TextAsset` (CSV/TSV con columna EN) y las escribe en
-    el archivo de XUnity.
+  - Con `--pretraducir`, `unity_tablas.py` traduce las tablas `TextAsset` (CSV/TSV con columna EN) de `.assets`,
+    `level*` y `data.unity3d`, y las escribe en el archivo de XUnity.
   - `--solo-genero` repasa ese archivo (`repasar_xunity`).
 
 **Perfil de juego**, en `workspace/<juego>/` (privado): `personajes.json`, `glosario.json`, `contexto.txt`,
-`nombres_protegidos.json`, `ajustes.json` (modelo y `carpeta_juego`), `cache/` y `casos_dificiles.jsonl`.
+`nombres_protegidos.json`, `ajustes.json` (modelo, `carpeta_juego` y, en Unity, `tablas_unity`: tablas omitidas,
+columna de hablante → personaje de la ficha y variables `{flag=…}` → nombre), `cache/` y `casos_dificiles.jsonl`.
 `config.resolver_juego()` deduce el perfil del nombre de la carpeta, o de `carpeta_juego` si ese nombre no sirve
 (por ejemplo, si está en chino).
 

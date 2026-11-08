@@ -8,10 +8,15 @@ hay que esperar a la IA mientras se juega (solo a lo que el juego monta al vuelo
 Si la tabla trae ruso o ucraniano, se usa como pista del sexo de quien habla: en esos idiomas el pasado
 cambia con el sexo ("я увидел" lo dice él, "я увидела" lo dice ella). Así "I'm sure" sale "estoy segura"
 cuando habla una chica aunque el juego no diga quién habla.
+
+Lo propio de cada juego va en ``ajustes.json`` del perfil, sección ``tablas_unity`` (ver ``AjustesTablas``):
+tablas que no se traducen, columna con quién habla y su nombre en la ficha, y valores de las variables que el
+juego sustituye antes de enseñar el texto (``{flag=...}``), porque XUnity ve el texto ya sustituido.
 """
 from __future__ import annotations
 
 import csv
+import fnmatch
 import io
 import logging
 import re
@@ -98,6 +103,47 @@ def genero_de_quien_escucha(celdas: dict[str, str]) -> str | None:
     return _votar(celdas, _PISTAS_TU)
 
 
+# --------------------------------------------------------------------------- ajustes del perfil
+@dataclass
+class AjustesTablas:
+    """Sección ``tablas_unity`` de ``workspace/<juego>/ajustes.json``. Todo opcional:
+
+    - ``omitir``: nombres de tabla (admite ``*``) que no se traducen (texto que el juego no enseña).
+    - ``columna_hablante``: ``{patrón de tabla: nº de columna}`` con quién habla en cada fila.
+    - ``hablantes``: ``{lo que pone esa columna: nombre en la ficha}``; ``""`` = no es nadie de la ficha.
+    - ``variables``: ``{código: valor}`` que el juego sustituye antes de enseñar la frase
+      (``{"{flag=Flag_Heroine_Name}": "Ana"}``).
+    """
+    omitir: list[str] = field(default_factory=list)
+    columna_hablante: dict[str, int] = field(default_factory=dict)
+    hablantes: dict[str, str] = field(default_factory=dict)
+    variables: dict[str, str] = field(default_factory=dict)
+
+    @classmethod
+    def desde_dict(cls, datos: dict | None) -> "AjustesTablas":
+        datos = datos or {}
+        return cls(omitir=list(datos.get("omitir") or []),
+                   columna_hablante={str(k): int(v) for k, v in (datos.get("columna_hablante") or {}).items()},
+                   hablantes={str(k): str(v or "") for k, v in (datos.get("hablantes") or {}).items()},
+                   variables={str(k): str(v) for k, v in (datos.get("variables") or {}).items()})
+
+    @classmethod
+    def del_juego(cls, juego: str | None) -> "AjustesTablas":
+        from ..config import ajustes_juego
+        return cls.desde_dict(ajustes_juego(juego).get("tablas_unity") if juego else None)
+
+    def se_omite(self, nombre: str) -> bool:
+        return any(fnmatch.fnmatchcase(nombre, p) for p in self.omitir)
+
+    def columna_de(self, nombre: str) -> int | None:
+        return next((c for p, c in self.columna_hablante.items() if fnmatch.fnmatchcase(nombre, p)), None)
+
+    def sustituir(self, texto: str) -> str:
+        for codigo, valor in self.variables.items():
+            texto = texto.replace(codigo, valor)
+        return texto
+
+
 # --------------------------------------------------------------------------- lectura de tablas
 @dataclass
 class TablaTexto:
@@ -107,6 +153,7 @@ class TablaTexto:
     col_en: int
     entradas: list[tuple[str, str | None]] = field(default_factory=list)  # (inglés, sexo de quien habla)
     oyentes: dict[str, str | None] = field(default_factory=dict)          # inglés -> sexo de quien escucha
+    hablantes: dict[str, str | None] = field(default_factory=dict)        # inglés -> columna de quién habla
 
     @property
     def es_dialogo(self) -> bool:
@@ -120,8 +167,10 @@ def _texto_visible_ingles(texto: str) -> bool:
         and tiene_texto_visible(texto)
 
 
-def leer_tabla(nombre: str, contenido: str) -> TablaTexto | None:
+def leer_tabla(nombre: str, contenido: str, ajustes: AjustesTablas | None = None) -> TablaTexto | None:
     """Una tabla con columna inglesa, o None si el texto no lo es."""
+    ajustes = ajustes or AjustesTablas()
+    col_hablante = ajustes.columna_de(nombre)
     if "\x00" in contenido[:2000]:
         return None
     # fin de línea de Windows -> "\n"; un "\r" suelto dentro de una celda rompería el lector de CSV
@@ -146,12 +195,13 @@ def leer_tabla(nombre: str, contenido: str) -> TablaTexto | None:
     for fila in tabla.filas:
         if len(fila) <= col:
             continue
-        texto = fila[col].replace("\\n", "\n")  # el juego convierte el "\n" escrito en salto
+        texto = ajustes.sustituir(fila[col].replace("\\n", "\n"))  # el juego convierte el "\n" escrito en salto
         if not _texto_visible_ingles(texto):
             continue
         celdas = {cab[i]: fila[i] for i in range(min(len(cab), len(fila)))}
         genero = genero_de_quien_habla(celdas)
         oyente = genero_de_quien_escucha(celdas)
+        quien = fila[col_hablante].strip() or None if col_hablante is not None and col_hablante < len(fila) else None
         # Una pausa del juego en mitad de la frase ("...culture,{wc} so she..."): el juego enseña cada
         # trozo por separado y XUnity los ve sueltos, así que también se traduce cada trozo
         trozos = [p.strip() for p in _PAUSA.split(texto)] if _PAUSA.search(texto) else []
@@ -162,10 +212,13 @@ def leer_tabla(nombre: str, contenido: str) -> TablaTexto | None:
                     tabla.entradas[i] = (frase, None)
                 if tabla.oyentes.get(frase) != oyente:
                     tabla.oyentes[frase] = None
+                if tabla.hablantes.get(frase) != quien:
+                    tabla.hablantes[frase] = None
                 continue
             vistos[frase] = len(tabla.entradas)
             tabla.entradas.append((frase, genero))
             tabla.oyentes[frase] = oyente
+            tabla.hablantes[frase] = quien
     return tabla if tabla.entradas else None
 
 
@@ -174,8 +227,9 @@ def _archivos_de_datos(ruta_juego: Path) -> list[Path]:
     return archivos(ruta_juego)
 
 
-def extraer_tablas(ruta_juego: Path) -> list[TablaTexto]:
-    """Todas las tablas de texto con columna inglesa que hay en los archivos del juego."""
+def extraer_tablas(ruta_juego: Path, ajustes: AjustesTablas | None = None) -> list[TablaTexto]:
+    """Todas las tablas de texto con columna inglesa que hay en los archivos del juego (menos las omitidas)."""
+    ajustes = ajustes or AjustesTablas()
     try:
         import UnityPy
     except ImportError:
@@ -200,7 +254,11 @@ def extraer_tablas(ruta_juego: Path) -> list[TablaTexto]:
                     script.encode("utf-8")
             except Exception:
                 continue
-            tabla = leer_tabla(getattr(datos, "m_Name", "") or "", script)
+            nombre = getattr(datos, "m_Name", "") or ""
+            if ajustes.se_omite(nombre):
+                log.info("Tabla de texto '%s' omitida (ajustes del perfil).", nombre)
+                continue
+            tabla = leer_tabla(nombre, script, ajustes)
             if tabla is not None:
                 log.info("Tabla de texto '%s' (%s): %d frases en inglés.", tabla.nombre, ruta.name,
                          len(tabla.entradas))
@@ -245,26 +303,31 @@ class PistasTablas:
     (``info`` y ``escena``) más ``genero_oyente``. Busca la frase tal cual o normalizada (sin etiquetas ni
     comillas tipográficas), como llega de XUnity. Si una frase sale con pistas distintas, no hay pista."""
 
-    def __init__(self, tablas: list[TablaTexto], ficha=None):
+    def __init__(self, tablas: list[TablaTexto], ficha=None, ajustes: AjustesTablas | None = None):
         from ..unity_dialogos import _normalizar
         self._normalizar = _normalizar
+        self._ficha = ficha
+        self._ajustes = ajustes or AjustesTablas()
         self._unico = _unico_por_genero(ficha)
         self._hablante: dict[str, str | None] = {}
         self._oyente: dict[str, str | None] = {}
+        self._etiqueta: dict[str, str | None] = {}
         for tabla in tablas:
             for frase, genero in tabla.entradas:
-                for destino, valor in ((self._hablante, genero), (self._oyente, tabla.oyentes.get(frase))):
+                for destino, valor in ((self._hablante, genero), (self._oyente, tabla.oyentes.get(frase)),
+                                       (self._etiqueta, tabla.hablantes.get(frase))):
                     for clave in {frase, _normalizar(frase)}:
                         destino[clave] = valor if destino.get(clave, valor) == valor else None
 
     def __len__(self) -> int:
-        return sum(1 for v in self._hablante.values() if v) + sum(1 for v in self._oyente.values() if v)
+        return sum(1 for d in (self._hablante, self._oyente, self._etiqueta) for v in d.values() if v)
 
     def _buscar(self, tabla: dict[str, str | None], texto: str) -> str | None:
         return tabla[texto] if texto in tabla else tabla.get(self._normalizar(texto))
 
     def info(self, texto: str) -> InfoLinea | None:
-        return _info(self._buscar(self._hablante, texto), self._unico)
+        return info_de_fila(self._buscar(self._etiqueta, texto), self._buscar(self._hablante, texto),
+                            self._ajustes, self._ficha, self._unico)
 
     def escena(self, texto: str) -> tuple:
         return ()   # las tablas no dicen quién más está en la conversación
@@ -279,8 +342,23 @@ def _info(genero: str | None, unico: dict[str, str]) -> InfoLinea | None:
     return InfoLinea(hablante=unico.get(genero), genero=genero)
 
 
+def info_de_fila(etiqueta: str | None, genero: str | None, ajustes: AjustesTablas, ficha,
+                 unico: dict[str, str]) -> InfoLinea | None:
+    """Quién dice la frase: el personaje de la columna de hablante (si está en ``ajustes.hablantes``) o, si no,
+    la pista rusa/ucraniana. Si la pista de ESTA línea contradice el sexo del personaje (una frase citada, una
+    fila mal marcada), gana la pista: ante la duda, no se impone el hablante."""
+    nombre = ajustes.hablantes.get(etiqueta or "", "") if etiqueta else ""
+    if not nombre:
+        return _info(genero, unico)
+    p = ficha.buscar(nombre) if ficha is not None and getattr(ficha, "personajes", None) else None
+    del_personaje = p.genero if p is not None and p.genero_conocido else None
+    if genero and del_personaje and genero != del_personaje:
+        return _info(genero, unico)
+    return InfoLinea(hablante=nombre, genero=del_personaje or genero)
+
+
 def pretraducir_tablas(ruta_juego: Path, translator, ruta_txt: Path, *, tablas: list[TablaTexto] | None = None,
-                       guardar_cada: int = 50, progreso=None) -> dict[str, int]:
+                       guardar_cada: int = 50, progreso=None, ajustes: AjustesTablas | None = None) -> dict[str, int]:
     """Traduce las tablas de texto del juego y las escribe en ``ruta_txt`` (formato XUnity).
 
     - Las frases van en el orden de la tabla (el de la historia), con conversación previa en las de diálogo.
@@ -288,7 +366,8 @@ def pretraducir_tablas(ruta_juego: Path, translator, ruta_txt: Path, *, tablas: 
       que no está en las tablas (números, nombres que el juego monta) se retraduce igual al final.
     - Se guarda cada ``guardar_cada`` frases: si se corta, la caché y el archivo conservan lo hecho.
     """
-    tablas = extraer_tablas(ruta_juego) if tablas is None else tablas
+    ajustes = ajustes or AjustesTablas()
+    tablas = extraer_tablas(ruta_juego, ajustes) if tablas is None else tablas
     anteriores = xunity.leer_traducciones(ruta_txt)
     en_tablas = {t for tabla in tablas for t, _ in tabla.entradas}
     sueltas = [o for o in anteriores if o not in en_tablas and _texto_visible_ingles(o)]
@@ -319,11 +398,12 @@ def pretraducir_tablas(ruta_juego: Path, translator, ruta_txt: Path, *, tablas: 
             stats["cambian"] += 1
         nuevas[texto] = final
 
-    unico = _unico_por_genero(getattr(getattr(translator, "perfil", None), "personajes", None))
+    ficha = getattr(getattr(translator, "perfil", None), "personajes", None)
+    unico = _unico_por_genero(ficha)
     historial_antes = getattr(translator, "usar_historial", False)
-    lotes = [(t.nombre, t.entradas, t.es_dialogo) for t in tablas]
+    lotes = [(t.nombre, [(e, g, t.hablantes.get(e)) for e, g in t.entradas], t.es_dialogo) for t in tablas]
     if sueltas:
-        lotes.append(("(sueltas de XUnity)", [(o, None) for o in sueltas], False))
+        lotes.append(("(sueltas de XUnity)", [(o, None, None) for o in sueltas], False))
     try:
         hechas = 0
         for indice, (nombre, entradas, dialogo) in enumerate(lotes, 1):
@@ -332,9 +412,9 @@ def pretraducir_tablas(ruta_juego: Path, translator, ruta_txt: Path, *, tablas: 
                 translator.historial.clear()
             if progreso is not None:
                 progreso.inicio_archivo(nombre, indice, len(entradas))
-            for n, (texto, genero) in enumerate(entradas, 1):
-                info = _info(genero, unico)
-                stats["con_pista"] += bool(genero)
+            for n, (texto, genero, etiqueta) in enumerate(entradas, 1):
+                info = info_de_fila(etiqueta, genero, ajustes, ficha, unico)
+                stats["con_pista"] += bool(info and (info.hablante or info.genero))
                 _traducir(texto, info)
                 hechas += 1
                 if progreso is not None:

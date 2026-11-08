@@ -15,7 +15,7 @@ from pathlib import Path
 from traductor import config
 from traductor.motores import InyectorCSV, InyectorRenPy, InyectorRPGMaker, detectar_motor, inyectar_unity
 from traductor.motores.unity import archivo_xunity, repasar_xunity
-from traductor.motores.unity_tablas import pretraducir_tablas
+from traductor.motores.unity_tablas import AjustesTablas, pretraducir_tablas
 from traductor.unity_dialogos import TablaHablantes, preparar_tabla, ruta_tabla
 from traductor.ollama import OllamaNoDisponible, OllamaTranslator, ruta_cache_por_defecto
 from traductor.progreso import EstadoProgreso
@@ -154,7 +154,8 @@ class GameEngineInjector:
                 if self.pretraducir:
                     # Tablas de texto del juego traducidas antes de jugar: XUnity ya las encuentra hechas
                     pretraducir_tablas(self.ruta_juego, self.translator, archivo_xunity(self.ruta_juego),
-                                       progreso=self.progreso)
+                                       progreso=self.progreso,
+                                       ajustes=AjustesTablas.del_juego(self.perfil.juego))
                 import ollama_proxy
                 log.info("Iniciando servidor proxy de traducción para Unity en tiempo real...")
                 ollama_proxy.ejecutar_proxy(self.translator)

@@ -43,6 +43,18 @@ class TestLecturaDeBytes(unittest.TestCase):
         self.assertEqual(datos_de_personaje(_personaje("X", "Robot", 7)), ("Robot", None))
 
 
+class TestArchivosDeDatos(unittest.TestCase):
+    def test_incluye_data_unity3d(self):
+        from traductor.unity_dialogos import _archivos_de_datos
+        with tempfile.TemporaryDirectory() as tmp:
+            datos = Path(tmp) / "Juego Inventado_Data"
+            datos.mkdir()
+            for nombre in ("data.unity3d", "resources.assets", "level0", "resources.resource", "app.info"):
+                (datos / nombre).write_bytes(b"")
+            nombres = [p.name for p in _archivos_de_datos(Path(tmp))]
+        self.assertEqual(nombres, ["data.unity3d", "level0", "resources.assets"])
+
+
 class TestTabla(unittest.TestCase):
     def test_busca_aunque_cambien_las_etiquetas(self):
         t = TablaHablantes({"<i>(I'm so tired…)</i>": Hablante("Ana", "mujer")})

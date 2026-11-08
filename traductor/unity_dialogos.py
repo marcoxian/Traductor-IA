@@ -87,8 +87,9 @@ def _archivos_de_datos(ruta_juego: Path) -> list[Path]:
     datos = next((p for p in Path(ruta_juego).glob("*_Data") if p.is_dir()), None)
     if datos is None:
         return []
+    # data.unity3d: algunos juegos empaquetan todos sus assets en un único archivo comprimido
     archivos = sorted(p for p in datos.iterdir()
-                      if p.is_file() and (p.suffix == ".assets" or re.fullmatch(r"level\d+", p.name)))
+                      if p.is_file() and (p.suffix in (".assets", ".unity3d") or re.fullmatch(r"level\d+", p.name)))
     return archivos + sorted((datos / "StreamingAssets").rglob("*.bundle"))
 
 
