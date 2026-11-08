@@ -143,15 +143,17 @@ tests/                  unittest; tests/datos/ con archivos de prueba inventados
 
 ## Qué modelo de Claude usar
 
-Al proponer el siguiente paso, o al listar tareas pendientes, di también **con qué modelo conviene hacer cada una**
-(el usuario lo cambia con `/model`). Criterio:
+Al proponer el siguiente paso, o al listar tareas pendientes, di también **con qué modelo y con qué esfuerzo
+conviene hacer cada una** (el usuario cambia el modelo con `/model` y el esfuerzo con `/effort`). Criterio:
 
-- **Opus** cuando hay que decidir o juzgar: revisar datos de entrenamiento o casos difíciles uno a uno, auditar
-  género en frases ambiguas, diseñar una regla nueva, depurar algo que no se entiende.
-- **Sonnet** cuando la receta ya está clara: aplicar una corrección conocida, pasar pruebas, instalar con copia de
-  respaldo, actualizar README y plan, hacer commits, lanzar un entrenamiento.
+- **Opus, esfuerzo alto (`high` o `xhigh`)** cuando hay que decidir o juzgar: revisar datos de entrenamiento o
+  casos difíciles uno a uno, auditar género en frases ambiguas, diseñar una regla nueva, depurar algo que no se
+  entiende.
+- **Sonnet, esfuerzo medio (`medium`)** cuando la receta ya está clara: aplicar una corrección conocida, pasar
+  pruebas, instalar con copia de respaldo, actualizar README y plan, hacer commits, lanzar un entrenamiento.
+- **Esfuerzo bajo (`low`)** para lo mecánico y corto: renombrar, formatear, copiar archivos.
 
-Si una tarea mezcla las dos, di cuál parte es de cada modelo.
+Si una tarea mezcla varias, di cuál parte es de cada modelo y esfuerzo.
 
 ## Cuándo limpiar la conversación
 
