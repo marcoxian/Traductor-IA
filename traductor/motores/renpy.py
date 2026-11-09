@@ -48,7 +48,9 @@ _NEW = re.compile(r"^(?P<pre>\s*new\s+)" + _CADENA + r"(?P<resto>\s*)$")
 _NO_DIALOGO = {"voice", "play", "queue", "stop", "show", "hide", "scene", "with", "window", "nvl", "pause",
                "call", "jump", "return", "renpy", "define", "default", "image", "transform", "screen",
                "label", "menu", "if", "elif", "else", "while", "python", "init", "old", "new", "translate"}
-_NARRADOR = {None, "narrator", "n", "nar", "narr", "centered", "extend"}
+# Narrador seguro. "n", "nar"... NO van aquí: muchos juegos llaman "n" a un personaje (define n = Character(...)).
+# Se pasan como código: si la ficha no los tiene, la línea queda sin hablante, igual que el narrador.
+_NARRADOR = {None, "narrator", "centered", "extend"}
 _SALTO = re.compile(r"\\n")
 
 
@@ -64,7 +66,7 @@ def escapar(texto: str) -> str:
 
 @dataclass
 class Pendiente:
-    """Una cadena sin traducir de un archivo ``tl``."""
+    """Una cadena de un archivo ``tl`` (sin traducir, o ya traducida si viene de ``leer_cadenas``)."""
 
     linea: int           # índice de la línea física en el archivo
     pre: str             # lo que va antes de la cadena ('    m "', '    new "')
@@ -73,6 +75,7 @@ class Pendiente:
     quien: str | None    # variable del hablante ('m', 'mc') o None
     es_cadena: bool      # True = old/new (interfaz, menús)
     nombre: str | None = None  # hablante escrito como cadena ('"Eileen" "Hola"')
+    actual: str = ""     # lo que hay ahora en el archivo (igual al original si está sin traducir)
 
     def info(self) -> InfoLinea | None:
         if self.es_cadena:
@@ -90,6 +93,13 @@ def _sin_traducir(original: str, actual: str) -> bool:
 
 def buscar_pendientes(lineas: list[str], idioma: str | None = None) -> list[Pendiente]:
     """Recorre las líneas de un ``tl`` y devuelve lo que falta por traducir."""
+    return [c for c in leer_cadenas(lineas, idioma)
+            if _sin_traducir(c.original, c.actual) and tiene_texto_visible(desescapar(c.original))]
+
+
+def leer_cadenas(lineas: list[str], idioma: str | None = None) -> list[Pendiente]:
+    """Todas las cadenas de un ``tl`` (diálogos y old/new), traducidas o no, en el orden del archivo.
+    ``actual`` es lo que hay escrito ahora; sirve para auditar una traducción ya hecha."""
     pendientes: list[Pendiente] = []
     en_bloque = False
     original: tuple[str, str | None, str | None] | None = None   # (texto, quien, nombre) del último comentario
@@ -110,8 +120,9 @@ def buscar_pendientes(lineas: list[str], idioma: str | None = None) -> list[Pend
             continue
         mn = _NEW.match(cuerpo)
         if mn:
-            if old is not None and _sin_traducir(old, mn.group("texto")) and tiene_texto_visible(desescapar(old)):
-                pendientes.append(Pendiente(i, mn.group("pre") + '"', old, '"' + mn.group("resto"), None, True))
+            if old is not None:
+                pendientes.append(Pendiente(i, mn.group("pre") + '"', old, '"' + mn.group("resto"), None, True,
+                                            actual=mn.group("texto")))
             old = None
             continue
         if cuerpo.lstrip().startswith("#"):
@@ -130,9 +141,8 @@ def buscar_pendientes(lineas: list[str], idioma: str | None = None) -> list[Pend
         if md and original is not None and (nombre or (md.group("quien") or "") not in _NO_DIALOGO):
             texto_original, quien_comentario, nombre_comentario = original
             quien = None if nombre else (md.group("quien") or quien_comentario)
-            if _sin_traducir(texto_original, md.group("texto")) and tiene_texto_visible(desescapar(texto_original)):
-                pendientes.append(Pendiente(i, md.group("pre") + '"', texto_original, '"' + md.group("resto"),
-                                            quien, False, nombre or nombre_comentario))
+            pendientes.append(Pendiente(i, md.group("pre") + '"', texto_original, '"' + md.group("resto"),
+                                        quien, False, nombre or nombre_comentario, md.group("texto")))
             original = None
     return pendientes
 

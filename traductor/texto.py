@@ -174,6 +174,37 @@ def _colocar_pausas(original: str, traducido: str, pendientes: Counter) -> str:
     return traducido
 
 
+_LLAVE = re.compile(r"[{}]")
+_PAR_LLAVES = re.compile(r"\{(/?)([A-Za-z]+)(?:=[^{}\s]*)?\}")
+
+
+def _llaves_sueltas(texto: str) -> int:
+    """Llaves '{' '}' que no forman parte de una etiqueta (ni de '{{', que es una llave escrita)."""
+    return len(_LLAVE.findall(PATRON_ETIQUETAS.sub("", texto.replace("{{", "").replace("}}", ""))))
+
+
+def _cierre_antes_de_abrir(texto: str) -> bool:
+    """True si un '{/x}' aparece sin un '{x}' abierto antes (Ren'Py da error con eso)."""
+    abiertas: list[str] = []
+    for m in _PAR_LLAVES.finditer(texto):
+        nombre = m.group(2).lower()
+        if not m.group(1):
+            abiertas.append(nombre)
+        elif nombre in abiertas:
+            del abiertas[len(abiertas) - 1 - abiertas[::-1].index(nombre)]
+        else:
+            return True
+    return False
+
+
+def etiquetas_desordenadas(original: str, traducido: str) -> bool:
+    """Fallos de etiquetas que el conteo no ve: '{Pedro: {i}}Hola' (llaves de más que no son etiqueta) o
+    '{/i} Hola {i}mundo' (se cierra antes de abrir). Solo cuenta si el original no tenía ya ese fallo."""
+    if _llaves_sueltas(traducido) > _llaves_sueltas(original):
+        return True
+    return _cierre_antes_de_abrir(traducido) and not _cierre_antes_de_abrir(original)
+
+
 def forzar_etiquetas(original: str, traducido: str) -> str:
     """Último recurso: añade las etiquetas que falten (respetando duplicados).
 
@@ -1206,7 +1237,7 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("longitud_larga")
 
     ok_tags, _, _ = comparar_etiquetas(original, traducido)
-    if not ok_tags:
+    if not ok_tags or etiquetas_desordenadas(original, traducido):
         problemas.append("etiquetas")
 
     faltan, sobran = numeros_cambiados(original, traducido)

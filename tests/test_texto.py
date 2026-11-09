@@ -16,6 +16,20 @@ from traductor.texto import (
 
 
 class TestTexto(unittest.TestCase):
+    def test_etiquetas_desordenadas(self):
+        from traductor.texto import etiquetas_desordenadas, evaluar_traduccion
+        # El modelo copia el nombre de quien habla dentro de una llave: el conteo de {i} cuadra, pero Ren'Py falla
+        self.assertTrue(etiquetas_desordenadas("{i}I better find her.", "{Pedro: {i}}Será mejor que la encuentre."))
+        self.assertTrue(etiquetas_desordenadas("{i}Fuck it.", "{i} {¡i! A la mierda."))
+        # Cierre antes de abrir
+        self.assertTrue(etiquetas_desordenadas("I {i}just{/i} told you.", "{/i} Acabo de {i}decírtelo."))
+        self.assertIn("etiquetas", evaluar_traduccion("I {i}just{/i} told you.", "{/i} Acabo de {i}decírtelo."))
+        # Bien: mismas etiquetas en orden, llaves escritas ({{) o llaves que ya estaban en el original
+        self.assertFalse(etiquetas_desordenadas("I {i}just{/i} told you.", "{i}Acabo{/i} de decírtelo."))
+        self.assertFalse(etiquetas_desordenadas("{size=16}Oh{/size} yes!", "{size=16}Oh{/size} ¡sí!"))
+        self.assertFalse(etiquetas_desordenadas("Use {{braces}}.", "Usa {{llaves}}."))
+        self.assertFalse(etiquetas_desordenadas("{Lesson 1: Home Row}", "{Lección 1: fila central}"))
+
     def test_extraer_etiquetas(self):
         txt = r"Hola \C[4]mundo\C[0] %1 {name} \I[123] \n salto"
         etiquetas = extraer_etiquetas(txt)

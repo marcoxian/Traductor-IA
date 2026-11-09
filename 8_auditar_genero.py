@@ -44,6 +44,7 @@ from traductor.csv_locales import analizar_cabecera, escribir_lineas, leer_linea
 from traductor.genero import (HOMBRE, MUJER, contradice_genero, corregir_plural, corregir_segunda_persona,
                                es_genero_marcado, marcas_genero, marcas_plural, personas_con_genero_en,
                                plural_a_medias)
+from traductor.motores import renpy
 from traductor.motores.rpgmaker import InyectorRPGMaker
 from traductor.personajes import (ContextoLinea, FichaPersonajes, InfoLinea, Personaje, aplicar_concordancia,
                                   es_los_dos, resolver_linea, ruta_ficha)
@@ -469,6 +470,68 @@ def auditar_csv(ruta_juego: Path, ficha: FichaPersonajes, corregir: bool = False
     return hallazgos, avisos
 
 
+# --------------------------------------------------------------------------- Ren'Py
+def _texto_renpy(cadena: str) -> str:
+    """Cadena de un .rpy -> texto revisable: sin comillas escapadas y con los '\\n' como saltos reales
+    (así las palabras de después de un salto se ven como palabras)."""
+    return renpy.desescapar(cadena).replace("\\n", "\n")
+
+
+def _cadena_renpy(texto: str) -> str:
+    return renpy.escapar(texto.replace("\n", "\\n"))
+
+
+def auditar_renpy(ruta_juego: Path, ficha: FichaPersonajes, corregir: bool = False,
+                  dudosas: bool = False, perfil_nombres=None, segunda: bool = False,
+                  idioma: str | None = None) -> tuple[list[Hallazgo], list[str]]:
+    """Audita los ``game/tl/<idioma>/**/*.rpy`` ya traducidos.
+
+    Cada bloque del ``tl`` lleva el original en un comentario y quién habla (``renpy:<variable>``), así que
+    se revisan la 1.ª persona, la 2.ª y el plural igual que en RPG Maker. Los diálogos de cada archivo
+    van en el orden del guion: las frases vecinas dan la escena. Los textos de interfaz y menús
+    (``old``/``new``) se revisan sin hablante. Con ``corregir`` solo se reescriben las líneas corregidas.
+    """
+    hallazgos: list[Hallazgo] = []
+    carpeta = renpy.InyectorRenPy(ruta_juego, None, idioma=idioma).carpeta_tl()
+    if carpeta is None:
+        return hallazgos, ["No se encontró la carpeta game/tl/<idioma> de Ren'Py."]
+    for ruta in sorted(carpeta.rglob("*.rpy")):
+        bom, lineas = renpy._leer(ruta)
+        cadenas = [c for c in renpy.leer_cadenas(lineas, carpeta.name) if c.actual != c.original]
+        if not cadenas:
+            continue
+        nombre = str(ruta.relative_to(carpeta))
+        dialogos = [c for c in cadenas if not c.es_cadena]
+        textos_o = [_texto_renpy(c.original) for c in dialogos]
+        contextos = [resolver_linea(ficha, t, c.info()) for t, c in zip(textos_o, dialogos)]
+        posicion = {id(c): i for i, c in enumerate(dialogos)}
+        textos_s = [_texto_renpy(c.original) for c in cadenas if c.es_cadena]
+        indice_s = 0
+        cambios = 0
+        for c in cadenas:
+            original, traducido = _texto_renpy(c.original), _texto_renpy(c.actual)
+            if c.es_cadena:
+                hs = revisar_linea(ficha, original, traducido, None, nombre, dudosas, perfil_nombres,
+                                   _contexto(textos_s, indice_s))
+                indice_s += 1
+            else:
+                i = posicion[id(c)]
+                hs = revisar_linea(ficha, original, traducido, c.info(), nombre, dudosas, perfil_nombres,
+                                   _contexto(textos_o, i), contextos[i], hablantes_cerca(contextos, i))
+            if not hs:
+                continue
+            hallazgos += hs
+            propuesta = _propuesta(hs, segunda)
+            if corregir and propuesta is not None:
+                lineas[c.linea] = f"{c.pre}{_cadena_renpy(propuesta)}{c.resto}{renpy._fin_de_linea(lineas[c.linea])}"
+                cambios += 1
+        if cambios:
+            _copia_seguridad(ruta)
+            renpy._escribir(ruta, bom, lineas)
+            log.info("  ✔ %s: %d correcciones de género aplicadas.", nombre, cambios)
+    return hallazgos, []
+
+
 # --------------------------------------------------------------------------- XUnity
 def buscar_archivos_xunity(ruta_juego: Path) -> list[Path]:
     encontrados: list[Path] = []
@@ -624,6 +687,11 @@ def main(argv: list[str] | None = None) -> int:
                                   segunda=args.segunda)
             hallazgos += h
             avisos += a
+    elif (ruta_juego / "game" / "tl").is_dir():
+        h, a = auditar_renpy(ruta_juego, ficha, corregir=args.corregir, dudosas=args.dudosas,
+                             perfil_nombres=perfil_nombres, segunda=args.segunda)
+        hallazgos += h
+        avisos += a
     else:
         h, a = auditar_rpgmaker(ruta_juego, ficha, perfil, corregir=args.corregir, dudosas=args.dudosas,
                                 nombres=args.nombres, segunda=args.segunda)

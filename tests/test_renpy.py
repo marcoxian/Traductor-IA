@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 from traductor.motores.detector import detectar_motor
-from traductor.motores.renpy import InyectorRenPy, buscar_pendientes, escapar
+from traductor.motores.renpy import InyectorRenPy, buscar_pendientes, escapar, leer_cadenas
 from traductor.personajes import FichaPersonajes, Personaje
 
 TL = '''# TODO: Translation updated at 2026-11-04 10:00
@@ -100,9 +100,31 @@ class TestRenPy(unittest.TestCase):
         por_texto = {p.original: p for p in pend}
         self.assertEqual(por_texto["Aah! I'm so tired."].info().codigo, "renpy:m")
         self.assertEqual(por_texto["Line one.\\nLine two."].info().codigo, "renpy:m")  # con atributo 'happy'
-        self.assertIsNone(por_texto["You run upstairs as fast as you can..."].info())   # narrador
+        # "n" puede ser un personaje (define n = Character("Nora")): se pasa como código y decide la ficha
+        self.assertEqual(por_texto["You run upstairs as fast as you can..."].info().codigo, "renpy:n")
         self.assertEqual(por_texto["Hello there."].info().hablante, "Eileen")           # hablante como cadena
         self.assertIsNone(por_texto["Start"].info())                                     # interfaz
+
+    def test_n_es_narrador_o_personaje_segun_la_ficha(self):
+        from traductor.personajes import resolver_linea
+        pend = {p.original: p for p in buscar_pendientes(TL.splitlines(keepends=True), "spanish")}
+        info = pend["You run upstairs as fast as you can..."].info()
+        sin_n = FichaPersonajes([Personaje("Mia", "mujer", "principal", codigos=["renpy:m"])])
+        self.assertIsNone(resolver_linea(sin_n, "You run upstairs.", info).hablante)   # narrador
+        con_n = FichaPersonajes([Personaje("Nora", "mujer", "principal", codigos=["renpy:n"])])
+        self.assertEqual(resolver_linea(con_n, "You run upstairs.", info).hablante.nombre, "Nora")
+        # "narrator" sí es siempre el narrador
+        narr = buscar_pendientes(['translate spanish x:\n', '    # narrator "Hi."\n', '    narrator "Hi."\n'],
+                                 "spanish")
+        self.assertIsNone(narr[0].info())
+
+    def test_leer_cadenas_incluye_lo_traducido(self):
+        cadenas = leer_cadenas(TL.splitlines(keepends=True), "spanish")
+        por_texto = {c.original: c for c in cadenas}
+        self.assertEqual(por_texto['She said \\"hi\\" to me.'].actual, "Ya traducido.")
+        self.assertEqual(por_texto['She said \\"hi\\" to me.'].quien, "mc")
+        self.assertEqual(por_texto["Load"].actual, "Cargar")
+        self.assertNotIn("Bonjour?", por_texto)                                          # otro idioma
 
     def test_procesar_rellena_y_es_idempotente(self):
         ruta = self.tl / "script.rpy"
