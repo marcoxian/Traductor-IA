@@ -98,7 +98,8 @@ def buscar_pendientes(lineas: list[str], idioma: str | None = None) -> list[Pend
         cuerpo = linea.rstrip("\r\n")
         m = _BLOQUE.match(cuerpo)
         if m:
-            en_bloque = idioma is None or m.group("idioma") == idioma
+            # Sin distinguir mayúsculas: la carpeta puede ser "Spanish" y el bloque "translate Spanish".
+            en_bloque = idioma is None or m.group("idioma").lower() == idioma.lower()
             original, old = None, None
             continue
         if not en_bloque or not cuerpo.strip():
@@ -168,12 +169,15 @@ class InyectorRenPy:
         base = self.ruta_juego / "game" / "tl"
         if not base.is_dir():
             return None
-        if self.idioma:
-            return base / self.idioma if (base / self.idioma).is_dir() else None
-        for preferido in ("spanish", "espanol", "español", "es", "castellano"):
-            if (base / preferido).is_dir():
-                return base / preferido
+        # Se buscan por iterdir() para quedarse con el nombre real de la carpeta ("Spanish"), que en Windows
+        # no se sabría con (base / "spanish").is_dir().
         idiomas = [p for p in base.iterdir() if p.is_dir() and p.name.lower() != "none"]
+        por_nombre = {p.name.lower(): p for p in idiomas}
+        if self.idioma:
+            return por_nombre.get(self.idioma.lower())
+        for preferido in ("spanish", "espanol", "español", "es", "castellano"):
+            if preferido in por_nombre:
+                return por_nombre[preferido]
         return idiomas[0] if len(idiomas) == 1 else None
 
     def procesar(self) -> int:
@@ -188,9 +192,20 @@ class InyectorRenPy:
         if self.archivo_objetivo:
             archivos = [a for a in archivos if a.name == self.archivo_objetivo]
         log.info("Ren'Py: %d archivos de traducción en %s", len(archivos), carpeta)
+        # Se cuentan antes las cadenas pendientes de cada archivo para que el monitor muestre porcentaje,
+        # archivo actual y tiempo restante. Solo cuentan los archivos que tienen algo pendiente.
+        conteo = {a: len(buscar_pendientes(_leer(a)[1], carpeta.name)) for a in archivos}
+        con_trabajo = [a for a in archivos if conteo[a]]
+        progreso = getattr(self.translator, "progreso", None)
+        if progreso is not None:
+            progreso.definir_totales(sum(conteo.values()), len(con_trabajo))
         total = 0
-        for archivo in archivos:
+        for indice, archivo in enumerate(con_trabajo, 1):
+            if progreso is not None:
+                progreso.inicio_archivo(archivo.name, indice, conteo[archivo])
             total += self.procesar_archivo(archivo, carpeta.name)
+            if progreso is not None:
+                progreso.fin_archivo()
         log.info("Ren'Py: %d cadenas traducidas.", total)
         return total
 
@@ -222,4 +237,7 @@ class InyectorRenPy:
                 lineas[p.linea] = f"{p.pre}{escapar(trad)}{p.resto}{_fin_de_linea(lineas[p.linea])}"
                 escritas += 1
             _escribir(ruta, bom, lineas)
+            progreso = getattr(self.translator, "progreso", None)
+            if progreso is not None:
+                progreso.avance_archivo(inicio + len(bloque))
         return escritas

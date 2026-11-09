@@ -129,6 +129,49 @@ class TestRenPy(unittest.TestCase):
         # Segunda pasada: nada pendiente
         self.assertEqual(InyectorRenPy(self.tmp, _Traductor()).procesar(), 0)
 
+    def test_avisa_al_monitor(self):
+        # El monitor recibe el total de frases y de archivos, el archivo actual y el avance.
+        (self.tl / "script.rpy").write_text(TL, encoding="utf-8")
+        (self.tl / "vacio.rpy").write_text("translate spanish strings:\n\n    old \"Hola\"\n    new \"Hola mundo\"\n",
+                                           encoding="utf-8")
+
+        class _Progreso:
+            def __init__(self):
+                self.eventos = []
+
+            def definir_totales(self, frases, archivos):
+                self.eventos.append(("totales", frases, archivos))
+
+            def inicio_archivo(self, nombre, indice, n):
+                self.eventos.append(("inicio", nombre, indice, n))
+
+            def avance_archivo(self, hechas):
+                self.eventos.append(("avance", hechas))
+
+            def fin_archivo(self):
+                self.eventos.append(("fin",))
+
+        falso = _Traductor()
+        falso.progreso = _Progreso()
+        InyectorRenPy(self.tmp, falso, tam_bloque=4).procesar()
+        self.assertEqual(falso.progreso.eventos, [
+            ("totales", 6, 1),                    # "vacio.rpy" no tiene nada pendiente: no cuenta
+            ("inicio", "script.rpy", 1, 6),
+            ("avance", 4), ("avance", 6),
+            ("fin",),
+        ])
+
+    def test_idioma_con_mayuscula(self):
+        # Carpeta "Spanish" junto a otro idioma y bloques "translate Spanish": se traduce igual.
+        shutil.rmtree(self.tl)
+        tl = self.tmp / "game" / "tl" / "Spanish"
+        tl.mkdir(parents=True)
+        (self.tmp / "game" / "tl" / "French").mkdir()
+        (tl / "script.rpy").write_text(TL.replace("translate spanish", "translate Spanish"), encoding="utf-8")
+        inyector = InyectorRenPy(self.tmp, _Traductor())
+        self.assertEqual(inyector.carpeta_tl().name, "Spanish")
+        self.assertEqual(inyector.procesar(), 6)
+
     def test_escapar_comillas(self):
         self.assertEqual(escapar('Dijo "hola".'), 'Dijo \\"hola\\".')
         self.assertEqual(escapar('Ya \\"escapada\\"'), 'Ya \\"escapada\\"')
