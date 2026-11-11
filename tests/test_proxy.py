@@ -89,6 +89,43 @@ class TestDiccionarioJuego(unittest.TestCase):
         self.assertIsNone(d.buscar("Unknown Limit+500"))
         self.assertIsNone(d.buscar("+500"))  # sin frase delante
 
+    def test_trozo_final_de_frase_conocida(self):
+        with self.ruta.open("a", encoding="utf-8") as f:
+            f.write("As the sun sets, I see Lumi Rex back at the old harbor.=Cuando se pone el sol, veo a Lumi Rex "
+                    "de vuelta en el viejo puerto.\n"
+                    "As the sun sets, I see the tall stranger back at the old harbor.=Cuando se pone el sol, veo al "
+                    "alto desconocido de vuelta en el viejo puerto.\n"
+                    "Then we walked home and the rain stopped.=Luego volvimos a casa y paró la lluvia.\n"
+                    "Later we walked home and the rain stopped.=Más tarde volvimos a casa y paró la lluvia.\n")
+        d = DiccionarioJuego(self.ruta)
+        # XUnity parte "A<color=#FFFFFF00>s the sun sets…</color>": el trozo final da la frase entera
+        self.assertEqual(d.buscar_con_via("s the sun sets, I see Lumi Rex back at the old harbor."),
+                         ("Cuando se pone el sol, veo a Lumi Rex de vuelta en el viejo puerto.", "trozo"))
+        # Nombre aún vacío (doble espacio): vale cualquiera de las variantes que solo cambian en el nombre
+        self.assertEqual(d.buscar("s the sun sets, I see  back at the old harbor."),
+                         "Cuando se pone el sol, veo a Lumi Rex de vuelta en el viejo puerto.")
+        self.assertEqual(d.buscar("ed lantern?"), None)  # demasiado corto para fiarse
+        # Encaja con dos frases distintas: no se adivina
+        self.assertIsNone(d.buscar(" we walked home and the rain stopped."))
+        # Más larga que la frase conocida: no es un trozo suyo
+        self.assertIsNone(d.buscar("Somebody said: as the sun sets, I see Lumi Rex back at the old harbor."))
+
+    def test_proxy_responde_el_trozo_final_sin_llamar_al_modelo(self):
+        with self.ruta.open("a", encoding="utf-8") as f:
+            f.write("As the sun sets, I see Lumi Rex back at the old harbor.=Cuando se pone el sol, veo a Lumi Rex "
+                    "de vuelta en el viejo puerto.\n")
+        traductor = MagicMock()
+        servidor = ollama_proxy.iniciar_servidor_proxy(traductor, puerto=0, ruta_traducciones=self.ruta)
+        try:
+            handler = servidor.RequestHandlerClass
+            self.assertEqual(handler._resolver("A"), (200, "A", "igual"))
+            self.assertEqual(handler._resolver("s the sun sets, I see  back at the old harbor."),
+                             (200, "Cuando se pone el sol, veo a Lumi Rex de vuelta en el viejo puerto.",
+                              "diccionario:trozo"))
+            traductor.translate.assert_not_called()
+        finally:
+            servidor.server_close()
+
     def test_busca_frase_y_variante_con_angulos(self):
         d = DiccionarioJuego(self.ruta)
         self.assertEqual(d.buscar("Where is the red lantern?"), "¿Dónde está el farol rojo?")
