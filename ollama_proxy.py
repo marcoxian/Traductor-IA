@@ -160,15 +160,52 @@ class DiccionarioJuego:
             log.debug("No se pudo leer %s: %s", self.ruta, e)
 
     def buscar(self, texto: str) -> str | None:
+        return self.buscar_con_via(texto)[0]
+
+    def buscar_con_via(self, texto: str) -> tuple[str | None, str]:
+        """Traducción ya hecha y cómo se encontró: "frase", "llaves" (etiquetas cambiadas) o "plantilla"."""
         with self._lock:
             self._cargar_si_cambio()
             hecho = self._datos.get(texto)
             if hecho:
-                return hecho
+                return hecho, "frase"
             llaves = con_llaves(texto)
             if llaves != texto and self._datos.get(llaves):
-                return con_angulos(self._datos[llaves])
-            return self._por_plantilla(texto)
+                return con_angulos(self._datos[llaves]), "llaves"
+            return self._por_plantilla(texto), "plantilla"
+
+
+class RegistroProxy:
+    """Registro a archivo (JSON por líneas) de lo que pide XUnity y de quién lo responde.
+
+    Sirve para medir cuánto se traduce en directo al jugar y por qué XUnity no encontró la frase en su archivo.
+    Va a ``workspace/<juego>/registro_proxy/`` (privado). Sin ruta no hace nada.
+    """
+
+    def __init__(self, ruta: Path | None):
+        self.ruta = ruta
+        self._lock = threading.Lock()
+
+    def anotar(self, **campos) -> None:
+        if self.ruta is None:
+            return
+        import json
+        campos = {"hora": time.strftime("%H:%M:%S"), **campos}
+        linea = json.dumps(campos, ensure_ascii=False) + "\n"
+        with self._lock:
+            try:
+                self.ruta.parent.mkdir(parents=True, exist_ok=True)
+                with open(self.ruta, "a", encoding="utf-8") as f:
+                    f.write(linea)
+            except OSError as e:
+                log.debug("No se pudo escribir el registro %s: %s", self.ruta, e)
+
+
+def ruta_registro_por_defecto(juego: str | None) -> Path | None:
+    """``workspace/<juego>/registro_proxy/AAAA-MM-DD.jsonl``; None sin perfil de juego."""
+    if not juego:
+        return None
+    return config.carpeta_juego(juego) / "registro_proxy" / f"{time.strftime('%Y-%m-%d')}.jsonl"
 
 
 def ruta_traducciones_del_juego(pid: int | None, idioma: str = "es") -> Path | None:
@@ -188,6 +225,7 @@ class TranslationHandler(BaseHTTPRequestHandler):
     translator: OllamaTranslator
     hablantes: TablaHablantes = TablaHablantes({})  # quién dice cada frase (si el juego lo guarda)
     diccionario: DiccionarioJuego = DiccionarioJuego(None)  # traducciones ya hechas del juego
+    registro: RegistroProxy = RegistroProxy(None)  # qué pide XUnity y quién responde (a archivo)
     _lock_vuelo = threading.Lock()
     _lock_gpu = threading.Lock()
     _en_vuelo: dict[str, threading.Event] = {}
@@ -201,32 +239,50 @@ class TranslationHandler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
+    @classmethod
+    def _llamadas_al_modelo(cls) -> int:
+        """Frases que el traductor ha mandado al modelo (para saber si una respuesta salió de la caché)."""
+        est = getattr(cls.translator, "estadisticas", None)
+        if not isinstance(est, dict):
+            return 0
+        return sum(est.get(k, 0) for k in ("traducidas", "rechazadas_calidad", "errores"))
+
     def _traducir_coordinado(self, text: str) -> tuple[int, str]:
+        codigo, traducido, _via = self._resolver(text)
+        return codigo, traducido
+
+    @classmethod
+    def _resolver(cls, text: str) -> tuple[int, str, str]:
+        """(código HTTP, traducción, vía). La vía dice quién respondió, para el registro: "igual" (sin
+        letras o solo cifras), "diccionario:frase|llaves|plantilla" (con "oculto+" si era una frase a medio
+        escribir), "cache", "modelo", "espera" (otra petición igual ya en curso) o "fallo"."""
         # Respuesta inmediata para textos de 1 carácter o sin letras visibles (evita saturar GPU y spam)
         texto_limpio_zalgo = re.sub(r"[\u0300-\u036f\u1dc0-\u1dff\u20d0-\u20ff\ufe20-\ufe2f]", "", text)
         if len(text.strip()) <= 1 or not any(c.isalnum() for c in text) or es_solo_cifras(text):
-            return (200, text)
+            return (200, text, "igual")
 
         # Frase a medio escribir o con etiquetas cambiadas: la traducción de la frase entera, si ya existe
         completo = quitar_texto_oculto(text)
-        hecho = self.diccionario.buscar(completo if completo is not None else text)
+        oculto = "oculto+" if completo is not None else ""
+        hecho, via_dicc = cls.diccionario.buscar_con_via(completo if completo is not None else text)
         if hecho:
-            return (200, hecho)
+            return (200, hecho, f"{oculto}diccionario:{via_dicc}")
 
-        with self._lock_vuelo:
-            evento_existente = self._en_vuelo.get(text)
+        with cls._lock_vuelo:
+            evento_existente = cls._en_vuelo.get(text)
             if evento_existente is not None:
                 esperar = True
             else:
                 evento_existente = threading.Event()
-                self._en_vuelo[text] = evento_existente
+                cls._en_vuelo[text] = evento_existente
                 esperar = False
 
         if esperar:
             evento_existente.wait(timeout=120)
-            with self._lock_vuelo:
-                return self._resultados_vuelo.get(text, (503, ""))
+            with cls._lock_vuelo:
+                return (*cls._resultados_vuelo.get(text, (503, "")), "espera")
 
+        via = "fallo"
         try:
             if completo is not None:
                 texto_a_traducir = completo  # se devuelve la frase entera traducida, ya visible
@@ -234,8 +290,10 @@ class TranslationHandler(BaseHTTPRequestHandler):
                 texto_a_traducir = texto_limpio_zalgo
             else:
                 texto_a_traducir = text
-            with self._lock_gpu:
-                traducido = self.translator.translate(texto_a_traducir, info=self.hablantes.info(texto_a_traducir))
+            with cls._lock_gpu:
+                antes = cls._llamadas_al_modelo()
+                traducido = cls.translator.translate(texto_a_traducir, info=cls.hablantes.info(texto_a_traducir))
+                via = oculto + ("modelo" if cls._llamadas_al_modelo() != antes else "cache")
             problemas = evaluar_traduccion(texto_a_traducir, traducido)
             if tiene_fallo_grave(problemas):
                 raise TraduccionFallida(f"rechazado por puerta de calidad ({problemas})")
@@ -245,12 +303,13 @@ class TranslationHandler(BaseHTTPRequestHandler):
         except Exception as e:
             log.error("❌ [Unity] Error traduciendo '%s': %s", text[:80], e)
             resultado = (503, "")
+            via = f"fallo({via})" if via != "fallo" else via
         finally:
-            with self._lock_vuelo:
-                self._resultados_vuelo[text] = resultado
-                self._en_vuelo.pop(text, None)
+            with cls._lock_vuelo:
+                cls._resultados_vuelo[text] = resultado
+                cls._en_vuelo.pop(text, None)
                 evento_existente.set()
-        return resultado
+        return (*resultado, via)
 
     def do_GET(self) -> None:
         parsed = urlparse(self.path)
@@ -272,10 +331,12 @@ class TranslationHandler(BaseHTTPRequestHandler):
             t0 = time.time()
             log.info("📩 [Unity] Solicitud (%s->%s): %s", origen, destino, text)
 
-            codigo, traducido = self._traducir_coordinado(text)
+            codigo, traducido, via = self._resolver(text)
             duracion = time.time() - t0
             if codigo == 200:
-                log.info("✨ [Unity] Traducido (%.2fs): %s", duracion, traducido)
+                log.info("✨ [Unity] Traducido (%.2fs, %s): %s", duracion, via, traducido)
+            self.registro.anotar(via=via, codigo=codigo, seg=round(duracion, 2), texto=text, respuesta=traducido,
+                                 cliente=self.headers.get("User-Agent", ""))
             self._responder(codigo, traducido)
             return
 
@@ -288,7 +349,8 @@ class TranslationHandler(BaseHTTPRequestHandler):
 
 
 def iniciar_servidor_proxy(translator: OllamaTranslator, puerto: int = 11435, host: str = "127.0.0.1",
-                           ruta_traducciones: Path | None = None) -> ThreadingHTTPServer:
+                           ruta_traducciones: Path | None = None,
+                           ruta_registro: Path | None = None) -> ThreadingHTTPServer:
     class CustomHandler(TranslationHandler):
         _lock_vuelo = threading.Lock()
         _lock_gpu = threading.Lock()
@@ -297,8 +359,11 @@ def iniciar_servidor_proxy(translator: OllamaTranslator, puerto: int = 11435, ho
 
     CustomHandler.translator = translator
     CustomHandler.diccionario = DiccionarioJuego(ruta_traducciones)
+    CustomHandler.registro = RegistroProxy(ruta_registro)
     if ruta_traducciones is not None:
         log.info("📖 Traducciones del juego: %s", ruta_traducciones)
+    if ruta_registro is not None:
+        log.info("📝 Registro de peticiones: %s", ruta_registro)
     juego = getattr(translator.perfil, "juego", None)
     if isinstance(juego, str) and juego:
         CustomHandler.hablantes = TablaHablantes.cargar(ruta_tabla(juego))
@@ -370,12 +435,16 @@ def vigilar_juego(pid: int | None, juego_slug: str | None) -> None:
     hilo.start()
 
 
-def ejecutar_proxy(translator: OllamaTranslator, puerto: int = 11435, host: str = "127.0.0.1", pid: int | None = None, juego: str | None = None) -> None:
+def ejecutar_proxy(translator: OllamaTranslator, puerto: int = 11435, host: str = "127.0.0.1", pid: int | None = None,
+                   juego: str | None = None, registro: bool = True) -> None:
     ajustar_prioridad_baja()
     vigilar_juego(pid, juego)
+    perfil_juego = getattr(translator.perfil, "juego", None)
     try:
-        servidor = iniciar_servidor_proxy(translator, puerto, host,
-                                          ruta_traducciones=ruta_traducciones_del_juego(pid))
+        servidor = iniciar_servidor_proxy(
+            translator, puerto, host, ruta_traducciones=ruta_traducciones_del_juego(pid),
+            ruta_registro=ruta_registro_por_defecto(perfil_juego if isinstance(perfil_juego, str) else None)
+            if registro else None)
     except OSError as e:
         import requests
         try:
@@ -425,6 +494,8 @@ def main() -> None:
     parser.add_argument("--puerto", "-p", type=int, default=11435, help="Puerto del proxy HTTP")
     parser.add_argument("--pid", type=int, default=None, help="PID del juego a vigilar para cerrarse con él")
     parser.add_argument("--debug", action="store_true", help="Activar modo depuración")
+    parser.add_argument("--sin-registro", action="store_true",
+                        help="No guardar las peticiones en workspace/<juego>/registro_proxy/")
     args = parser.parse_args()
 
     if args.debug:
@@ -478,7 +549,7 @@ def main() -> None:
 
     log.info("Precalentando modelo '%s' en VRAM...", modelo)
     translator.precalentar()
-    ejecutar_proxy(translator, puerto=args.puerto, pid=args.pid, juego=args.juego)
+    ejecutar_proxy(translator, puerto=args.puerto, pid=args.pid, juego=args.juego, registro=not args.sin_registro)
 
 
 if __name__ == "__main__":

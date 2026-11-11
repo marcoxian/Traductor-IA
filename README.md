@@ -238,7 +238,8 @@ el proxy solo traduce lo que el juego monta al vuelo («Día 3», «Ánimo 50 %�
     "omitir": ["tabla_vieja*"],
     "columna_hablante": {"TextData*": 1},
     "hablantes": {"莉莉": "Lily", "主角": "Protagonist", "？？？": ""},
-    "variables": {"{flag=Flag_Heroine}": "Lily"}
+    "variables": {"{flag=Flag_Heroine}": "Lily"},
+    "otros_valores": {"{flag=Flag_Heroine}": [{"en": "the strange girl", "es": "la chica extraña"}]}
   }
   ```
 
@@ -268,6 +269,13 @@ python 9_evaluar_genero.py --modelo IA_Traductora_v2    # mídelo antes de usarl
   «I'm a maid»…), a partir de un corpus con hablantes.
 - Los ejemplos SIN pista de hablante que tienen género en 1.ª o 2.ª persona («Estoy segura») pasan a una forma
   neutra («Seguro que…», «¿Todo listo?») o se quitan, para que el modelo no aprenda a adivinar. Se desactiva
+  - `otros_valores`: lo que el juego enseña en otros momentos en lugar de ese nombre (por ejemplo, «the strange
+    girl» antes de que el jugador le ponga nombre). De cada frase ya traducida con el nombre se crea su gemela
+    cambiando el nombre por el texto en español (con mayúscula si empieza frase), sin volver a llamar al modelo.
+    Si el nombre no sale en la traducción tantas veces como en el inglés, esa frase se deja.
+- **Registro del proxy.** Cada petición de XUnity se apunta en `workspace/<juego>/registro_proxy/AAAA-MM-DD.jsonl`
+  con quién la respondió (`diccionario`, `cache`, `modelo`, `fallo`…). Sirve para ver qué se traduce en directo
+  al jugar y por qué no estaba ya hecho. Se desactiva con `--sin-registro`.
   con `--sin-neutros`.
 - Al cargar los datos, `entrenar_v2.py` corrige o descarta los ejemplos que enseñan fallos conocidos: sentido
   equivocado de *chest*, coletillas pegadas, vocabulario que no es de España, palabras vulgares suavizadas.

@@ -113,19 +113,28 @@ class AjustesTablas:
     - ``hablantes``: ``{lo que pone esa columna: nombre en la ficha}``; ``""`` = no es nadie de la ficha.
     - ``variables``: ``{código: valor}`` que el juego sustituye antes de enseñar la frase
       (``{"{flag=Flag_Heroine_Name}": "Ana"}``).
+    - ``otros_valores``: ``{código: [{"en": …, "es": …}]}``, lo que el juego enseña en lugar del valor principal
+      en otros momentos (p. ej. "the strange girl" antes de que el jugador le ponga nombre). De cada frase
+      traducida con el valor principal se saca su gemela cambiando el nombre, sin volver a llamar al modelo.
     """
     omitir: list[str] = field(default_factory=list)
     columna_hablante: dict[str, int] = field(default_factory=dict)
     hablantes: dict[str, str] = field(default_factory=dict)
     variables: dict[str, str] = field(default_factory=dict)
+    otros_valores: dict[str, list[tuple[str, str]]] = field(default_factory=dict)
 
     @classmethod
     def desde_dict(cls, datos: dict | None) -> "AjustesTablas":
         datos = datos or {}
+        otros: dict[str, list[tuple[str, str]]] = {}
+        for codigo, valores in (datos.get("otros_valores") or {}).items():
+            valores = [valores] if isinstance(valores, dict) else valores
+            otros[str(codigo)] = [(str(v["en"]), str(v["es"])) for v in valores if v.get("en") and v.get("es")]
         return cls(omitir=list(datos.get("omitir") or []),
                    columna_hablante={str(k): int(v) for k, v in (datos.get("columna_hablante") or {}).items()},
                    hablantes={str(k): str(v or "") for k, v in (datos.get("hablantes") or {}).items()},
-                   variables={str(k): str(v) for k, v in (datos.get("variables") or {}).items()})
+                   variables={str(k): str(v) for k, v in (datos.get("variables") or {}).items()},
+                   otros_valores=otros)
 
     @classmethod
     def del_juego(cls, juego: str | None) -> "AjustesTablas":
@@ -138,10 +147,22 @@ class AjustesTablas:
     def columna_de(self, nombre: str) -> int | None:
         return next((c for p, c in self.columna_hablante.items() if fnmatch.fnmatchcase(nombre, p)), None)
 
-    def sustituir(self, texto: str) -> str:
-        for codigo, valor in self.variables.items():
-            texto = texto.replace(codigo, valor)
+    def sustituir(self, texto: str, variante: int | None = None) -> str:
+        """Pone el valor de cada variable; con ``variante`` = k, el k-ésimo de ``otros_valores`` si lo hay."""
+        for codigo in {**self.variables, **self.otros_valores}:
+            otros = self.otros_valores.get(codigo, [])
+            if variante is not None and variante < len(otros):
+                texto = texto.replace(codigo, otros[variante][0])
+            elif codigo in self.variables:
+                texto = texto.replace(codigo, self.variables[codigo])
         return texto
+
+    @property
+    def n_variantes(self) -> int:
+        return max((len(v) for v in self.otros_valores.values()), default=0)
+
+    def tiene_otros_valores(self, texto: str) -> bool:
+        return any(codigo in texto for codigo in self.otros_valores)
 
 
 # --------------------------------------------------------------------------- lectura de tablas
@@ -154,6 +175,7 @@ class TablaTexto:
     entradas: list[tuple[str, str | None]] = field(default_factory=list)  # (inglés, sexo de quien habla)
     oyentes: dict[str, str | None] = field(default_factory=dict)          # inglés -> sexo de quien escucha
     hablantes: dict[str, str | None] = field(default_factory=dict)        # inglés -> columna de quién habla
+    crudas: dict[str, set[str]] = field(default_factory=dict)  # inglés -> texto con códigos con otros valores
 
     @property
     def es_dialogo(self) -> bool:
@@ -195,9 +217,15 @@ def leer_tabla(nombre: str, contenido: str, ajustes: AjustesTablas | None = None
     for fila in tabla.filas:
         if len(fila) <= col:
             continue
-        texto = ajustes.sustituir(fila[col].replace("\\n", "\n"))  # el juego convierte el "\n" escrito en salto
+        crudo = fila[col].replace("\\n", "\n")  # el juego convierte el "\n" escrito en salto
+        texto = ajustes.sustituir(crudo)
         if not _texto_visible_ingles(texto):
             continue
+        if ajustes.tiene_otros_valores(crudo):  # la frase y cada trozo, con sus códigos
+            partes = [crudo] + ([p.strip() for p in _PAUSA.split(crudo)] if _PAUSA.search(crudo) else [])
+            for parte in partes:
+                if ajustes.tiene_otros_valores(parte):
+                    tabla.crudas.setdefault(ajustes.sustituir(parte), set()).add(parte)
         celdas = {cab[i]: fila[i] for i in range(min(len(cab), len(fila)))}
         genero = genero_de_quien_habla(celdas)
         oyente = genero_de_quien_escucha(celdas)
@@ -282,6 +310,66 @@ def elegir(original: str, anterior: str | None, nueva: str | None) -> str | None
     if gravedad(evaluar_traduccion(original, nueva)) > gravedad(evaluar_traduccion(original, anterior)):
         return anterior
     return nueva
+
+
+# Detrás de esto, el nombre empieza frase y va con mayúscula ("¡La chica…", "*Zas*~ La chica…", "(La chica…").
+_ABRE_FRASE = "¡¿(«\"“'‘ \t"
+_CIERRA_FRASE = ".!?…~*\n"
+
+
+def _con_mayuscula_si_empieza(traduccion: str, pos: int, valor: str) -> str:
+    previo = traduccion[:pos].rstrip(" \t")
+    if previo.endswith("\n"):
+        return valor[:1].upper() + valor[1:]
+    previo = previo.rstrip(_ABRE_FRASE)
+    if not previo or previo[-1] in _CIERRA_FRASE:
+        return valor[:1].upper() + valor[1:]
+    return valor
+
+
+def traducir_variante(crudo: str, traduccion: str, ajustes: AjustesTablas, variante: int) -> str | None:
+    """La traducción de ``crudo`` con los otros valores (variante k) a partir de la hecha con los principales.
+
+    Cambia en la traducción el valor principal ("Lily") por el otro en español ("la chica extraña"), con
+    mayúscula si empieza frase. None si no es seguro: el nombre no sale tantas veces como en el inglés, o dos
+    códigos con el mismo valor principal piden cosas distintas."""
+    cambios: dict[str, str] = {}
+    veces: dict[str, int] = {}
+    for codigo, principal in ajustes.variables.items():
+        n = crudo.count(codigo)
+        if not n:
+            continue
+        otros = ajustes.otros_valores.get(codigo, [])
+        nuevo = otros[variante][1] if variante < len(otros) else principal
+        if cambios.setdefault(principal, nuevo) != nuevo:
+            return None
+        veces[principal] = veces.get(principal, 0) + n
+    if not any(principal != nuevo for principal, nuevo in cambios.items()):
+        return None
+    if any(traduccion.count(principal) != veces[principal] for principal in cambios):
+        return None
+    patron = re.compile("|".join(re.escape(p) for p in sorted(cambios, key=len, reverse=True)))
+    return patron.sub(lambda m: _con_mayuscula_si_empieza(m.string, m.start(), cambios[m.group()]), traduccion)
+
+
+def variantes_por_valores(tablas: list[TablaTexto], ajustes: AjustesTablas,
+                          traducciones: dict[str, str]) -> dict[str, str]:
+    """{inglés con otro valor: traducción} de las frases con códigos de ``otros_valores`` ya traducidas."""
+    nuevas: dict[str, str] = {}
+    for tabla in tablas:
+        for frase, crudos in tabla.crudas.items():
+            hecha = traducciones.get(frase)
+            if not hecha or hecha == frase:
+                continue
+            for crudo in sorted(crudos):
+                for k in range(ajustes.n_variantes):
+                    ingles = ajustes.sustituir(crudo, k)
+                    if ingles == frase or ingles in nuevas:
+                        continue
+                    traducida = traducir_variante(crudo, hecha, ajustes, k)
+                    if traducida:
+                        nuevas[ingles] = traducida
+    return nuevas
 
 
 def _unico_por_genero(ficha) -> dict[str, str]:
@@ -424,6 +512,12 @@ def pretraducir_tablas(ruta_juego: Path, translator, ruta_txt: Path, *, tablas: 
                     log.info("  %d/%d frases (%.1f%%)", hechas, total, hechas * 100 / max(1, total))
             if progreso is not None:
                 progreso.fin_archivo()
+        if ajustes.otros_valores:
+            gemelas = variantes_por_valores(tablas, ajustes, {**anteriores, **nuevas})
+            nuevas.update(gemelas)
+            stats["otros_valores"] = len(gemelas)
+            log.info("🔁 %d frases más con otros valores de las variables (p. ej. antes de elegir nombre).",
+                     len(gemelas))
     finally:
         translator.usar_historial = historial_antes
         _guardar()

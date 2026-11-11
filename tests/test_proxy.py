@@ -104,6 +104,39 @@ class TestDiccionarioJuego(unittest.TestCase):
         finally:
             servidor.server_close()
 
+    def test_via_de_cada_respuesta(self):
+        traductor = MagicMock()
+        traductor.estadisticas = {"traducidas": 0}
+
+        def traducir(texto, info=None):
+            traductor.estadisticas["traducidas"] += 1
+            return "El gato duerme en la silla."
+        traductor.translate.side_effect = traducir
+        servidor = ollama_proxy.iniciar_servidor_proxy(traductor, puerto=0, ruta_traducciones=self.ruta)
+        try:
+            handler = servidor.RequestHandlerClass
+            self.assertEqual(handler._resolver("Stock:7"), (200, "Tienes:7", "diccionario:plantilla"))
+            self.assertEqual(handler._resolver("Where is the r<color=#FFFFFF00>ed lantern?</color>")[2],
+                             "oculto+diccionario:frase")
+            self.assertEqual(handler._resolver("x999")[2], "igual")
+            self.assertEqual(handler._resolver("The cat sleeps on the chair.")[2], "modelo")
+            traductor.translate.side_effect = None
+            traductor.translate.return_value = "El gato duerme en la silla."
+            self.assertEqual(handler._resolver("The cat sleeps on the chair.")[2], "cache")
+        finally:
+            servidor.server_close()
+
+    def test_registro_a_archivo(self):
+        ruta = Path(self.tmp.name) / "registro" / "dia.jsonl"
+        registro = ollama_proxy.RegistroProxy(ruta)
+        registro.anotar(via="modelo", texto="Hello there", respuesta="Hola")
+        registro.anotar(via="cache", texto="Bye", respuesta="Adiós")
+        import json
+        lineas = [json.loads(l) for l in ruta.read_text(encoding="utf-8").splitlines()]
+        self.assertEqual([l["via"] for l in lineas], ["modelo", "cache"])
+        self.assertEqual(lineas[1]["respuesta"], "Adiós")
+        ollama_proxy.RegistroProxy(None).anotar(via="x")  # sin ruta no hace nada
+
     def test_proxy_rechaza_cifras_cambiadas_en_texto_corto(self):
         traductor = MagicMock()
         traductor.translate.return_value = "(Antes de que tú...)"
@@ -113,6 +146,21 @@ class TestDiccionarioJuego(unittest.TestCase):
             self.assertEqual(handler._traducir_coordinado(handler, "(8 Times)")[0], 503)
         finally:
             servidor.server_close()
+
+
+class TestAnalizarRegistro(unittest.TestCase):
+    def test_motivo_de_cada_frase_en_directo(self):
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "herramientas_extra"))
+        from analizar_registro_proxy import Buscador
+        b = Buscador({"Hello there,\nfriend.": "x", "Gold: 50": "y", "<b>Big</b> dog": "z",
+                      "The long road goes on and on": "w"})
+        self.assertEqual(b.motivo("Hello there, friend."), ("espacios", "Hello there,\nfriend."))
+        self.assertEqual(b.motivo("hello there, friend.")[0], "mayusculas")
+        self.assertEqual(b.motivo("Big dog")[0], "etiquetas")
+        self.assertEqual(b.motivo("Gold: 75")[0], "cifras")
+        self.assertEqual(b.motivo("road goes on")[0], "trozo")
+        self.assertEqual(b.motivo("Nothing alike"), ("nueva", None))
 
 
 if __name__ == "__main__":
