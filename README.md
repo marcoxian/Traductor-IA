@@ -225,6 +225,11 @@ el proxy solo traduce lo que el juego monta al vuelo («Día 3», «Ánimo 50 %�
   con el sexo («я увидел» lo dice él, «я увидела» lo dice ella). Así «I'm sure» sale «estoy segura» cuando
   habla una chica, aunque el juego no diga quién habla.
 - Se leen los `.assets`, los `level*` y también `data.unity3d` (juegos que lo empaquetan todo en un archivo).
+- Al jugar, el proxy lee ese archivo para responder al momento, sin el modelo, a lo que XUnity no reconoce:
+  frases que el juego escribe letra a letra tapando el resto con un color transparente
+  (`Hol<color=#FFFFFF00>a</color>`), etiquetas `<color>` que la tabla guarda como `{color}` y plantillas con
+  números (`Owned:{0}` traduce «Owned:5»). Los textos que son solo cifras («2.0x», «x999») se dejan como están,
+  y un texto corto con las cifras cambiadas se rechaza (se queda en inglés) en vez de enseñar un número falso.
 - Se guarda cada 50 frases; si se corta, se puede relanzar y lo hecho sale de la caché.
 - Lo propio de cada juego va en `ajustes.json` del perfil, sección `tablas_unity` (todo opcional):
 
