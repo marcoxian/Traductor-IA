@@ -43,6 +43,16 @@ class TestFuncionesProxy(unittest.TestCase):
         self.assertEqual(con_llaves("Hola {0} y <wave>"), "Hola {0} y <wave>")
 
 
+class TestSignoDeCifras(unittest.TestCase):
+    def test_signo_perdido_es_fallo_de_cifras(self):
+        from traductor.texto import evaluar_traduccion, signos_perdidos
+        self.assertEqual(signos_perdidos("Lantern Limit+500", "Límite de farol más 500"), ["+500"])
+        self.assertIn("numeros", evaluar_traduccion("Lantern Limit+500", "Límite de farol más 500"))
+        self.assertEqual(signos_perdidos("Lantern Limit+500", "Límite de farol+500"), [])
+        self.assertEqual(signos_perdidos("Level-5 gear", "Equipo de nivel 5"), [])  # guion, no signo
+        self.assertEqual(signos_perdidos("Fear -3", "Miedo 3"), ["-3"])
+
+
 class TestDiccionarioJuego(unittest.TestCase):
     def setUp(self):
         self.tmp = tempfile.TemporaryDirectory()
@@ -68,6 +78,16 @@ class TestDiccionarioJuego(unittest.TestCase):
 
     def tearDown(self):
         self.tmp.cleanup()
+
+    def test_frase_conocida_con_cifras_pegadas(self):
+        with self.ruta.open("a", encoding="utf-8") as f:
+            f.write("Lantern Limit=Límite de farol\nPower=Fuerza\n")
+        d = DiccionarioJuego(self.ruta)
+        self.assertEqual(d.buscar_con_via("Lantern Limit+500"), ("Límite de farol+500", "sufijo"))
+        self.assertEqual(d.buscar("Lantern Limit -3"), "Límite de farol -3")
+        self.assertEqual(d.buscar("Power 15%"), "Fuerza 15%")
+        self.assertIsNone(d.buscar("Unknown Limit+500"))
+        self.assertIsNone(d.buscar("+500"))  # sin frase delante
 
     def test_busca_frase_y_variante_con_angulos(self):
         d = DiccionarioJuego(self.ruta)
@@ -161,6 +181,15 @@ class TestAnalizarRegistro(unittest.TestCase):
         self.assertEqual(b.motivo("Gold: 75")[0], "cifras")
         self.assertEqual(b.motivo("road goes on")[0], "trozo")
         self.assertEqual(b.motivo("Nothing alike"), ("nueva", None))
+
+    def test_entrada_guardada_por_xunity_tras_la_respuesta_no_cuenta(self):
+        import sys
+        sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "herramientas_extra"))
+        from analizar_registro_proxy import es_eco_de_la_respuesta
+        archivo = {"Gold: 75": "Oro: 75", "Gold: 50": "Oro: 50"}
+        self.assertTrue(es_eco_de_la_respuesta("Gold: 75", "Oro:  75", archivo))
+        self.assertFalse(es_eco_de_la_respuesta("Gold: 50", "Oro: 75", archivo))
+        self.assertFalse(es_eco_de_la_respuesta(None, "Oro: 75", archivo))
 
 
 if __name__ == "__main__":

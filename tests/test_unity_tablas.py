@@ -42,6 +42,11 @@ class TestLeerTabla(unittest.TestCase):
         self.assertIsNone(leer_tabla("x", "ID,ZH,JA\n1,a,b\n"))
         self.assertIsNone(leer_tabla("x", "\x02\x00\x00\x00datos"))
 
+    def test_columna_que_acaba_en_en(self):
+        t = leer_tabla("NombresFalsos", "ID,Nombre_name_EN,Nombre_name_ZH\n1,Giant Snail,x\n2,Guard Captain,y\n")
+        self.assertEqual([e for e, _ in t.entradas], ["Giant Snail", "Guard Captain"])
+        self.assertIsNone(leer_tabla("x", "ID,Hen,ZH\n1,aa,bb\n"))
+
     def test_pausa_en_mitad_de_frase_tambien_se_traduce_por_trozos(self):
         csv = ('ID,EN,ru\n1,"I was sure she would be angry,{wc} so I ran.","Я был уверен."\n'
                '2,"Training results: {0} Attack +{1}",\n')

@@ -209,7 +209,7 @@ def leer_tabla(nombre: str, contenido: str, ajustes: AjustesTablas | None = None
     if len(filas) < 2:
         return None
     cab = [c.strip().lower() for c in filas[0]]
-    col = next((i for i, c in enumerate(cab) if c in COLUMNAS_INGLES), None)
+    col = next((i for i, c in enumerate(cab) if c in COLUMNAS_INGLES or c.endswith("_en")), None)
     if col is None:
         return None
     tabla = TablaTexto(nombre, filas[0], filas[1:], col)

@@ -35,6 +35,12 @@ def _espacios(t: str) -> str:
     return re.sub(r"\s+", " ", t).strip()
 
 
+def es_eco_de_la_respuesta(clave: str | None, respuesta: str, traducciones: dict[str, str]) -> bool:
+    """True si la entrada parecida del archivo vale justo lo que respondió el proxy: la guardó XUnity después
+    de la respuesta, así que no estaba antes y la frase era nueva."""
+    return clave is not None and bool(respuesta) and _espacios(traducciones.get(clave, "")) == _espacios(respuesta)
+
+
 def leer_registro(rutas: list[Path]) -> list[dict]:
     filas = []
     for ruta in rutas:
@@ -104,10 +110,13 @@ def main() -> None:
     print(f"\n{len(directas)} textos distintos respondidos con la caché o el modelo (o que fallaron).")
     if not args.archivo:
         return
-    buscador = Buscador(xunity.leer_traducciones(Path(args.archivo)))
+    traducciones = xunity.leer_traducciones(Path(args.archivo))
+    buscador = Buscador(traducciones)
     por_motivo: dict[str, list[tuple[str, str | None]]] = {}
-    for texto in directas:
+    for texto, fila in directas.items():
         motivo, parecida = buscador.motivo(texto)
+        if es_eco_de_la_respuesta(parecida, fila.get("respuesta", ""), traducciones):
+            motivo, parecida = "nueva", None
         por_motivo.setdefault(motivo, []).append((texto, parecida))
     for motivo, lista in sorted(por_motivo.items(), key=lambda x: -len(x[1])):
         print(f"\n== {motivo}: {len(lista)}")

@@ -1241,7 +1241,7 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("etiquetas")
 
     faltan, sobran = numeros_cambiados(original, traducido)
-    if faltan or sobran:
+    if faltan or sobran or signos_perdidos(original, traducido):
         problemas.append("numeros")
     if _USTEDES.search(vis_t) and not _USTEDES.search(vis_o) and not _TRATO_FORMAL_EN.search(vis_o):
         problemas.append("ustedes")
@@ -1357,6 +1357,20 @@ _ROLES_GENERICOS = frozenset({
     "lady", "gentleman", "guy", "dude", "sir", "madam", "master", "mistress", "slave", "pet", "fan", "fans",
     "crowd", "audience", "announcer", "speaker", "player", "hero", "heroine", "villain", "creature", "girls",
     "boys", "men", "women", "everyone", "nobody", "somebody", "both", "all", "group", "goon", "goons",
+# "+500" / " -3" pegados al número: el signo es parte de la cifra ("Stamina Limit+500" -> "aguanta más 500" mal).
+# El guion pegado a una palabra ("Level-5") es un guion, no un signo.
+_NUMERO_CON_SIGNO = re.compile(r"(?:(?<![A-Za-z0-9])[-−]|\+)(\d[\d.,]*)")
+
+
+def signos_perdidos(original: str, traducido: str) -> list[str]:
+    """Números con signo "+"/"-" del original ("+500") que en la traducción ya no llevan ese signo."""
+    visible_o = PATRON_CODIGOS.sub(" ", original or "")
+    visible_t = PATRON_CODIGOS.sub(" ", traducido or "")
+    en_traduccion = {m.group(0).replace("−", "-") for m in _NUMERO_CON_SIGNO.finditer(visible_t)}
+    return [m.group(0) for m in _NUMERO_CON_SIGNO.finditer(visible_o)
+            if m.group(0).replace("−", "-") not in en_traduccion]
+
+
     "security", "guardian", "henchman", "minion", "enemy", "ghost", "spirit", "robot", "android",
     # Nombres que también son palabras inglesas corrientes ("Max texture size", "Hope is all we have")
     "max", "will", "may", "mark", "bill", "frank", "jack", "grace", "hope", "faith", "joy", "rose", "lily",
