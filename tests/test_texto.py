@@ -104,6 +104,24 @@ class TestTexto(unittest.TestCase):
         self.assertEqual(limpiar_respuesta(resp, r"Sorry. \!I'm leaving."), r"Lo siento. \!Me voy.")
         self.assertEqual(limpiar_respuesta("Borrador a corregir: Me voy.", "I'm leaving."), "Me voy.")
 
+    def test_limpiar_respuesta_quita_los_ecos_con_la_etiqueta_reescrita(self):
+        """El modelo cambia la etiqueta ("Borrado a corrigir", "Corrección sugerida"...) y a veces la pone
+        en otra línea; lo de detrás es la frase vieja."""
+        casos = [
+            ("{i}Seguirá...{/i}\nBorrado a corregir: Seguira...", "{i}Seguirá...{/i}"),
+            ("{i}Ajustes{/i}\nBorrado a corrigir: Ajustes", "{i}Ajustes{/i}"),
+            ("Me voy ya.\nCorrección sugerida: Me voy.", "Me voy ya."),
+            ("Me voy ya.\nCorrección: Me voy.", "Me voy ya."),
+            ("{i}¡No, no!\nVersión del usuario para corregir: {no no... ¡No!", "{i}¡No, no!"),
+            ("¡Qué frío!\nTexto del borrador que necesita corrección: ¡Qué frio!", "¡Qué frío!"),
+            ("¡Bien! Corrección para el borrado: ¡Bien hecho!", "¡Bien!"),
+            ("El texto original es: Lo haría igual. El borrador que se debe corregir dice: Lo hacía igual.",
+             "Lo haría igual."),
+        ]
+        for respuesta, esperado in casos:
+            with self.subTest(respuesta=respuesta):
+                self.assertEqual(limpiar_respuesta(respuesta, "I'd do the same."), esperado)
+
     def test_forzar_etiquetas_pone_las_pausas_entre_las_mismas_frases(self):
         """Una pausa de mitad de frase al principio haría pulsar una tecla antes de ver el texto."""
         self.assertEqual(forzar_etiquetas(r"Yeah... \!Becoming one seems nice...", "Sí... ¡Serlo parece genial..."),

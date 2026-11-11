@@ -22,6 +22,12 @@ Uso:
     python 9_evaluar_genero.py --solo-casos                      # lista las frases, sin llamar a Ollama
     python 9_evaluar_genero.py --comparar workspace/_evaluaciones/A.json workspace/_evaluaciones/B.json
 
+Banco FIJO (``--banco``): ~95 frases y personajes inventados (``tests/datos/banco_traduccion.json``) por
+categorías (género, a quién se habla, tú/usted, prohibiciones, frases hechas, palabras de España, dos
+sentidos, opciones de menú...). No necesita juegos y sirve para comparar modelos (p. ej. v4 y v6).
+    python 9_evaluar_genero.py --banco --modelo IA_Traductora_v4
+    python 9_evaluar_genero.py --comparar workspace/_evaluaciones/banco_A.json workspace/_evaluaciones/banco_B.json
+
 Prueba ESPEJO (``--invertir-protagonista``): el mismo juego con el protagonista del otro género. Mide con
 muchas frases lo que más cuesta: un hombre que le habla a una protagonista mujer. Solo B y C (el contexto
 antiguo de A diría lo contrario que la ficha).
@@ -50,8 +56,8 @@ from traductor.ollama import OllamaNoDisponible, OllamaTranslator
 from traductor.personajes import (FichaPersonajes, InfoLinea, aplicar_concordancia, es_pensamiento,
                                   resolver_linea)
 from traductor.registro import configurar_logging
-from traductor.texto import (PATRON_NOMBRE_HABLANTE, PATRON_PREFIJO, evaluar_traduccion, limpiar_respuesta,
-                             nombres_perdidos, separar_envoltorio, tiene_fallo_grave)
+from traductor.texto import (PATRON_CODIGOS, PATRON_NOMBRE_HABLANTE, PATRON_PREFIJO, evaluar_traduccion,
+                             limpiar_respuesta, nombres_perdidos, separar_envoltorio, tiene_fallo_grave)
 
 log = logging.getLogger("evaluar_genero")
 
@@ -425,6 +431,179 @@ def comparar(rutas: list[Path]) -> str:
     return "\n\n".join(salida[:len(datos)]) + ("\n\n" + "\n".join(salida[len(datos):]) if len(salida) > len(datos) else "")
 
 
+# --------------------------------------------------------------------------- Banco fijo (frases inventadas)
+# Mide lo mismo en cualquier modelo y en cualquier momento: frases y personajes inventados, con lo que DEBE
+# y NO DEBE salir. Dos condiciones: "modelo" (primer intento, sin arreglos: lo que sabe el modelo) y
+# "pipeline" (traductor completo: reintentos, concordancia, arreglos de España...; lo que acaba en el juego).
+BANCO_POR_DEFECTO = Path(__file__).resolve().parent / "tests" / "datos" / "banco_traduccion.json"
+CONDICIONES_BANCO = ("modelo", "pipeline")
+_PALABRA = re.compile(r"[^\W\d_]+")
+
+
+def cargar_banco(ruta: Path) -> tuple[dict, FichaPersonajes]:
+    """Lee el banco (JSON) y su ficha de personajes inventada. Valida los casos (expresiones y nombres)."""
+    datos = json.loads(Path(ruta).read_text(encoding="utf-8"))
+    ficha = FichaPersonajes.from_dict({"personajes": datos.get("personajes", [])})
+    ids = set()
+    for c in datos.get("casos", []):
+        if c["id"] in ids:
+            raise ValueError(f"Caso repetido en el banco: {c['id']}")
+        ids.add(c["id"])
+        for patron in c.get("debe", []) + c.get("no_debe", []):
+            re.compile(patron, re.IGNORECASE)
+        for clave in ("hablante", "oyente"):
+            if c.get(clave) and ficha.buscar(c[clave]) is None:
+                raise ValueError(f"{c['id']}: '{c[clave]}' no está en los personajes del banco")
+    return datos, ficha
+
+
+def perfil_banco(datos: dict, ficha: FichaPersonajes) -> config.Perfil:
+    """Perfil global (glosarios de siempre) con la ficha y el contexto del banco, como un juego más."""
+    base = config.cargar_perfil(None, auto_crear=False)
+    contexto = " ".join(c for c in (ficha.regla_protagonista(),
+                                     config.leer_contexto(config.CONTEXTO_GLOBAL, con_ficha=True),
+                                     datos.get("contexto", "")) if c)
+    return dataclasses.replace(base, juego="_banco", personajes=ficha, contexto=contexto)
+
+
+def info_caso(caso: dict) -> InfoLinea:
+    return InfoLinea(hablante=caso.get("hablante"), oyente=caso.get("oyente"), es_opcion=bool(caso.get("opcion")))
+
+
+def puntuar_banco(caso: dict, traduccion: str) -> list[str]:
+    """Fallos de una traducción del banco (vacío = bien)."""
+    t = (traduccion or "").strip()
+    if not t or t == caso["en"].strip():
+        return ["sin traducir"]
+    fallos = []
+    for persona, clave in (("1", "genero_1p"), ("2", "genero_2p")):
+        if caso.get(clave) and contradice_genero(t, persona, caso[clave]):
+            fallos.append(f"género {persona}.ª persona")
+    fallos += [f"falta /{p}/" for p in caso.get("debe", []) if not re.search(p, t, re.IGNORECASE)]
+    fallos += [f"sobra /{p}/" for p in caso.get("no_debe", []) if re.search(p, t, re.IGNORECASE)]
+    if caso.get("max_palabras") and len(_PALABRA.findall(PATRON_CODIGOS.sub(" ", t))) > caso["max_palabras"]:
+        fallos.append("demasiado larga")
+    return fallos
+
+
+class EvaluadorBanco:
+    """Traduce los casos del banco en las dos condiciones (sin caché ni historial)."""
+
+    def __init__(self, modelo: str, perfil: config.Perfil):
+        self.perfil = perfil
+        self.t = OllamaTranslator(model_name=modelo, perfil=perfil, ruta_cache=None, usar_historial=False)
+        self.t.semilla = 42  # sin ruido de una pasada a otra: así se comparan dos modelos de verdad
+
+    def modelo(self, caso: dict) -> str:
+        """Primer intento del modelo con el prompt de hoy (ficha, glosario y pistas), solo con la limpieza
+        de la respuesta: sin reintentos ni arreglos."""
+        texto = caso["en"]
+        ctx = resolver_linea(self.perfil.personajes, texto, info_caso(caso))
+        prefijo, nucleo, sufijo = separar_envoltorio(texto)
+        instruccion = prompts.construir_instruccion(prompts.INSTRUCCION, self.perfil.contexto,
+                                                    self.perfil.terminos_para(texto), personajes=ctx.ficha())
+        respuesta = self.t._generar(prompts.formatear(instruccion, nucleo), self.t._tokens_para(nucleo, 180),
+                                    temperature=0.1)
+        limpio = limpiar_respuesta(respuesta or "", nucleo) or nucleo
+        return f"{prefijo}{limpio}{sufijo}" if (prefijo or sufijo) else limpio
+
+    def pipeline(self, caso: dict) -> str:
+        """Lo que usan los motores: traducción con reintentos + revisión de etiquetas (autocorrección)."""
+        return self.t.traducir_textos([caso["en"]], info=[info_caso(caso)])[0]
+
+    def evaluar(self, caso: dict) -> dict:
+        res = {}
+        for cond, funcion in (("modelo", self.modelo), ("pipeline", self.pipeline)):
+            traduccion = funcion(caso)
+            res[cond] = {"traduccion": traduccion, "fallos": puntuar_banco(caso, traduccion)}
+        return res
+
+    def cerrar(self) -> None:
+        self.t.cerrar()
+
+
+def resumir_banco(resultados: list[dict]) -> dict:
+    """% de casos bien por condición, en total y por categoría."""
+    resumen: dict = {}
+    for cond in CONDICIONES_BANCO:
+        por_cat: dict[str, list[int]] = defaultdict(lambda: [0, 0])
+        for r in resultados:
+            par = por_cat[r["categoria"]]
+            par[1] += 1
+            par[0] += 0 if r["resultados"][cond]["fallos"] else 1
+        bien = sum(b for b, _ in por_cat.values())
+        total = sum(n for _, n in por_cat.values())
+        resumen[cond] = {"bien": bien, "total": total, "por_categoria": {k: {"bien": b, "total": n}
+                                                                          for k, (b, n) in sorted(por_cat.items())}}
+    return resumen
+
+
+def tabla_banco(resumen: dict, titulo: str = "") -> str:
+    lineas = [titulo] if titulo else []
+    m, p = resumen.get("modelo", {}), resumen.get("pipeline", {})
+    if not m.get("total"):
+        return "\n".join(lineas)
+    lineas.append(f"{'Categoría':24} {'casos':>5}   {'modelo (1.er intento)':>22}   {'pipeline completo':>18}")
+    for cat in m["por_categoria"]:
+        cm, cp = m["por_categoria"][cat], p.get("por_categoria", {}).get(cat, {"bien": 0, "total": 0})
+        lineas.append(f"{cat:24} {cm['total']:5d}   {_pct(cm['bien'], cm['total']):>22}   {_pct(cp['bien'], cp['total']):>18}")
+    lineas.append(f"{'TOTAL':24} {m['total']:5d}   {_pct(m['bien'], m['total']):>22}   {_pct(p.get('bien', 0), p.get('total', 0)):>18}")
+    return "\n".join(lineas)
+
+
+def comparar_banco(datos: list[dict], rutas: list[Path]) -> str:
+    salida = [tabla_banco(d["resumen"], f"== {d['modelo']} ({d['fecha']}, {r.name})") for d, r in zip(datos, rutas)]
+    if len(datos) == 2:
+        antes = {c["id"]: c for c in datos[0]["casos"]}
+        for cond in CONDICIONES_BANCO:
+            cambios = []
+            for c in datos[1]["casos"]:
+                previo = antes.get(c["id"])
+                if previo is None:
+                    continue
+                b0, b1 = not previo["resultados"][cond]["fallos"], not c["resultados"][cond]["fallos"]
+                if b0 != b1:
+                    cambios.append(f"  {'MEJORA' if b1 else 'EMPEORA'} {c['id']}: {c['en'][:50]} -> "
+                                   f"{c['resultados'][cond]['traduccion'][:60]}")
+            salida.append(f"Casos que cambian en '{cond}': {len(cambios)}\n" + "\n".join(cambios))
+    return "\n\n".join(salida)
+
+
+def ejecutar_banco(ruta: Path, modelo: str, salida: str | None) -> int:
+    datos, ficha = cargar_banco(ruta)
+    perfil = perfil_banco(datos, ficha)
+    ev = EvaluadorBanco(modelo, perfil)
+    inicio = time.time()
+    resultados = []
+    try:
+        for i, caso in enumerate(datos["casos"], 1):
+            resultados.append({"id": caso["id"], "categoria": caso["categoria"], "en": caso["en"],
+                               "resultados": ev.evaluar(caso)})
+            if i % 10 == 0 or i == len(datos["casos"]):
+                log.info("  %d/%d casos (%.0f s)", i, len(datos["casos"]), time.time() - inicio)
+    except OllamaNoDisponible as e:
+        log.error("Ollama no disponible: %s", e)
+        return 3
+    finally:
+        ev.cerrar()
+    resumen = resumir_banco(resultados)
+    fecha = datetime.now().strftime("%Y-%m-%d_%H%M")
+    destino = Path(salida) if salida else config.DIR_WORKSPACE / "_evaluaciones" / f"banco_{modelo}_{fecha}.json"
+    destino.parent.mkdir(parents=True, exist_ok=True)
+    destino.write_text(json.dumps({"banco": str(ruta.name), "version_banco": datos.get("version"), "modelo": modelo,
+                                   "fecha": fecha, "resumen": resumen, "casos": resultados},
+                                  ensure_ascii=False, indent=1), encoding="utf-8", newline="\n")
+    print(tabla_banco(resumen, f"Banco fijo ({len(resultados)} casos), modelo {modelo} ({time.time() - inicio:.0f} s)"))
+    fallidos = [r for r in resultados if r["resultados"]["pipeline"]["fallos"]]
+    if fallidos:
+        print(f"\nFallan en el pipeline ({len(fallidos)}):")
+        for r in fallidos:
+            print(f"  {r['id']}: {r['en'][:55]} -> {r['resultados']['pipeline']['traduccion'][:60]} "
+                  f"[{', '.join(r['resultados']['pipeline']['fallos'])}]")
+    print(f"Resultados: {destino}")
+    return 0
+
+
 # --------------------------------------------------------------------------- CLI
 def _juegos(args) -> dict[str, Path]:
     if not args.juego:
@@ -451,13 +630,20 @@ def main(argv: list[str] | None = None) -> int:
                     help="Prueba espejo: la protagonista con el otro género (solo condiciones B y C)")
     ap.add_argument("--sin-hablante", action="store_true",
                     help="Añadir la condición D: con ficha pero sin saber quién habla (como en Unity/XUnity)")
+    ap.add_argument("--banco", nargs="?", const=str(BANCO_POR_DEFECTO), metavar="JSON",
+                    help="Banco fijo de frases inventadas (por defecto tests/datos/banco_traduccion.json): mide el "
+                         "modelo y el pipeline por categorías, sin necesitar juegos")
     ap.add_argument("--debug", action="store_true")
     args = ap.parse_args(argv)
     configurar_logging(detallado=args.debug)
 
     if args.comparar:
-        print(comparar([Path(r) for r in args.comparar]))
+        rutas = [Path(r) for r in args.comparar]
+        datos = [json.loads(r.read_text(encoding="utf-8")) for r in rutas]
+        print(comparar_banco(datos, rutas) if all("banco" in d for d in datos) else comparar(rutas))
         return 0
+    if args.banco:
+        return ejecutar_banco(Path(args.banco), args.modelo, args.salida)
 
     todos: list[Caso] = []
     perfiles: dict[str, config.Perfil] = {}

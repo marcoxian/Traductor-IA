@@ -257,6 +257,25 @@ class TestFicha(unittest.TestCase):
         self.assertEqual(resolver_linea(self.f, "Just a normal line.", None).firma(), "")
         self.assertIn("Habla Laura (mujer)", resolver_linea(self.f, "Hi.", InfoLinea(codigo="He")).ficha())
 
+    def test_contexto_usa_el_nombre_como_sale_en_el_texto(self):
+        # Ficha "'Lucky' Bruno" con alias "Bruno": si el inglés dice "Bruno", el prompt no debe enseñar
+        # el apodo (el modelo lo copiaba: "Gracias, Afortunado Bruno").
+        ficha = FichaPersonajes([Personaje("1Hero", "hombre", "protagonista"),
+                                 Personaje("'Lucky' Bruno", "hombre", "principal", alias=["Bruno"]),
+                                 Personaje("Rita", "mujer", "principal", codigos=["Ri"])])
+        ctx = resolver_linea(ficha, "Thanks, Bruno.", InfoLinea(codigo="Ri"))
+        self.assertIn("Se dirige a Bruno (hombre).", ctx.ficha())
+        self.assertIn("'tú' = Bruno", ctx.ficha())
+        self.assertNotIn("Lucky", ctx.ficha())
+        ctx = resolver_linea(ficha, "I saw BRUNO there.", InfoLinea(codigo="Ri"))
+        self.assertIn("Mencionados: Bruno (hombre).", ctx.ficha())
+        # Si sale entero, se usa entero; si no sale, el nombre de la ficha
+        self.assertIn("'Lucky' Bruno (hombre)", resolver_linea(ficha, "I saw 'Lucky' Bruno.", None).ficha())
+        self.assertIn("Habla Rita (mujer)", resolver_linea(ficha, "Hi.", InfoLinea(codigo="Ri")).ficha())
+        # La firma (clave de la caché) no cambia con la forma del nombre
+        self.assertEqual(resolver_linea(ficha, "Thanks, Bruno.", InfoLinea(codigo="Ri")).firma(),
+                         resolver_linea(ficha, "Thanks, 'Lucky' Bruno.", InfoLinea(codigo="Ri")).firma())
+
     def test_aplicar_concordancia(self):
         ctx = resolver_linea(self.f, "Chloe, are you ready? Bradley is tired.", InfoLinea(codigo="He"))
         self.assertEqual(aplicar_concordancia("Chloe, ¿estás listo? Bradley está cansada.",

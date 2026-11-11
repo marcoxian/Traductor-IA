@@ -39,10 +39,10 @@ try:
 except ImportError:  # pragma: no cover
     requests = None  # type: ignore[assignment]
 
-from . import ambiguas, config, prompts
+from . import ambiguas, config, modismos, prompts
 from .config import Perfil
 from .genero import HOMBRE, MUJER, marcas_genero
-from .personajes import ContextoLinea, InfoLinea, aplicar_concordancia, resolver_linea
+from .personajes import ContextoLinea, InfoLinea, aplicar_concordancia, oyente_contradicho, resolver_linea
 from .registro import AZUL, RESET, VERDE
 from .texto import (
     PROBLEMAS_LEVES_REINTENTO,
@@ -228,6 +228,9 @@ class OllamaTranslator:
         # Opcional (activar_casos_dificiles): JSONL donde se guardan las frases que el modelo falló al
         # primer intento y arregló en un reintento, para reentrenar. None = no se guarda nada.
         self.ruta_casos_dificiles: Path | None = None
+        # Semilla fija de Ollama (None = la de siempre, al azar). La usa el banco de pruebas para poder
+        # comparar dos modelos sin el ruido de una pasada a otra.
+        self.semilla: int | None = None
         # Migrar en memoria cualquier clave en texto plano que hubiera en la caché
         self._migrar_claves_planas()
 
@@ -362,6 +365,8 @@ class OllamaTranslator:
                 ],
             },
         }
+        if self.semilla is not None:  # mismas respuestas en cada pasada (bancos de pruebas)
+            payload["options"]["seed"] = self.semilla
         for intento in range(1, self.reintentos + 1):
             try:
                 r = self.session.post(self.endpoint, json=payload, timeout=self.timeout)
@@ -785,6 +790,13 @@ class OllamaTranslator:
                     nota = f"{nota} {ambiguas.nota_reintento(ultimos_equivocados)}".strip()
                 if "numeros" in ultimos_problemas and numeros_del_original(texto):
                     nota = f"{nota} Cifras del original: {', '.join(numeros_del_original(texto))}.".strip()
+                if "genero_oyente" in ultimos_problemas and ctx is not None and ctx.destinatario is not None:
+                    d = ctx.destinatario
+                    forma = "femenino ('¿estás segura?', 'eres amiga')" if d.genero == MUJER else \
+                        "masculino ('¿estás seguro?', 'eres amigo')"
+                    nota = f"{nota} Se habla a {ctx.etiqueta_de(d)}: lo que se dice de 'tú' va en {forma}.".strip()
+                if "calco" in ultimos_problemas and mejor_candidato:
+                    nota = f"{nota} {modismos.nota_reintento(modismos.calcos(texto, mejor_candidato))}".strip()
                 if nota:
                     instruccion = f"{instruccion} IMPORTANTE: {nota}"
             temp = 0.1 if intento == 1 else min(0.45, 0.15 + 0.15 * (intento - 1))
@@ -805,6 +817,8 @@ class OllamaTranslator:
             equivocados = self._sentido_mal(texto, candidato)
             if equivocados:
                 problemas.append("sentido_equivocado")
+            if oyente_contradicho(ctx, texto, candidato):
+                problemas.append("genero_oyente")
             if intento == 1:
                 primer_candidato, primeros_problemas = candidato, list(problemas)
             g = gravedad(problemas)

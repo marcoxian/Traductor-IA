@@ -26,7 +26,7 @@ from dataclasses import dataclass
 from pathlib import Path
 
 from ..ollama import OllamaTranslator
-from ..personajes import InfoLinea
+from ..personajes import InfoLinea, oyentes_por_turnos
 from ..texto import reinsertar_saltos, tiene_texto_visible
 from .rpgmaker import traductor_acepta_info
 
@@ -60,8 +60,24 @@ def desescapar(texto: str) -> str:
 
 
 def escapar(texto: str) -> str:
-    """Texto traducido -> cadena válida dentro de "..." en un .rpy."""
+    """Texto traducido -> cadena válida dentro de "..." en un .rpy.
+
+    Un salto de línea real dejaría la cadena abierta y Ren'Py no arrancaría: se escribe como ``\\n``."""
+    texto = texto.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\\n")
     return re.sub(r'(?<!\\)"', r'\\"', texto)
+
+
+_PORCENTAJE_SOLO = re.compile(r"(?<!%)%(?!%)")
+
+
+def ajustar_porcentajes(original: str, traducido: str) -> str:
+    """Si el original escribe el signo como ``%%`` (Ren'Py lo pide así), la traducción también.
+
+    El modelo devuelve "10%" donde el inglés tenía "10%%"; Ren'Py lo toma por un código de formato
+    ("Unknown string format code"). Solo se toca si el original no tiene ningún ``%`` suelto."""
+    if "%%" not in original or _PORCENTAJE_SOLO.search(original):
+        return traducido
+    return _PORCENTAJE_SOLO.sub("%%", traducido)
 
 
 @dataclass
@@ -77,14 +93,32 @@ class Pendiente:
     nombre: str | None = None  # hablante escrito como cadena ('"Eileen" "Hola"')
     actual: str = ""     # lo que hay ahora en el archivo (igual al original si está sin traducir)
 
-    def info(self) -> InfoLinea | None:
+    def info(self, oyente: str | None = None) -> InfoLinea | None:
+        """Lo que se sabe de la línea; ``oyente`` = a quién habla probablemente (ver ``oyentes_por_turnos``)."""
         if self.es_cadena:
             return None
         if self.nombre:
-            return InfoLinea(hablante=self.nombre)
+            return InfoLinea(hablante=self.nombre, oyente=oyente)
         if self.quien in _NARRADOR:
             return None
-        return InfoLinea(codigo=f"renpy:{self.quien}")
+        return InfoLinea(codigo=f"renpy:{self.quien}", oyente=oyente)
+
+    @property
+    def id_hablante(self) -> str | None:
+        """Quién habla, para los turnos: código 'renpy:x', nombre escrito o None (narrador, menús)."""
+        if self.es_cadena:
+            return None
+        if self.nombre:
+            return self.nombre
+        return None if self.quien in _NARRADOR else f"renpy:{self.quien}"
+
+
+def oyentes_del_archivo(lineas: list[str], idioma: str | None = None) -> dict[int, str]:
+    """Línea física -> a quién habla probablemente, por los turnos de TODO el archivo (también las líneas
+    ya traducidas: la conversación es la misma)."""
+    dialogos = [p for p in leer_cadenas(lineas, idioma) if not p.es_cadena]
+    oyentes = oyentes_por_turnos([p.id_hablante for p in dialogos])
+    return {p.linea: o for p, o in zip(dialogos, oyentes) if o is not None}
 
 
 def _sin_traducir(original: str, actual: str) -> bool:
@@ -229,13 +263,15 @@ class InyectorRenPy:
         if not copia.exists():
             shutil.copy2(ruta, copia)
         acepta_info = traductor_acepta_info(self.translator)
+        oyentes = oyentes_del_archivo(lineas, idioma) if acepta_info else {}
         escritas = 0
         for inicio in range(0, len(pendientes), self.tam_bloque):
             bloque = pendientes[inicio:inicio + self.tam_bloque]
             segmentos = [_SALTO.split(desescapar(p.original)) for p in bloque]
             textos = [re.sub(r" {2,}", " ", " ".join(s.strip() for s in segs)).strip() for segs in segmentos]
             if acepta_info:
-                traducciones = self.translator.traducir_textos(textos, info=[p.info() for p in bloque])
+                traducciones = self.translator.traducir_textos(textos, info=[p.info(oyentes.get(p.linea))
+                                                                             for p in bloque])
             else:
                 traducciones = self.translator.traducir_textos(textos)
             for p, segs, texto, trad in zip(bloque, segmentos, textos, traducciones):
@@ -244,6 +280,7 @@ class InyectorRenPy:
                     continue
                 if len(segs) > 1:
                     trad = reinsertar_saltos(trad, segs)
+                trad = ajustar_porcentajes(p.original, trad)
                 lineas[p.linea] = f"{p.pre}{escapar(trad)}{p.resto}{_fin_de_linea(lineas[p.linea])}"
                 escritas += 1
             _escribir(ruta, bom, lineas)

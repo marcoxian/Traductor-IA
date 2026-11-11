@@ -41,9 +41,9 @@ import os
 import re
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterable
+from typing import Iterable, Sequence
 
-from .genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, convencion_de, corregir_plural,
+from .genero import (DESCONOCIDO, HOMBRE, MUJER, NEUTRO, contradice_genero, convencion_de, corregir_plural,
                      corregir_primera_persona, corregir_segunda_persona, corregir_tercera_persona,
                      es_genero_marcado, normalizar_genero, personas_con_genero_en)
 
@@ -220,12 +220,14 @@ class FichaPersonajes:
                 self._por_nombre.setdefault(marcador.casefold(), prota)
                 nombres_mencion.append((marcador, prota))
         self._menciones: list[tuple[re.Pattern, Personaje]] = []
+        self._formas_mencion: list[str] = []   # nombre de la ficha de cada patrón de ``_menciones``
         self._vocativos: list[tuple[tuple[re.Pattern, ...], Personaje]] = []
         vistos: set[str] = set()
         for nombre, p in sorted(nombres_mencion, key=lambda x: -len(x[0])):
             if nombre in vistos:
                 continue
             vistos.add(nombre)
+            self._formas_mencion.append(nombre)
             variantes = {re.escape(nombre)}
             if nombre[:1].isalpha():
                 variantes.add(re.escape(nombre.upper()))
@@ -317,6 +319,23 @@ class FichaPersonajes:
             if m and m.group(0).casefold() not in marcadores and m.group(0) not in encontrados:
                 encontrados.append(m.group(0))
         return encontrados
+
+    def formas_en(self, texto: str) -> dict[str, str]:
+        """Cómo nombra ``texto`` a cada personaje: {nombre de la ficha: nombre o alias que aparece}.
+
+        "'Lucky' Bruno" con alias "Bruno" y el texto "Thanks, Bruno." -> {"'Lucky' Bruno": "Bruno"}. Gana la
+        forma más larga ("'Lucky' Bruno" si sale entera). Los marcadores del protagonista ('\\N[1]') no
+        cuentan: el prompt sigue usando su nombre."""
+        if not texto or not self._menciones:
+            return {}
+        marcadores = {m.casefold() for m in MARCADORES_PROTAGONISTA}
+        formas: dict[str, str] = {}
+        for (patron, p), forma in zip(self._menciones, self._formas_mencion):
+            if p.nombre in formas or forma.casefold() in marcadores:
+                continue
+            if patron.search(texto):
+                formas[p.nombre] = forma
+        return formas
 
     def vocativo_en(self, texto: str, excluir: Personaje | None = None) -> Personaje | None:
         """Personaje al que se habla por su nombre: 'Chloe, ...', 'Hey Chloe!', '..., Chloe?'."""
@@ -498,6 +517,9 @@ class InfoLinea:
     - ``destinatario``: nombre de a quién se habla, si el motor lo sabe.
     - ``genero``: género de quien habla según el propio juego ('hombre'/'mujer'). Solo se usa si el hablante no
       está en la ficha (extras como "Woman" o "Guard 2"); si está, manda la ficha.
+    - ``oyente``: a quién se habla PROBABLEMENTE, deducido de los turnos de la conversación (nombre o código
+      como en ``hablante``/``codigo``; ver ``oyentes_por_turnos``). No es seguro: va como pista al modelo y,
+      si la traducción lo contradice, se reintenta; nunca se corrige solo.
     """
 
     hablante: str | None = None
@@ -506,6 +528,25 @@ class InfoLinea:
     es_pensamiento: bool | None = None
     destinatario: str | None = None
     genero: str | None = None
+    oyente: str | None = None
+
+
+def oyentes_por_turnos(hablantes: Sequence[str | None], ventana: int = 3) -> list[str | None]:
+    """A quién habla probablemente cada línea, por los turnos de la conversación (A-B-A).
+
+    ``hablantes`` son las líneas en orden (nombre o código de quien habla; None = narrador). Si el último
+    que habló antes que X y el primero que habla después de X (como mucho ``ventana`` líneas) son la misma
+    persona Y, X le habla a Y. Medido en un juego ya revisado a mano: la 2.ª persona coincide con ese
+    oyente en 315 frases y lo contradice en 14 (y esas 14 eran fallos)."""
+    oyentes: list[str | None] = [None] * len(hablantes)
+    for i, x in enumerate(hablantes):
+        if x is None:
+            continue
+        antes = next((h for h in reversed(hablantes[max(0, i - ventana):i]) if h is not None and h != x), None)
+        despues = next((h for h in hablantes[i + 1:i + 1 + ventana] if h is not None and h != x), None)
+        if antes is not None and antes == despues:
+            oyentes[i] = antes
+    return oyentes
 
 
 _PENSAMIENTO = re.compile(r"^[\s\"'“”«»*~]*[(（][^()（）]*[A-Za-zÁÉÍÓÚáéíóúñÑ][^()（）]*[)）][\s\"'“”«»*~.!?…]*$")
@@ -528,6 +569,10 @@ class ContextoLinea:
     destinatario_explicito: bool = False
     mencionados: list[Personaje] = field(default_factory=list)
     pensamiento: bool = False
+    destinatario_por_turnos: bool = False   # el destinatario sale de los turnos (InfoLinea.oyente)
+    # Cómo los nombra el texto ({"'Lucky' Bruno": "Bruno"}): el prompt usa esa forma para que el modelo no
+    # copie el apodo de la ficha ("Gracias, Afortunado Bruno"). No entra en la firma (la caché no cambia).
+    formas: dict[str, str] = field(default_factory=dict)
 
     @property
     def vacio(self) -> bool:
@@ -536,6 +581,13 @@ class ContextoLinea:
     def _con_genero(self, p: Personaje | None) -> bool:
         return p is not None and p.genero_conocido
 
+    def _nombre(self, p: Personaje) -> str:
+        return self.formas.get(p.nombre, p.nombre)
+
+    def etiqueta_de(self, p: Personaje) -> str:
+        """'Bruno (hombre)': como ``Personaje.etiqueta()`` pero con el nombre tal como sale en el texto."""
+        return f"{self._nombre(p)} ({p.genero})"
+
     def ficha(self) -> str:
         """Texto compacto para el prompt. Vacío si no hay nada útil sobre género."""
         partes: list[str] = []
@@ -543,24 +595,24 @@ class ContextoLinea:
         d = self.destinatario if self._con_genero(self.destinatario) and self.destinatario is not self.hablante else None
         if h is not None:
             if self.pensamiento:
-                partes.append(f"Es un pensamiento de {h.etiqueta()}.")
+                partes.append(f"Es un pensamiento de {self.etiqueta_de(h)}.")
             elif h.es_protagonista:
-                partes.append(f"Habla el protagonista, {h.etiqueta()}.")
+                partes.append(f"Habla el protagonista, {self.etiqueta_de(h)}.")
             else:
-                partes.append(f"Habla {h.etiqueta()}.")
+                partes.append(f"Habla {self.etiqueta_de(h)}.")
         if d is not None:
             if self.destinatario_explicito:
-                partes.append(f"Se dirige a {d.etiqueta()}.")
+                partes.append(f"Se dirige a {self.etiqueta_de(d)}.")
             else:
-                partes.append(f"Probablemente se dirige a {d.etiqueta()}.")
+                partes.append(f"Probablemente se dirige a {self.etiqueta_de(d)}.")
         otros = [p for p in self.mencionados if p.genero_conocido and p is not h and p is not d]
         if otros:
-            partes.append("Mencionados: " + ", ".join(p.etiqueta() for p in otros[:6]) + ".")
+            partes.append("Mencionados: " + ", ".join(self.etiqueta_de(p) for p in otros[:6]) + ".")
         if not partes:
             return ""
         if h is not None or d is not None:
-            yo = h.nombre if h is not None else None
-            tu = d.nombre if d is not None else None
+            yo = self._nombre(h) if h is not None else None
+            tu = self._nombre(d) if d is not None else None
             guia = []
             if yo:
                 guia.append(f"'yo' = {yo}")
@@ -591,6 +643,20 @@ class ContextoLinea:
         return f"{self.hablante.nombre}: "
 
 
+def oyente_contradicho(ctx: ContextoLinea | None, original: str, traduccion: str) -> bool:
+    """¿La 2.ª persona de la traducción va en el género contrario al del oyente sacado de los turnos?
+
+    Solo con el oyente de ``InfoLinea.oyente`` (no con el protagonista "probable" de siempre) y si el inglés
+    no dice ya ese género ("you're a good girl"). No se corrige solo: el traductor reintenta con una nota."""
+    if ctx is None or not ctx.destinatario_por_turnos or ctx.destinatario is None or ctx.pensamiento:
+        return False
+    d = ctx.destinatario
+    if d is ctx.hablante or d.genero not in (HOMBRE, MUJER) or not contradice_genero(traduccion, "2", d.genero):
+        return False
+    contrario = MUJER if d.genero == HOMBRE else HOMBRE
+    return contrario not in personas_con_genero_en(original)
+
+
 def resolver_linea(ficha: FichaPersonajes | None, texto: str, info: InfoLinea | None = None) -> ContextoLinea:
     """Averigua hablante, destinatario y personajes mencionados de una línea (texto ORIGINAL)."""
     if ficha is None or not ficha.personajes:
@@ -617,7 +683,12 @@ def resolver_linea(ficha: FichaPersonajes | None, texto: str, info: InfoLinea | 
             pensamiento = False
 
     destinatario: Personaje | None = None
-    explicito = False
+    explicito = por_turnos = False
+    oyente = None
+    if not pensamiento and info.oyente and not info.es_opcion:
+        oyente = ficha.por_codigo(info.oyente) or ficha.buscar(info.oyente)
+        if oyente is hablante:
+            oyente = None
     if not pensamiento:
         voc = ficha.vocativo_en(texto, excluir=hablante)
         if voc is not None:
@@ -625,13 +696,16 @@ def resolver_linea(ficha: FichaPersonajes | None, texto: str, info: InfoLinea | 
         elif info.destinatario:
             destinatario = ficha.buscar(info.destinatario)
             explicito = destinatario is not None
+        elif oyente is not None and hablante is not None:
+            destinatario, por_turnos = oyente, True
         elif (hablante is not None and prota is not None and hablante is not prota
               and not info.es_opcion and reglas.get("npc_hablan_al_protagonista", True)):
             destinatario = prota
 
     mencionados = ficha.mencionados_en(texto, excluir=(hablante, destinatario))
     return ContextoLinea(hablante=hablante, destinatario=destinatario, destinatario_explicito=explicito,
-                         mencionados=mencionados, pensamiento=pensamiento)
+                         mencionados=mencionados, pensamiento=pensamiento, destinatario_por_turnos=por_turnos,
+                         formas=ficha.formas_en(texto))
 
 
 # "Nosotros" que son exactamente quien habla y quien escucha. "Join us" o "we" a secas no valen: el

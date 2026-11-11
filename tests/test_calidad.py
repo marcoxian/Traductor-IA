@@ -35,6 +35,19 @@ class TestNombresPerdidos(unittest.TestCase):
         self.assertEqual(nombres_perdidos("¡Guardia!", ["Guard"]), [])
         self.assertEqual(nombres_perdidos("\\C[2]ANA\\C[0]: hola", ["ANA"]), [])
 
+    def test_apodo_con_alias_solo_exige_lo_que_dice_el_ingles(self):
+        # Ficha "'Lucky' Bruno" con alias "Bruno": si el inglés dice solo "Bruno", basta "Bruno" y
+        # el apodo suelto ("Lucky", "Afortunado") no vale por el nombre.
+        ficha = FichaPersonajes([Personaje("'Lucky' Bruno", "hombre", "principal", alias=["Bruno"])])
+        nombres = ficha.nombres_en("Thanks, Bruno.")
+        self.assertEqual(nombres, ["Bruno"])
+        self.assertEqual(nombres_perdidos("Gracias, Bruno.", nombres), [])
+        self.assertEqual(nombres_perdidos("Gracias, Lucky.", nombres), ["Bruno"])
+        self.assertEqual(nombres_perdidos("Gracias, Afortunado.", nombres), ["Bruno"])
+        # Con el nombre completo en el inglés vale cualquiera de sus palabras
+        nombres = ficha.nombres_en("Hey, 'Lucky' Bruno!")
+        self.assertEqual(nombres_perdidos("¡Eh, Bruno!", nombres), [])
+
     def _traductor(self):
         from traductor.ollama import OllamaTranslator
         ficha = FichaPersonajes([Personaje("1Hero", "hombre", "protagonista"),
@@ -148,6 +161,16 @@ class TestPuertaCalidad(unittest.TestCase):
         trad = ("¿¡Espera! Esto no está bien! Tu mente no es la de un ser humano normal, "
                 "también es antigua. Es como si hubiera algo más ahí dentro bloqueándolo todo. [pic=41]")
         self.assertIn("longitud_larga", evaluar_traduccion(orig, trad))
+
+    def test_detecta_lineas_que_el_original_no_tiene(self):
+        """Una línea de más es un eco o una nota del modelo (y en Ren'Py rompe el archivo)."""
+        orig = "She's been a great help. \\nWe met six months ago."
+        trad = "¡Ah, la profesora!\n\nHa sido de gran ayuda. \\nNos conocimos hace seis meses."
+        problemas = evaluar_traduccion(orig, trad)
+        self.assertIn("lineas_extra", problemas)
+        self.assertTrue(tiene_fallo_grave(problemas))
+        self.assertNotIn("lineas_extra", evaluar_traduccion(orig, "Ha sido de gran ayuda. \\nNos conocimos hace seis meses."))
+        self.assertNotIn("lineas_extra", evaluar_traduccion("Hello there.\nHow are you?", "Hola.\n¿Qué tal?"))
 
     def test_detecta_vacia_cuando_solo_quedan_simbolos(self):
         orig = "♪♪♪♪♪♪♪♪♪♪Hello, room service at your service! [pic=41]"

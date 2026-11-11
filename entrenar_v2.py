@@ -151,6 +151,8 @@ if general:
 # artículos de "cofre" ("la cofre"). Si el sentido no se puede arreglar con un cambio seguro, el ejemplo se quita.
 def limpiar_ejemplos(lista, nombre):
     from traductor import ambiguas
+    from traductor.espana import coger_a_follar
+    from traductor.gramatica import arreglar_determinantes
     from traductor.texto import quitar_cola_pegada
     def sentido_mal(en, t):  # "chest"/"safe" al revés (las palabras vulgares se cuentan aparte)
         return [d for d in ambiguas.sentido_equivocado(en, t) if d.sentido not in ambiguas.SENTIDOS_VULGARES]
@@ -164,7 +166,10 @@ def limpiar_ejemplos(lista, nombre):
         if not isinstance(en, str) or not isinstance(es, str):
             limpios.append(e)
             continue
-        nuevo = ambiguas.espanol_de_espana(en, ambiguas.arreglar_articulos(quitar_cola_pegada(en, es)))
+        # AC: antes de mirar el vocabulario latino, los arreglos seguros: "cógeme" -> "fóllame" (si el inglés
+        # habla de sexo) y "muchos actualizaciones" -> "muchas actualizaciones". Así esos ejemplos no se pierden.
+        nuevo = arreglar_determinantes(coger_a_follar(ambiguas.arreglar_articulos(quitar_cola_pegada(en, es)), en))
+        nuevo = ambiguas.espanol_de_espana(en, nuevo)
         if nuevo is None:  # W8: vocabulario de Latinoamérica sin arreglo seguro ("acabar", "coger", "vagina")
             latam += 1
             continue

@@ -98,6 +98,14 @@ _COFRE_DEBIL = re.compile(
     r"items?|inside|contents?|contain\w*|open\w*|chandelier|attic|basement|cave|caves|dungeon|map|craft\w*)\b",
     _I)
 _PLURAL_SIN_DUENO = re.compile(r"\bchests\b", _I)
+# Una persona que "tiene" pecho ("she had a chest...", "you've got a nice chest"), salvo que sea un cofre lleno
+# de algo ("he had a chest full of gold").
+_PERSONA_TIENE_PECHO = re.compile(
+    r"(?:\b(?:she|he)(?:['’](?:s|d))?\s+(?:has|had|got|['’]s\s+got)\s+(?:a|such\s+a|quite\s+a)"
+    r"|\b(?:she|he|you|I)(?:['’](?:s|ve|d))?\s+(?:has|had|have|got|['’]s\s+got|['’]ve\s+got)\s+"
+    r"(?:such\s+)?an?\s+(?!wooden|treasure|old|big\s+wooden|locked|heavy|iron|metal)\w+)\s+chest\b"
+    r"(?!\s+(?:full|of|with|filled|packed|stuffed|that\s+(?:holds|contains)|in|on|at|under|behind|inside|"
+    r"upstairs|downstairs|somewhere|here|there|hidden|for|to))", _I)
 
 
 def _palabras_previas(texto: str, inicio: int, n: int = 3) -> list[str]:
@@ -129,6 +137,9 @@ def _puntos_chest(texto: str) -> tuple[int, int, str]:
         if patron.search(texto):
             cuerpo += 2
             pistas.append(motivo)
+    if _PERSONA_TIENE_PECHO.search(texto):
+        cuerpo += 4  # "she had a chest worth a fortune": la fortuna es una metáfora
+        pistas.append("alguien tiene pecho")
     for patron, motivo in _COFRE_FUERTE:
         if patron.search(texto):
             cofre += 2

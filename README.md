@@ -17,7 +17,7 @@ No envía nada a internet: los textos del juego, la traducción y el modelo se q
   traductor la usa para que cada personaje hable con su género («Estoy cansado» o «Estoy cansada») y corrige
   después la concordancia de forma determinista.
 - **Puerta de calidad.** Rechaza y reintenta las traducciones vacías, en inglés, recortadas, con bucles, con
-  etiquetas rotas o con nombres perdidos. Nada malo entra en la caché.
+  etiquetas rotas, con líneas de más o con nombres perdidos. Nada malo entra en la caché.
 - **Palabras con dos sentidos.** Decide por el contexto de la frase si *chest* es «cofre» o «pecho», o si *safe* es
   «caja fuerte». Se lo indica al modelo y comprueba el resultado.
 - **Vocabulario para juegos adultos.** Es opcional y editable (`glosarios/glosario_adulto.json`): mantiene el
@@ -130,7 +130,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | 6 | `6_auditoria_semantica.py` | Corrige falsos amigos (*party* → grupo, *item* → objeto, *save* → guardar…). |
 | 7 | `7_arreglar_partida_rpgmaker.py` | Aplica las correcciones a una partida guardada de RPG Maker (`.rpgsave`) sin empezar de nuevo. |
 | 8 | `8_auditar_genero.py` | Audita y corrige el género de un juego ya traducido: RPG Maker, CSV de idiomas, Ren'Py (`game/tl/<idioma>`, con quién habla en cada línea) y XUnity (también sobre una copia de su archivo). La 2.ª persona que no nombra a quien escucha se marca como `probable` si todos los que están en la escena son del otro género ("¿Estás segura?" a un protagonista hombre); se aplica solo con `--corregir --segunda`, tras revisar el informe. Lo mismo con el plural de grupo ("vosotros dos" a dos chicas → "vosotras dos"). |
-| 9 | `9_evaluar_genero.py` | Banco de pruebas: ¿respeta el modelo el género de quien habla? Condiciones A (sin ficha), B (con pista), C (proceso completo) y D (`--sin-hablante`: sin saber quién habla, como en Unity). |
+| 9 | `9_evaluar_genero.py` | Banco de pruebas: ¿respeta el modelo el género de quien habla? Condiciones A (sin ficha), B (con pista), C (proceso completo) y D (`--sin-hablante`: sin saber quién habla, como en Unity). Con `--banco`, un banco fijo de frases inventadas por categorías. |
 
 ---
 
@@ -187,6 +187,40 @@ Maker) y `glosario_adulto.json`.
   entrenamiento enseñan («ESTRELLAConstellation name (optional)»).
 - **Nombres.** Restaura los nombres protegidos que el modelo deforma, sin pisar nunca un nombre que esté tal cual en
   el original.
+- **Ecos de la autocorrección.** Si el modelo repite la entrada de la corrección con otra etiqueta («Borrado a
+  corregir:», «Corrección sugerida:», «El texto original es:…»), se queda solo la frase buena. Una traducción con
+  saltos de línea que el original no tiene se rechaza y se reintenta.
+- **Ren'Py.** Un salto de línea real nunca llega al `.rpy` (se escribe `\n`), y si el inglés escribe `10%%` la
+  traducción también: con un `%` suelto Ren'Py da error.
+- **A quién se habla, por los turnos** (Ren'Py). Si una frase va entre dos turnos de la misma persona (Ana, Luis,
+  Ana), Luis le habla a Ana. Va como pista al modelo y, si la 2.ª persona sale en el otro género («¿eres amigo?» a
+  una mujer), se reintenta con una nota. Nunca se corrige solo: no es seguro.
+- **Frases hechas y palabrotas** (`traductor/modismos.py`). «Busting my ass», «damn good», «a hell of a race», «go
+  fuck yourself», «not at all», «every last drop»… Las que el modelo falla casi siempre van como pista en el
+  glosario de la frase; en todas, si sale la versión palabra por palabra («maldita buena», «carrera de mierda»,
+  «En absoluto no»), se reintenta diciendo lo que significan.
+- **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
+  siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
+  conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»
+  («I-It threw her» → «Yo... la lanzó»).
+- **«Coger» → «follar»** cuando el inglés habla de sexo (*fuck*, *bang*) y no de tomar algo (*take*, *grab*).
+- **Frases muy cortas.** Si una frase de 1 a 3 palabras («\*coughs\*», «Help her.») se convierte en una frase
+  entera inventada, se rechaza y se reintenta.
+
+### Ren'Py: si el juego ya trae otro español
+
+Si el juego trae su propio `tl/Spanish` dentro de un `.rpa`, no se puede poner el nuestro con el mismo nombre (los
+dos chocan). Lo que funciona es usar un idioma nuevo:
+
+1. Copia la carpeta traducida como `game/tl/castellano/` y cambia `translate Spanish ` por `translate castellano `
+   en la cabecera de cada bloque. Los archivos `.original` no se copian.
+2. Añade un `.rpy` suelto con `init offset = 1` que vuelva a definir la pantalla de idiomas del juego con un botón
+   más (`Language("castellano")`). Las pantallas se definen en `init -500`, así que la tuya va después y la
+   sustituye sin tocar el `.rpa`.
+3. Comprueba con el propio juego antes de instalar: `lib\py3-windows-x86_64\python.exe <juego>.py . compile` y
+   `... lint lint.txt`.
+
+Para quitarla basta con borrar esos archivos.
 
 ---
 
@@ -250,6 +284,13 @@ el proxy solo traduce lo que el juego monta al vuelo («Día 3», «Ánimo 50 %�
     gana la pista.
   - `variables`: códigos que el juego cambia por un nombre antes de enseñar la frase. XUnity ve la frase ya
     cambiada, así que se traduce con el nombre puesto.
+  - `otros_valores`: lo que el juego enseña en otros momentos en lugar de ese nombre (por ejemplo, «the strange
+    girl» antes de que el jugador le ponga nombre). De cada frase ya traducida con el nombre se crea su gemela
+    cambiando el nombre por el texto en español (con mayúscula si empieza frase), sin volver a llamar al modelo.
+    Si el nombre no sale en la traducción tantas veces como en el inglés, esa frase se deja.
+- **Registro del proxy.** Cada petición de XUnity se apunta en `workspace/<juego>/registro_proxy/AAAA-MM-DD.jsonl`
+  con quién la respondió (`diccionario`, `cache`, `modelo`, `fallo`…). Sirve para ver qué se traduce en directo
+  al jugar y por qué no estaba ya hecho. Se desactiva con `--sin-registro`.
 
 ---
 
@@ -263,23 +304,25 @@ python entrenar_v2.py --solo-datos --version 2    # resume los datos sin usar la
 python entrenar_v2.py --version 2 --casos-dificiles
 ollama create IA_Traductora_v2 -f Modelfile_v2
 python 9_evaluar_genero.py --modelo IA_Traductora_v2    # mídelo antes de usarlo
+python 9_evaluar_genero.py --banco --modelo IA_Traductora_v2   # banco fijo de frases inventadas
+python 9_evaluar_genero.py --comparar workspace/_evaluaciones/banco_A.json workspace/_evaluaciones/banco_B.json
 ```
+
+- **Banco fijo** (`--banco`, `tests/datos/banco_traduccion.json`): unas 120 frases y personajes inventados por
+  categorías (género de quien habla y de quien escucha, tú/usted, prohibiciones, frases hechas, palabras de España,
+  dos sentidos, concordancia, opciones de menú, sonidos, tartamudeos, cifras y etiquetas). Mide el modelo solo
+  (primer intento) y el traductor completo (con reintentos y arreglos). Usa una semilla fija: dos pasadas del mismo
+  modelo dan lo mismo, así que la diferencia entre dos modelos es real. No necesita juegos.
 
 - Los datos de entrenamiento son tuyos (`datasets/`, privado). `herramientas_extra/dataset_genero.py` genera
   ejemplos con la pista de quién habla, y sus espejos (no los hace si el inglés fija el sexo: anatomía,
   «I'm a maid»…), a partir de un corpus con hablantes.
 - Los ejemplos SIN pista de hablante que tienen género en 1.ª o 2.ª persona («Estoy segura») pasan a una forma
   neutra («Seguro que…», «¿Todo listo?») o se quitan, para que el modelo no aprenda a adivinar. Se desactiva
-  - `otros_valores`: lo que el juego enseña en otros momentos en lugar de ese nombre (por ejemplo, «the strange
-    girl» antes de que el jugador le ponga nombre). De cada frase ya traducida con el nombre se crea su gemela
-    cambiando el nombre por el texto en español (con mayúscula si empieza frase), sin volver a llamar al modelo.
-    Si el nombre no sale en la traducción tantas veces como en el inglés, esa frase se deja.
-- **Registro del proxy.** Cada petición de XUnity se apunta en `workspace/<juego>/registro_proxy/AAAA-MM-DD.jsonl`
-  con quién la respondió (`diccionario`, `cache`, `modelo`, `fallo`…). Sirve para ver qué se traduce en directo
-  al jugar y por qué no estaba ya hecho. Se desactiva con `--sin-registro`.
   con `--sin-neutros`.
 - Al cargar los datos, `entrenar_v2.py` corrige o descarta los ejemplos que enseñan fallos conocidos: sentido
-  equivocado de *chest*, coletillas pegadas, vocabulario que no es de España, palabras vulgares suavizadas.
+  equivocado de *chest*, coletillas pegadas, vocabulario que no es de España («coger» sexual pasa a «follar»),
+  palabras vulgares suavizadas y determinantes que no concuerdan («muchos actualizaciones»).
 - Las frases que el traductor arregla en un reintento se guardan en `workspace/<juego>/casos_dificiles.jsonl`.
   Inclúyelas con `--casos-dificiles`.
 

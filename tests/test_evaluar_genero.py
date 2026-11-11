@@ -184,3 +184,47 @@ class TestRecogidaYEvaluacion(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+
+class TestBancoFijo(unittest.TestCase):
+    """El banco de frases inventadas (tests/datos/banco_traduccion.json) y su puntuación."""
+
+    def test_el_banco_se_carga_y_es_valido(self):
+        datos, ficha = evaluar.cargar_banco(evaluar.BANCO_POR_DEFECTO)
+        self.assertGreaterEqual(len(datos["casos"]), 90)
+        self.assertEqual(ficha.protagonista().nombre, "Dario")
+        self.assertGreaterEqual(len({c["categoria"] for c in datos["casos"]}), 12)
+
+    def test_puntuar(self):
+        caso = {"id": "x", "en": "Are you sure?", "genero_2p": "mujer", "no_debe": [r"\busted\b"]}
+        self.assertEqual(evaluar.puntuar_banco(caso, "¿Estás segura?"), [])
+        self.assertEqual(evaluar.puntuar_banco(caso, "¿Estás seguro?"), ["género 2.ª persona"])
+        self.assertEqual(evaluar.puntuar_banco(caso, "¿Está usted segura?"), [r"sobra /\busted\b/"])
+        self.assertEqual(evaluar.puntuar_banco(caso, "Are you sure?"), ["sin traducir"])
+        corto = {"id": "y", "en": "*sniffs*", "max_palabras": 4}
+        self.assertEqual(evaluar.puntuar_banco(corto, "*sorbe por la nariz*"), [])
+        self.assertEqual(evaluar.puntuar_banco(corto, "¡Joder! No he comido nada desde ayer."), ["demasiado larga"])
+        self.assertEqual(evaluar.puntuar_banco({"id": "z", "en": "Drop it", "debe": ["suelta"]}, "Tíralo"),
+                         ["falta /suelta/"])
+
+    def test_ejecutar_con_modelo_simulado(self):
+        datos, ficha = evaluar.cargar_banco(evaluar.BANCO_POR_DEFECTO)
+        mini = dict(datos, casos=[c for c in datos["casos"] if c["id"] in ("g2o-01", "mo-02")])
+        tmp = Path(tempfile.mkdtemp())
+        self.addCleanup(shutil.rmtree, tmp, True)
+        banco = tmp / "banco.json"
+        banco.write_text(json.dumps(mini), encoding="utf-8")
+        respuestas = {"Are you sure?": "¿Estás seguro?", "She's a damn good mechanic.": "Es una maldita buena mecánica."}
+
+        def generar(self_t, prompt, num_predict, temperature=0.1):
+            for en, es in respuestas.items():
+                if en in prompt.rsplit("###", 1)[0][-200:] or en in prompt:
+                    return es if temperature <= 0.1 else es.replace("seguro", "segura").replace("maldita buena", "buenísima")
+            return "?"
+
+        with mock.patch.object(OllamaTranslator, "_generar", generar), \
+                mock.patch("builtins.print"):
+            self.assertEqual(evaluar.ejecutar_banco(banco, "prueba", str(tmp / "r.json")), 0)
+        r = json.loads((tmp / "r.json").read_text(encoding="utf-8"))
+        self.assertEqual(r["resumen"]["modelo"]["bien"], 0)       # el primer intento falla los dos
+        self.assertEqual(r["resumen"]["pipeline"]["bien"], 2)     # el reintento los arregla

@@ -13,7 +13,9 @@ from functools import lru_cache
 from pathlib import Path
 
 # genero.py y espana.py no importan nada del paquete: no hay ciclo de importación.
+from . import modismos
 from .espana import a_espanol_de_espana
+from .gramatica import arreglar_determinantes, imperativo_negativo_mal, tartamudeo_como_yo
 from .genero import corregir_primera_persona, es_genero_marcado
 
 # --------------------------------------------------------------------------- Regex
@@ -382,6 +384,17 @@ _ECO_PROMPT = re.compile(
     re.IGNORECASE,
 )
 _COLA_PROMPT = re.compile(r"\s*Traduce este texto[^\n]*$", re.IGNORECASE)
+# Ecos de la entrada de la autocorrección (prompts.entrada_correccion:"Texto original: …\nBorrador a corregir: …"). El modelo
+# reescribe las etiquetas a su manera; lo que va detrás de la etiqueta es la frase vieja y se descarta.
+_ECO_CORRECCION = re.compile(
+    r"\s*\b(?:borrad(?:or|o)\s+a\s+corr[ei]gir|texto original|texto del borrador[^.!?:\n]{0,40}"
+    r"|(?:el\s+)?borrador que se debe corregir(?:\s+dice)?|fuente de lo que se debe corregir[^.!?:\n]{0,30}"
+    r"|correcci[oó]n(?:\s+sugerida|\s+para el borrad(?:or|o))?|versi[oó]n del usuario[^.!?:\n]{0,30})\s*:",
+    re.IGNORECASE,
+)
+_ECO_MOTIVO = re.compile(r"\s*\.?\s*(?:Motivo:\s*(?:faltan|sobran)|Devuelve [UÚ]NICAMENTE la traducci[oó]n|"
+                         r"C[oó]digos obligatorios:)", re.IGNORECASE)
+_ECO_CORRECCION_INICIO = re.compile(r"^(?:El texto original es|Fuente del texto original)\s*:\s*", re.IGNORECASE)
 _TOKENS_ESPECIALES = ("<|im_start|>", "<|im_end|>", "<|eot_id|>", "<|end_of_text|>", "### Instruction")
 _COMILLAS = [('"', '"'), ("'", "'"), ("“", "”"), ("«", "»")]
 
@@ -840,6 +853,8 @@ def postprocesar_traduccion(texto: str, original: str = "") -> str:
 
     # 6d. Vocabulario de Latinoamérica que se cambia sin riesgo ("enojado" -> "enfadado", "apúrate" -> "date prisa")
     r = a_espanol_de_espana(r, original)
+    # 6e. Determinante masculino con sustantivo femenino ("muchos actualizaciones" -> "muchas actualizaciones")
+    r = arreglar_determinantes(r)
 
     # 7. Signos dobles de apertura desemparejados al cerrar (ej: "¡¿Qué haces!" -> "¡¿Qué haces?!")
     r = re.sub(r"(¡¿[^?!¡¿]+)!(\s*)$", r"\1?!\2", r)
@@ -991,10 +1006,17 @@ def limpiar_respuesta(respuesta: str, original: str = "") -> str:
     )
     if "Texto original:" in r and "Tu traducción:" in r:
         r = r.split("Tu traducción:", 1)[-1].strip()
-    # Eco al final de la corrección: "Frase corregida. Borrador a corregir: frase vieja"
-    eco = re.search(r"\s*(?:Borrador a corregir|Texto original)\s*:", r)
+    # Eco al principio con la etiqueta reescrita: "El texto original es: Frase. El borrador que se debe..."
+    r = _ECO_CORRECCION_INICIO.sub("", r)
+    # Eco al final de la corrección: "Frase corregida. Borrador a corregir: frase vieja" (y sus variantes:
+    # "Borrado a corrigir:", "Corrección sugerida:", "Versión del usuario para corregir:"...)
+    eco = _ECO_CORRECCION.search(r)
     if eco and eco.start() > 0 and r[:eco.start()].strip():
         r = r[:eco.start()].strip()
+    # Eco de la instrucción de la autocorrección: "¿Eh?{w} {nw}. Motivo: faltan ['']. Devuelve ÚNICAMENTE..."
+    eco = _ECO_MOTIVO.search(r)
+    if eco and r[:eco.start()].strip(" .") and not _ECO_MOTIVO.search(original or ""):
+        r = r[:eco.start()].rstrip()
 
     # Evitar bucles de degeneración o tartamudeo infinito del LLM (ej: ¡R-¡R-¡R-... o R-R-R-...)
     r = re.sub(r"([¡¿]?[A-Za-zÁÉÍÓÚáéíóúñÑ]-[¡¿]?){4,}", r"\1\1", r)
@@ -1109,7 +1131,12 @@ _PESO_PROBLEMA = {
     "sentido_equivocado": 40,   # "chest" de cuerpo traducido "cofre" (ver traductor.ambiguas)
     "numeros": 40,              # "Afecto+178" -> "Afecto+96", "Tienes:5" -> "Tienes:"
     "longitud_larga": 35,
+    "lineas_extra": 85,         # saltos de línea reales que el original no tiene (ecos, notas, frase repetida)
     "etiquetas": 15,
+    "calco": 30,                # "damn good" -> "maldita buena" (ver traductor.modismos)
+    "genero_oyente": 30,        # "¿eres amigo?" a una mujer, según los turnos de la conversación
+    "imperativo_negativo": 25,  # "Don't pretend" -> "No finge"
+    "tartamudeo": 25,           # "I-It threw her" -> "Yo... la lanzó"
     "ustedes": 5,               # "ustedes" con confianza: en España es "vosotros" (solo aviso, ver abajo)
 }
 
@@ -1117,7 +1144,8 @@ _PESO_PROBLEMA = {
 # versión, porque pueden ser falsos avisos ("24/7" -> "24 horas"). "ustedes" NO está: medido con v4 en 25
 # frases reales, al pedirle "vosotros" deja de decir "ustedes" en 20, pero 7 salen peor ("¿Qué piensan tú
 # dos?", "podéis irte cuando quieráis"). Se queda como aviso para el repaso a mano y para los datos de v6.
-PROBLEMAS_LEVES_REINTENTO = frozenset({"numeros"})
+# "genero_oyente" lo añade el traductor (necesita saber a quién se habla; ver personajes.oyente_contradicho).
+PROBLEMAS_LEVES_REINTENTO = frozenset({"numeros", "calco", "imperativo_negativo", "tartamudeo", "genero_oyente"})
 
 # Problemas graves: si persisten tras los reintentos NO se guarda en la caché (se reintentará en otra sesión).
 PROBLEMAS_GRAVES = frozenset({
@@ -1129,6 +1157,7 @@ PROBLEMAS_GRAVES = frozenset({
     "ingles_residual",
     "longitud_corta",
     "longitud_larga",
+    "lineas_extra",
 })
 
 
@@ -1166,10 +1195,17 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
       - ``repeticion``: bucle degenerado de caracteres o palabras que no estaba en el original.
       - ``longitud_corta``: frase mutilada (< 42 % de la longitud original en frases de ≥ 35 car.).
       - ``longitud_larga``: alucinación o fusión de lotes (> 2.8x de la longitud original).
+      - ``lineas_extra``: la traducción trae saltos de línea reales y el original no (eco de la corrección,
+        notas, frase repetida). En Ren'Py, además, rompen el archivo.
       - ``etiquetas``: faltan o sobran etiquetas de formato respecto al original.
       - ``numeros`` (leve): faltan, cambian o sobran cifras ("Cum 100000 inside" -> "Córrete dentro").
       - ``ustedes`` (aviso, sin reintento): "ustedes" sin que el inglés sea formal; en España, con
         confianza, es "vosotros".
+      - ``imperativo_negativo`` (leve): "Don't pretend" -> "No finge"/"No finja" (con tú es "No finjas").
+      - ``tartamudeo`` (leve): "I-It threw her" -> "Yo... la lanzó" (es "E-el camión", no "yo").
+      - ``calco`` (leve): frase hecha traducida palabra por palabra ("damn good" -> "maldita buena",
+        "busting my ass" -> "darme una patada en el culo"); ver ``traductor.modismos``.
+    Las frases de 1-3 palabras también dan ``longitud_larga`` si la traducción se inventa una frase entera.
     """
     if not tiene_texto_visible(original):
         return []
@@ -1209,7 +1245,8 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
 
     if re.search(
         r"###\s*(?:Instruction|Input|Response)|GLOSARIO OBLIGATORIO|CONTEXTO DEL JUEGO|CONVERSACIÓN PREVIA|"
-        r"Usa esta conversaci[oó]n para entender el contexto|traduce [UÚ]NICAMENTE la frase del Input",
+        r"Usa esta conversaci[oó]n para entender el contexto|traduce [UÚ]NICAMENTE la frase del Input|"
+        r"Devuelve [UÚ]NICAMENTE la traducci[oó]n|C[oó]digos obligatorios:|\bMotivo:\s*(?:faltan|sobran)",
         traducido,
         re.IGNORECASE,
     ) or (_ECO_PERSONAJES.search(traducido) and not _ECO_PERSONAJES.search(original)) \
@@ -1235,6 +1272,15 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("longitud_corta")
     elif len_o >= 20 and len_t > max(len_o * 2.8, len_o + 120):
         problemas.append("longitud_larga")
+    elif 1 <= len(palabras_o) <= 3:
+        # Frases de 1-3 palabras ("*coughs*", "Help her.", "OH, DAMN!"): el modelo a veces se inventa una
+        # frase entera. El español alarga un poco ("Better hurry" -> "Será mejor que te des prisa"), no tanto.
+        n_t = len(re.findall(r"[A-Za-zÁÉÍÓÚáéíóúñÑüÜ]+", vis_t))
+        if n_t >= 2 * len(palabras_o) + 4:
+            problemas.append("longitud_larga")
+
+    if "\n" in traducido.strip() and "\n" not in original:
+        problemas.append("lineas_extra")
 
     ok_tags, _, _ = comparar_etiquetas(original, traducido)
     if not ok_tags or etiquetas_desordenadas(original, traducido):
@@ -1245,6 +1291,12 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("numeros")
     if _USTEDES.search(vis_t) and not _USTEDES.search(vis_o) and not _TRATO_FORMAL_EN.search(vis_o):
         problemas.append("ustedes")
+    if imperativo_negativo_mal(vis_o, vis_t):
+        problemas.append("imperativo_negativo")
+    if tartamudeo_como_yo(vis_o, vis_t):
+        problemas.append("tartamudeo")
+    if modismos.calcos(vis_o, vis_t):
+        problemas.append("calco")
 
     return problemas
 
@@ -1305,6 +1357,20 @@ def _numeros(texto: str) -> Counter:
     return Counter(int(re.sub(r"[.,]", "", m.group(0))) for m in _NUMERO.finditer(visible))
 
 
+# "+500" / " -3" pegados al número: el signo es parte de la cifra ("Stamina Limit+500" -> "aguanta más 500" mal).
+# El guion pegado a una palabra ("Level-5") es un guion, no un signo.
+_NUMERO_CON_SIGNO = re.compile(r"(?:(?<![A-Za-z0-9])[-−]|\+)(\d[\d.,]*)")
+
+
+def signos_perdidos(original: str, traducido: str) -> list[str]:
+    """Números con signo "+"/"-" del original ("+500") que en la traducción ya no llevan ese signo."""
+    visible_o = PATRON_CODIGOS.sub(" ", original or "")
+    visible_t = PATRON_CODIGOS.sub(" ", traducido or "")
+    en_traduccion = {m.group(0).replace("−", "-") for m in _NUMERO_CON_SIGNO.finditer(visible_t)}
+    return [m.group(0) for m in _NUMERO_CON_SIGNO.finditer(visible_o)
+            if m.group(0).replace("−", "-") not in en_traduccion]
+
+
 def numeros_del_original(original: str) -> list[str]:
     """Las cifras del original tal y como se escriben (para la nota del reintento)."""
     visible = PATRON_CODIGOS.sub(" ", original or "")
@@ -1357,20 +1423,6 @@ _ROLES_GENERICOS = frozenset({
     "lady", "gentleman", "guy", "dude", "sir", "madam", "master", "mistress", "slave", "pet", "fan", "fans",
     "crowd", "audience", "announcer", "speaker", "player", "hero", "heroine", "villain", "creature", "girls",
     "boys", "men", "women", "everyone", "nobody", "somebody", "both", "all", "group", "goon", "goons",
-# "+500" / " -3" pegados al número: el signo es parte de la cifra ("Stamina Limit+500" -> "aguanta más 500" mal).
-# El guion pegado a una palabra ("Level-5") es un guion, no un signo.
-_NUMERO_CON_SIGNO = re.compile(r"(?:(?<![A-Za-z0-9])[-−]|\+)(\d[\d.,]*)")
-
-
-def signos_perdidos(original: str, traducido: str) -> list[str]:
-    """Números con signo "+"/"-" del original ("+500") que en la traducción ya no llevan ese signo."""
-    visible_o = PATRON_CODIGOS.sub(" ", original or "")
-    visible_t = PATRON_CODIGOS.sub(" ", traducido or "")
-    en_traduccion = {m.group(0).replace("−", "-") for m in _NUMERO_CON_SIGNO.finditer(visible_t)}
-    return [m.group(0) for m in _NUMERO_CON_SIGNO.finditer(visible_o)
-            if m.group(0).replace("−", "-") not in en_traduccion]
-
-
     "security", "guardian", "henchman", "minion", "enemy", "ghost", "spirit", "robot", "android",
     # Nombres que también son palabras inglesas corrientes ("Max texture size", "Hope is all we have")
     "max", "will", "may", "mark", "bill", "frank", "jack", "grace", "hope", "faith", "joy", "rose", "lily",
@@ -1487,9 +1539,15 @@ _GUIA_REINTENTO = {
     "repeticion": "Evita repetir palabras o signos en bucle; escribe una oración natural y concisa.",
     "longitud_corta": "Traduce TODAS las oraciones del original sin omitir ni recortar ninguna parte.",
     "longitud_larga": "Traduce únicamente la frase indicada, sin añadir explicaciones ni texto extra.",
+    "lineas_extra": "Devuelve la traducción en una sola línea, sin añadir líneas nuevas, notas ni versiones.",
     "etiquetas": "Conserva exactamente las etiquetas de formato del original.",
     "nombre_perdido": "Conserva los nombres propios de los personajes tal y como aparecen en el original.",
     "numeros": "Conserva exactamente las cifras del original: no cambies, quites ni añadas ningún número.",
+    "imperativo_negativo": ("Una prohibición con 'tú' lleva el verbo en subjuntivo acabado en -s ('Don't pretend' = "
+                            "'No finjas', 'Don't send it' = 'No lo envíes'); con varios, 'vosotros' ('No finjáis')."),
+    "tartamudeo": ("'I-It', 'I-If' son tartamudeos de 'It'/'If', no la palabra 'yo': repite la primera sílaba en "
+                   "español ('E-el coche...', 'S-si...')."),
+    "calco": "No traduzcas las frases hechas palabra por palabra: usa la expresión que se dice en España.",
 }
 
 

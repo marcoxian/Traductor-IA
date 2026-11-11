@@ -136,6 +136,50 @@ def _echar_de_menos_pegado(m: re.Match) -> str:
     return f"{forma}{intensidad} de menos"
 
 
+# --------------------------------------------------------------------------- coger -> follar
+# En Latinoamérica "coger" es follar; en España es tomar. Solo se cambia si el inglés habla de sexo
+# ("fuck", "bang", "screw") y no de tomar algo ("take", "grab", "catch", "pick up"): "¡Cógeme!" -> "¡Fóllame!".
+_SEXO_EN = re.compile(r"\b(?:fuck(?:s|ed|ing|in['’]?)?|bang(?:s|ed|ing)?|screw(?:s|ed|ing)?|shag\w*|hump\w*)\b",
+                      re.IGNORECASE)
+_TOMAR_EN = re.compile(r"\b(?:take|takes|took|taken|taking|grab\w*|catch\w*|caught|pick\w*|hold\w*|seize\w*|"
+                       r"snatch\w*|(?:get|gets|got)(?!\s+(?:\w+\s+)?(?:fucked|banged|screwed|laid)))\b",
+                       re.IGNORECASE)
+# terminación de "coger" -> la de "follar" (sin pronombres pegados). "coj-" es la raíz antes de a/o.
+_FOLLAR = {
+    "er": "ar", "erse": "arse", "iendo": "ando", "iéndo": "ándo", "ido": "ado", "ida": "ada", "idos": "ados",
+    "idas": "adas", "e": "a", "es": "as", "en": "an", "emos": "amos", "éis": "áis", "í": "é", "iste": "aste",
+    "ió": "ó", "imos": "amos", "isteis": "asteis", "ieron": "aron", "ía": "aba", "ías": "abas", "íamos": "ábamos",
+    "íais": "abais", "ían": "aban", "eré": "aré", "erás": "arás", "erá": "ará", "eremos": "aremos",
+    "eréis": "aréis", "erán": "arán", "ería": "aría", "erías": "arías", "eríamos": "aríamos", "erían": "arían",
+    "iera": "ara", "ieras": "aras", "ieran": "aran", "ed": "ad", "o": "o", "a": "e", "as": "es", "an": "en",
+    "amos": "emos", "áis": "éis",
+}
+_FINALES_COGER = "|".join(sorted(_FOLLAR, key=len, reverse=True))
+_PRONOMBRES_PEGADOS = r"(?:me|te|se|lo|la|le|los|las|les|nos|os)*"
+_COGER = re.compile(rf"(?<!{_L})(c)([oó])(g|j)(?P<fin>{_FINALES_COGER})(?P<pron>{_PRONOMBRES_PEGADOS})(?!{_L})",
+                    re.IGNORECASE)
+
+
+def _follar(m: re.Match) -> str:
+    raiz, fin = m.group(3).lower(), m.group("fin").lower()
+    # "coj-" solo va delante de a/o ("cojo", "coja"); "cog-" delante de e/i ("coge", "cogió")
+    if (raiz == "j") != (fin[:1] in ("a", "o", "á")):
+        return m.group(0)
+    if raiz == "g" and fin == "o":
+        return m.group(0)  # "cogo" no existe
+    nuevo = "f" + m.group(2).lower() + "ll" + _FOLLAR[fin] + m.group("pron").lower()
+    return _igual_mayusculas(m.group(0), nuevo)
+
+
+def coger_a_follar(traduccion: str, original: str) -> str:
+    """"coger" con sentido sexual -> "follar" en todas sus formas, si el inglés habla de sexo y no de tomar."""
+    if not traduccion or not original or not _SEXO_EN.search(original) or _TOMAR_EN.search(original):
+        return traduccion
+    res = re.sub(r"\buna\s+buena\s+cogida\b", lambda m: _igual_mayusculas(m.group(0), "un buen polvo"),
+                 traduccion, flags=re.IGNORECASE)
+    return _COGER.sub(_follar, res)
+
+
 # --------------------------------------------------------------------------- Todo junto
 def a_espanol_de_espana(traduccion: str, original: str = "") -> str:
     """Cambia el vocabulario de Latinoamérica que se puede cambiar sin riesgo (ver el docstring del módulo).
@@ -151,4 +195,6 @@ def a_espanol_de_espana(traduccion: str, original: str = "") -> str:
     if original and _MISS_EN.search(original):
         res = _EXTRANAR_VERBO.sub(_echar_de_menos, res)
         res = _EXTRANAR_PEGADO.sub(_echar_de_menos_pegado, res)
+    if original:
+        res = coger_a_follar(res, original)
     return res

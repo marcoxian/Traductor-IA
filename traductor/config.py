@@ -33,7 +33,7 @@ from pathlib import Path
 
 # personajes.py solo importa genero.py: no hay ciclo. El analizador (que sí importa config)
 # se importa SIEMPRE dentro de las funciones.
-from . import ambiguas  # solo usa la biblioteca estándar: no hay ciclo
+from . import ambiguas, modismos  # solo usan la biblioteca estándar: no hay ciclo
 from .genero import DESCONOCIDO
 from .personajes import ARCHIVO_PERSONAJES, FichaPersonajes, Personaje
 
@@ -414,6 +414,8 @@ class Perfil:
         encontrados = encontrados[:MAX_TERMINOS_PROMPT]
         if con_ambiguas and self.palabras_ambiguas:
             encontrados += ambiguas.terminos(texto, encontrados)
+            # Frases hechas que el modelo traduce palabra por palabra ("busting my ass", "damn good")
+            encontrados += modismos.terminos(texto, encontrados)
         return encontrados
 
     def valor_glosario(self, termino: str) -> str | None:

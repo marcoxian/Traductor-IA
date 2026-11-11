@@ -8,7 +8,7 @@ import unittest
 from pathlib import Path
 
 from traductor.motores.detector import detectar_motor
-from traductor.motores.renpy import InyectorRenPy, buscar_pendientes, escapar, leer_cadenas
+from traductor.motores.renpy import InyectorRenPy, ajustar_porcentajes, buscar_pendientes, escapar, leer_cadenas
 from traductor.personajes import FichaPersonajes, Personaje
 
 TL = '''# TODO: Translation updated at 2026-11-04 10:00
@@ -197,6 +197,19 @@ class TestRenPy(unittest.TestCase):
     def test_escapar_comillas(self):
         self.assertEqual(escapar('Dijo "hola".'), 'Dijo \\"hola\\".')
         self.assertEqual(escapar('Ya \\"escapada\\"'), 'Ya \\"escapada\\"')
+
+    def test_escapar_saltos_reales(self):
+        """Un salto real deja la cadena abierta y Ren'Py no arranca ("Could not parse string")."""
+        self.assertEqual(escapar("{i}Seguirá...{/i}\nNota"), "{i}Seguirá...{/i}\\nNota")
+        self.assertEqual(escapar("Uno\r\nDos"), "Uno\\nDos")
+        self.assertEqual(escapar("Ya \\nescrito"), "Ya \\nescrito")
+
+    def test_ajustar_porcentajes(self):
+        """'10%%' en inglés: la traducción también debe doblar el signo, o Ren'Py lo lee como código."""
+        self.assertEqual(ajustar_porcentajes("Pay a 10%% fee.", "Paga un 10% de recargo."), "Paga un 10%% de recargo.")
+        self.assertEqual(ajustar_porcentajes("Pay a 10%% fee.", "Paga un 10%% de recargo."), "Paga un 10%% de recargo.")
+        self.assertEqual(ajustar_porcentajes("Pay 10% now.", "Paga 10% ya."), "Paga 10% ya.")
+        self.assertEqual(ajustar_porcentajes("%(name)s has 10%%.", "%(name)s tiene 10%."), "%(name)s tiene 10%.")
 
     def test_sin_carpeta_tl(self):
         shutil.rmtree(self.tmp / "game" / "tl")
