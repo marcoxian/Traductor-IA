@@ -209,6 +209,8 @@ class TestRenPy(unittest.TestCase):
         self.assertEqual(ajustar_porcentajes("Pay a 10%% fee.", "Paga un 10% de recargo."), "Paga un 10%% de recargo.")
         self.assertEqual(ajustar_porcentajes("Pay a 10%% fee.", "Paga un 10%% de recargo."), "Paga un 10%% de recargo.")
         self.assertEqual(ajustar_porcentajes("Pay 10% now.", "Paga 10% ya."), "Paga 10% ya.")
+        self.assertEqual(ajustar_porcentajes("Get 5 percent equity.", "Consigue un 5 % de capital."),
+                         "Consigue un 5 %% de capital.")
         self.assertEqual(ajustar_porcentajes("%(name)s has 10%%.", "%(name)s tiene 10%."), "%(name)s tiene 10%.")
 
     def test_sin_carpeta_tl(self):

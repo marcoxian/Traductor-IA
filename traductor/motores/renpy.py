@@ -75,6 +75,10 @@ def ajustar_porcentajes(original: str, traducido: str) -> str:
 
     El modelo devuelve "10%" donde el inglés tenía "10%%"; Ren'Py lo toma por un código de formato
     ("Unknown string format code"). Solo se toca si el original no tiene ningún ``%`` suelto."""
+    if "%" not in original:
+        # El original no tiene ningún "%" (decía "percent"): el que añada el modelo se escapa, o
+        # "5 % de" se lee como código de formato ("%d format: a number is required").
+        return _PORCENTAJE_SOLO.sub("%%", traducido)
     if "%%" not in original or _PORCENTAJE_SOLO.search(original):
         return traducido
     return _PORCENTAJE_SOLO.sub("%%", traducido)
