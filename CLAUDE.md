@@ -155,8 +155,7 @@ columna de hablante → personaje de la ficha y variables `{flag=…}` → nombr
 
 ## Qué modelo de Claude usar
 
-La regla general (Opus, Sonnet y Haiku, con su esfuerzo) está en el `CLAUDE.md` global y se sigue siempre. Ejemplos
-de este proyecto:
+Ejemplos de este proyecto para elegir modelo y esfuerzo (la regla general es personal de cada usuario):
 
 - **Opus, esfuerzo alto:** revisar datos de entrenamiento o casos difíciles uno a uno, auditar género en frases
   ambiguas, diseñar una regla nueva, depurar algo que no se entiende.
