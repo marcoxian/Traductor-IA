@@ -126,6 +126,9 @@ columna de hablante → personaje de la ficha y variables `{flag=…}` → nombr
 - **Banco fijo** (`tests/datos/banco_traduccion.json`): no cambiar los casos que ya existen (las medidas dejarían
   de compararse); añadir casos nuevos con otro `id`. Antes de adoptar una regla de reintento nueva, comprobar en el
   banco que no empeora (con "ustedes" empeoraba).
+- **Tras arreglar un fallo:** si se puede, añade también una mejora que evite que vuelva. Por ejemplo, una
+  comprobación en `evaluar_traduccion`, una regla en código o un caso nuevo en el banco con otro `id`. Si no se
+  puede, dilo.
 - **Estilo:** nombres de funciones y variables en español, `from __future__ import annotations`, logging con
   `log = logging.getLogger(__name__)` y mensajes claros para el usuario.
 
