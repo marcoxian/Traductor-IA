@@ -1137,8 +1137,13 @@ _PESO_PROBLEMA = {
     "genero_oyente": 30,        # "¿eres amigo?" a una mujer, según los turnos de la conversación
     "imperativo_negativo": 25,  # "Don't pretend" -> "No finge"
     "tartamudeo": 25,           # "I-It threw her" -> "Yo... la lanzó"
+    "apodo_inventado": 10,      # "Marcos" -> "Honesto Marcos" (solo aviso, ver abajo)
     "ustedes": 5,               # "ustedes" con confianza: en España es "vosotros" (solo aviso, ver abajo)
 }
+
+# Epíteto que el modelo pega delante de un nombre ("Marcos" -> "Honesto Marcos") sin que el inglés lo diga.
+_APODO_HONESTO = re.compile(r"(?<![^\W\d_])[Hh]onest[oa]s?\s+[A-ZÁÉÍÓÚÑ]")
+_HONEST_EN = re.compile(r"honest", re.IGNORECASE)
 
 # Problemas leves que merecen otro intento (con su nota): si ningún intento los arregla se acepta la mejor
 # versión, porque pueden ser falsos avisos ("24/7" -> "24 horas"). "ustedes" NO está: medido con v4 en 25
@@ -1201,6 +1206,7 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
       - ``numeros`` (leve): faltan, cambian o sobran cifras ("Cum 100000 inside" -> "Córrete dentro").
       - ``ustedes`` (aviso, sin reintento): "ustedes" sin que el inglés sea formal; en España, con
         confianza, es "vosotros".
+      - ``apodo_inventado`` (aviso, sin reintento): "Honesto Marcos" cuando el inglés dice solo "Marcos".
       - ``imperativo_negativo`` (leve): "Don't pretend" -> "No finge"/"No finja" (con tú es "No finjas").
       - ``tartamudeo`` (leve): "I-It threw her" -> "Yo... la lanzó" (es "E-el camión", no "yo").
       - ``calco`` (leve): frase hecha traducida palabra por palabra ("damn good" -> "maldita buena",
@@ -1291,6 +1297,8 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("numeros")
     if _USTEDES.search(vis_t) and not _USTEDES.search(vis_o) and not _TRATO_FORMAL_EN.search(vis_o):
         problemas.append("ustedes")
+    if _APODO_HONESTO.search(vis_t) and not _HONEST_EN.search(vis_o):
+        problemas.append("apodo_inventado")
     if imperativo_negativo_mal(vis_o, vis_t):
         problemas.append("imperativo_negativo")
     if tartamudeo_como_yo(vis_o, vis_t):

@@ -278,5 +278,22 @@ class TestTraductorReintenta(unittest.TestCase):
         self.assertIn("Se habla a Paula (mujer)", self.prompts[1])
 
 
+class TestApodoInventado(unittest.TestCase):
+    def test_avisa_si_se_inventa_honesto(self):
+        self.assertIn("apodo_inventado", evaluar_traduccion("Marcos, come here.", "Honesto Marcos, ven aquí."))
+        self.assertIn("apodo_inventado", evaluar_traduccion("Meet Ana.", "Te presento a la honesta Ana."))
+
+    def test_no_avisa_si_el_ingles_lo_dice(self):
+        self.assertNotIn("apodo_inventado",
+                         evaluar_traduccion("'Honest' Marcos, come here.", "Honesto Marcos, ven aquí."))
+
+    def test_no_avisa_si_no_es_un_apodo(self):
+        self.assertNotIn("apodo_inventado", evaluar_traduccion("Be straight with me, Marcos.", "Sé honesto conmigo, Marcos."))
+        self.assertNotIn("apodo_inventado", evaluar_traduccion("Marcos, come here.", "Marcos, ven aquí."))
+
+    def test_es_solo_aviso(self):
+        self.assertNotIn("apodo_inventado", PROBLEMAS_LEVES_REINTENTO)
+
+
 if __name__ == "__main__":
     unittest.main()
