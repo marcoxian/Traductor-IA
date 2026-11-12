@@ -824,6 +824,7 @@ def postprocesar_traduccion(texto: str, original: str = "") -> str:
     r = _aplicar_locales(r, orig_low, "erratas_nombres")
 
     # 6c. Correcciones gramaticales, modismos frecuentes y fugas a otros idiomas
+    r = modismos.arreglar(original, r)   # "Later." -> "Después" y "You're welcome" -> "Eres bienvenida"
     r = re.sub(r"\bBella come sempre\b", "Preciosa, como siempre", r, flags=re.IGNORECASE)
     r = re.sub(r"\bMój się(?:\s+na\s+niej)?\b", "Enséñamelo", r, flags=re.IGNORECASE)
     if orig_low and re.search(r"\boh,?\s*dear\b", orig_low):

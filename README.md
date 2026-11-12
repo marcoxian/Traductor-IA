@@ -198,7 +198,9 @@ Maker) y `glosario_adulto.json`.
 - **Frases hechas y palabrotas** (`traductor/modismos.py`). «Busting my ass», «damn good», «a hell of a race», «go
   fuck yourself», «not at all», «every last drop»… Las que el modelo falla casi siempre van como pista en el
   glosario de la frase; en todas, si sale la versión palabra por palabra («maldita buena», «carrera de mierda»,
-  «En absoluto no»), se reintenta diciendo lo que significan.
+  «En absoluto no»), se reintenta diciendo lo que significan. Dos se arreglan además en código, solo donde es
+  seguro: «You're welcome» → «De nada» (no «Eres bienvenida») y «Later.» como despedida → «Hasta luego» o «Luego»
+  (no «Después»).
 - **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
   siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
   conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»

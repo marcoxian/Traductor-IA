@@ -278,6 +278,118 @@ class TestTraductorReintenta(unittest.TestCase):
         self.assertIn("Se habla a Paula (mujer)", self.prompts[1])
 
 
+class TestDeNadaYHastaLuego(unittest.TestCase):
+    """"You're welcome" -> "De nada" y "Later." (despedida) -> "Hasta luego" (AC8)."""
+
+    def test_de_nada_mal_traducido(self):
+        for en, es in [("You're welcome.", "Está bien."), ("You’re welcome!", "¡Bienvenido!"),
+                       ("Ha! You're welcome, Lucía.", "¡Ja! Eres bienvenida, Lucía."),
+                       ("No need to thank me. You are welcome.", "No hace falta. ¿Estás segura?"),
+                       (r"You're welcome, \C[2]Lucía\C[0].", r"Eres bienvenida, \C[2]Lucía\C[0].")]:
+            with self.subTest(en=en):
+                self.assertEqual([m.clave for m in modismos.calcos(en, es)], ["you're welcome"])
+                self.assertIn("calco", evaluar_traduccion(en, es))
+
+    def test_de_nada_bien_traducido(self):
+        for en, es in [("You're welcome.", "De nada."), ("You're welcome!", "¡No hay de qué!"),
+                       ("You're very welcome, Lucía.", "Cuando quieras, Lucía."),
+                       ("You're welcome. And welcome to the team!", "De nada. ¡Y bienvenido al equipo!")]:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.calcos(en, es), [])
+
+    def test_bienvenido_de_verdad_no_cuenta(self):
+        for en, es in [("You're welcome to stay the night.", "Puedes quedarte a dormir."),
+                       ("You're always welcome here, Lucía.", "Aquí siempre eres bienvenida, Lucía."),
+                       ("Welcome to the shop!", "¡Bienvenido a la tienda!"),
+                       ("You're not welcome here.", "Aquí no eres bienvenido.")]:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.calcos(en, es), [])
+                self.assertEqual(modismos.terminos(en), [])
+
+    def test_hasta_luego_mal_traducido(self):
+        for en, es in [("Later.", "Después."), ("Later!", "¡Después!"), ("Later, [mc]!", "¡Después, [mc]!"),
+                       ("Later [mc].", "Después de eso [mc]."), ("Later, Rodrigo.", "Después, Rodrigo."),
+                       ("... Later, bro!", "¡... Después, colega!"), ("Okay, later.", "Vale, después."),
+                       ("{i}Later, guys.{/i}", "{i}Después, chicos.{/i}"), ("'Later.", "'Después."),
+                       ("Later.", "Oye."), ("Later, bro.", "Despídete, colega.")]:
+            with self.subTest(en=en):
+                self.assertEqual([m.clave for m in modismos.calcos(en, es)], ["later (despedida)"])
+
+    def test_hasta_luego_bien_traducido(self):
+        for en, es in [("Later.", "Hasta luego."), ("Later, [mc]!", "¡Nos vemos, [mc]!"),
+                       ("Later.", "Luego.")]:   # si contesta a "¿cuándo?", "Luego" también vale
+            with self.subTest(en=en):
+                self.assertEqual(modismos.calcos(en, es), [])
+
+    def test_later_que_no_es_despedida(self):
+        for en, es in [("Later...", "Más tarde..."), ("Moments later...", "Un rato después..."),
+                       ("Maybe later.", "Quizá después."), ("Later today.", "Después, hoy."),
+                       ("Later?", "¿Después?"), ("Later, I promise.", "Después, te lo prometo."),
+                       ("We can talk about it later.", "Podemos hablarlo después.")]:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.calcos(en, es), [])
+                self.assertEqual(modismos.terminos(en), [])
+
+    def test_pista_en_el_glosario(self):
+        self.assertEqual([c for c, _ in modismos.terminos("You're welcome.")], ["you're welcome"])
+        self.assertEqual([c for c, _ in modismos.terminos("Later, [mc]!")], ["later (despedida)"])
+
+    def test_el_traductor_reintenta(self):
+        t = OllamaTranslator(model_name="prueba", perfil=Perfil(contexto="CTX"), ruta_cache=None)
+        self.addCleanup(t.cerrar)
+        prompts: list[str] = []
+        cola = ["Despídete, Rodrigo.", "Nos vemos, Rodrigo."]
+
+        def generar(prompt, num_predict, temperature=0.1):
+            prompts.append(prompt)
+            return cola.pop(0) if len(cola) > 1 else cola[0]
+
+        t._generar = generar
+        self.assertEqual(t.translate("Later, Rodrigo."), "Nos vemos, Rodrigo.")
+        self.assertIn("'later (despedida)'", prompts[0])               # pista en el glosario
+        self.assertIn("'later (despedida)' significa", prompts[1])     # nota del reintento
+
+    def test_arreglo_en_codigo_de_later(self):
+        casos = [
+            ("Later, [mc]!", "¡Después, [mc]!", "¡Hasta luego, [mc]!"),
+            ("Later, bro.", "Después, colega.", "Hasta luego, colega."),
+            ("Yeah. Later.", "Sí. Después.", "Sí. Hasta luego."),
+            ("Later.", "Después.", "Luego."),               # a secas: vale como despedida y como "¿cuándo?"
+            ("{i}Later.{/i}", "{i}Después.{/i}", "{i}Luego.{/i}"),
+            ("Later [mc].", "Después de eso [mc].", "Después de eso [mc]."),   # no se adivina: se reintenta
+            ("Later...", "Después...", "Después..."),        # salto de tiempo: no es despedida
+            ("We'll talk later.", "Hablaremos después.", "Hablaremos después."),
+        ]
+        for en, es, esperado in casos:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.arreglar(en, es), esperado)
+
+    def test_arreglo_en_codigo_de_you_re_welcome(self):
+        casos = [
+            ("You're welcome.", "Eres bienvenida.", "De nada."),
+            ("Ha! You're welcome!", "¡Ja! ¡Te estás bienvenido!", "¡Ja! ¡De nada!"),
+            ("You're welcome, Lucía.", "Eres bienvenida, Lucía.", "De nada, Lucía."),
+            ("No need to thank me. You are welcome.", "No hace falta. Eres bienvenida.", "No hace falta. De nada."),
+            ("You're welcome.", "Está bien.", "De nada."),
+            ("You are welcome.", "¡Bienvenido!", "¡De nada!"),
+            # Solo si el original no dice nada más: "Está bien" puede ser la traducción de otra frase.
+            ("You're welcome. Now go.", "Está bien. Ahora vete.", "Está bien. Ahora vete."),
+            # No está al principio de la frase: "eres bienvenido" puede ser lo que se quiere decir.
+            ("Of course you're welcome.", "Claro que eres bienvenido.", "Claro que eres bienvenido."),
+            ("You're welcome. And welcome aboard!", "De nada. ¡Y bienvenido a bordo!", "De nada. ¡Y bienvenido a bordo!"),
+            ("You're always welcome here.", "Siempre eres bienvenido aquí.", "Siempre eres bienvenido aquí."),
+            ("You're welcome.", "¿Estás segura?", "¿Estás segura?"),     # no se adivina: se reintenta
+        ]
+        for en, es, esperado in casos:
+            with self.subTest(en=en, es=es):
+                self.assertEqual(modismos.arreglar(en, es), esperado)
+
+    def test_arreglo_dentro_del_posprocesado(self):
+        self.assertEqual(postprocesar_traduccion("¡Después, Lucía!", "Later, Lucía!"), "¡Hasta luego, Lucía!")
+        self.assertEqual(postprocesar_traduccion("Eres bienvenido.", "You're welcome."), "De nada.")
+        self.assertEqual(postprocesar_traduccion("Eres bienvenido.", "Welcome!"), "Eres bienvenido.")
+
+
 class TestApodoInventado(unittest.TestCase):
     def test_avisa_si_se_inventa_honesto(self):
         self.assertIn("apodo_inventado", evaluar_traduccion("Marcos, come here.", "Honesto Marcos, ven aquí."))

@@ -19,12 +19,20 @@ from __future__ import annotations
 import re
 from dataclasses import dataclass
 
-__all__ = ["Modismo", "MODISMOS", "terminos", "calcos", "nota_reintento"]
+__all__ = ["Modismo", "MODISMOS", "terminos", "calcos", "nota_reintento", "arreglar"]
 
 _I = re.IGNORECASE
 _POS = r"(?:my|your|his|her|our|their|yer|ur)"
 _ELOGIO = (r"(?:hot|perfect|beautiful|gorgeous|amazing|awesome|incredible|great|good|sexy|tight|nice|lovely|"
            r"delicious|best|brilliant|cute|pretty|fine)")
+# Lo que puede rodear una frase suelta sin cambiar su sentido: etiquetas ({i}, {w}), códigos (\C[2], \N[1]),
+# comillas, asteriscos y puntos suspensivos al principio ("... Later, bro!").
+_ANTES = r"(?:\{[^}]*\}|\\[A-Za-z]+(?:\[[^\]]*\]|<[^>]*>)?|[\s\"'‘’“”*(]|\.\.\.|…)*"
+_DESPUES = r"(?:\{[^}]*\}|\\[A-Za-z]+(?:\[[^\]]*\]|<[^>]*>)?|[\s\"'’”*)])*"
+# A quién se despide: [mc], \N[1], un nombre con mayúscula ("Later, Ana.") o un apelativo ("Later, bro.").
+_VOCATIVO = (r"(?:\[\w+\]|\\[A-Za-z]+\[\d+\]|(?-i:[A-Z][\w'’-]*)(?:\s+(?-i:[A-Z][\w'’-]*))?|"
+             r"bro|buddy|dude|man|guys|girls?|babe|kids?|sis|pal|mate|honey|sweetie|everyone|everybody|folks|"
+             r"all|then)")
 
 
 @dataclass(frozen=True)
@@ -94,7 +102,63 @@ MODISMOS: tuple[Modismo, ...] = (
             "cabreado, mosqueado, cabrear ('piss off' a secas = lárgate)", mal=_re(r"\bmead[oa]\b|\borina\w*|\bmeó\b")),
     Modismo("blow my mind", _re(rf"\bblow\w*\s+{_POS}\s+mind\b|\bmind[\s-]+blowing\b"),
             "alucinar, flipar, dejar sin palabras", mal=_re(r"\bexplot\w*\s+(?:la|mi|tu|su)\s+mente\b|\bsopl\w*")),
+    # Respuesta a "gracias": el modelo la tradujo mal 9 de cada 10 veces ("Eres bienvenida", "Está bien",
+    # "¡Bienvenido!"). Solo cuenta si detrás viene un signo o el final ("You're welcome, Ana."): "You're
+    # welcome to stay" y "You're always welcome here" sí son "bienvenido".
+    Modismo("you're welcome", _re(r"\byou(?:['’]re|\s+are)\s+(?:so\s+|very\s+|most\s+|more\s+than\s+)?welcome\b"
+                                  r"(?=\s*(?:$|[.!?,~…\"'’”*{\\\-—]))"),
+            "de nada, no hay de qué (respuesta a 'gracias'; no es 'bienvenido')",
+            bien=_re(r"\bde\s+nada\b|\bno\s+hay\s+(?:de|por)\s+qu[eé]\b|\bcuando\s+quieras\b|\bun\s+placer\b|"
+                     r"\bcon\s+(?:mucho\s+)?gusto\b|\bfaltar[ií]a\s+m[aá]s\b|\bpara\s+(?:eso|servir\w*)\b|"
+                     r"\bno\s+es\s+nada\b"),
+            pista=True),
+    # "Later." / "Later, bro!" como frase entera es una despedida; el modelo pone casi siempre "Después".
+    # No cuenta "Later..." (salto de tiempo: "Más tarde..."), "Later?" ni "Later today".
+    Modismo("later (despedida)",
+            _re(rf"^{_ANTES}(?:(?:ok(?:ay)?|alright|all\s+right|right|yeah|yep|well|anyway|cool|bye)[,.!]*\s+)?"
+                rf"later,?\s*(?:{_VOCATIVO}\s*)?(?:!+|\.(?!\.)|~)?{_DESPUES}$"),
+            "Hasta luego, Nos vemos, Luego (no es 'Después')",
+            mal=_re(r"\bdespu[eé]s\b|\bdesp[ií]d\w*"),
+            bien=_re(r"\bluego\b|\bnos\s+vemos\b|\bm[aá]s\s+tarde\b|\badi[oó]s\b|\bchao\b|"
+                     r"\bhasta\s+(?:pronto|la\s+vista|otra|ma[ñn]ana)\b"),
+            pista=True),
 )
+
+# Para arreglar en código lo que los reintentos no arreglan (ver ``arreglar``).
+_LATER = next(m for m in MODISMOS if m.clave == "later (despedida)")
+_WELCOME = next(m for m in MODISMOS if m.clave == "you're welcome")
+_LATER_SIN_NADA = _re(rf"^{_ANTES}later\.?{_DESPUES}$")       # "Later." a secas: despedida o "¿cuándo?"
+_DESPUES_SUELTO = re.compile(r"\b([Dd])espu[eé]s\b(?!\s+de\b)")
+_SOLO_WELCOME = _re(rf"^{_ANTES}(?:\w+[.!]+\s+)?you(?:['’]re|\s+are)\s+(?:so\s+|very\s+|most\s+)?welcome,?\s*"
+                    rf"(?:{_VOCATIVO}\s*)?[.!]*{_DESPUES}$")
+# Inicio de frase: principio, tras . ! ? … o tras ¡, comillas, etiquetas y códigos.
+_INICIO = r"(?:^|(?<=[.!?…¡\"'“‘*}\]>])|(?<=[.!?…]\s))"
+_ERES_BIENVENIDO = re.compile(
+    _INICIO + r"(?:(?:t[uú]|usted)\s+)?(?:eres|es|est[aá]s|est[aá]n?|te\s+est[aá]s)\s+(?:muy\s+)?bienvenid[oa]s?\b",
+    re.IGNORECASE)
+_BIENVENIDO_SOLO = re.compile(_INICIO + r"(?:bienvenid[oa]s?|est[aá]\s+bien)\b(?=\s*[,.!…]|\s*$)", re.IGNORECASE)
+
+
+def arreglar(original: str, traduccion: str) -> str:
+    """Arreglos seguros de dos frases hechas, por si los reintentos no bastan (si no aplica, no cambia nada):
+
+    - "Later, Ana!" -> "¡Después, Ana!" pasa a "¡Hasta luego, Ana!". "Later." a secas pasa a "Luego.", que
+      vale como despedida y como respuesta a "¿cuándo?". "Después de eso" no se toca.
+    - "You're welcome" -> "Eres bienvenida" (al principio de una frase) pasa a "De nada". "Está bien" o
+      "¡Bienvenido!" solo se cambian si el original no dice nada más ("Ha! You're welcome, Ana!").
+    """
+    if not original or not traduccion:
+        return traduccion
+    r = traduccion
+    if _LATER.patron.search(original):
+        sustituto = "luego" if _LATER_SIN_NADA.search(original) else "hasta luego"
+        r = _DESPUES_SUELTO.sub(lambda m: (sustituto[0].upper() if m.group(1) == "D" else sustituto[0])
+                                + sustituto[1:], r)
+    if _WELCOME.patron.search(original) and not _WELCOME.bien.search(r):
+        r = _ERES_BIENVENIDO.sub("De nada", r)
+        if _SOLO_WELCOME.search(original):
+            r = _BIENVENIDO_SOLO.sub("De nada", r)
+    return r
 
 
 def terminos(texto: str, ya: list[tuple[str, str]] | tuple = ()) -> list[tuple[str, str]]:
