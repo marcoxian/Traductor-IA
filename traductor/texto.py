@@ -1099,7 +1099,11 @@ _PATRON_FUGA_PALABRAS = re.compile(
     r"questo|questa|quello|quella|perché|tutto bene|più|anche|sempre|"
     r"avec|dans|c'est|très|mais|vous|nous|"
     r"nicht|ich bin|aber|oder|schon|jetzt|"
-    r"você|não|então|muito|também)\b",
+    r"você|não|então|muito|também|"
+    # Checo, eslovaco y polaco: a veces el modelo los escribe sin las letras con háček ("Slo jedna cesta, jak
+    # se to zjistí"), así que el patrón de letras no basta. Solo palabras que no existen en español.
+    r"jak|jsem|jsi|jste|není|nevím|něco|proč|protože|tady|který|která|které|jedna|jeden|zjist\w*|"
+    r"jest|nie|jestem|dlaczego|dobrze|wszystko)\b",
     re.IGNORECASE,
 )
 

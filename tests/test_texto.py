@@ -213,6 +213,10 @@ class TestTexto(unittest.TestCase):
         self.assertIn("fuga_idioma", evaluar_traduccion("Chloe is upset.", "克洛伊很生气。"))
         self.assertIn("fuga_idioma", evaluar_traduccion("Beautiful as always.", "Bella come sempre."))
         self.assertIn("fuga_idioma", evaluar_traduccion("Show it to me.", "Mój się."))
+        # Checo sin háček: ninguna letra rara, solo las palabras lo delatan
+        self.assertIn("fuga_idioma", evaluar_traduccion("Only one way to find out.", "Slo jedna cesta, jak se to zjistí."))
+        self.assertIn("fuga_idioma", evaluar_traduccion("I don't know.", "Nie wiem, to jest dziwne."))
+        self.assertNotIn("fuga_idioma", evaluar_traduccion("Grab the basket.", "Coge la cesta, que no hay tiempo."))
         self.assertTrue(tiene_fallo_grave(evaluar_traduccion("Chloe is upset.", "克洛伊很生气。")))
 
         # Corrección de género de hablante según prefijo V21 de 2 letras
