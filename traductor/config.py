@@ -16,6 +16,8 @@ Lo universal vive en ``glosarios/``. Lo específico de cada juego vive en
     workspace/<juego>/personajes.json          protagonista, personajes y su género (Paso 0)
     workspace/<juego>/glosario_bd.json         nombres de objetos, habilidades... (lo crea el traductor
                                                de RPG Maker; se puede corregir a mano)
+    workspace/<juego>/frases_fijas.json        {"frase inglesa entera": "traducción hecha a mano"}: juegos
+                                               de palabras y chistes que el modelo no sabe traducir
 
 Con ``personajes.json`` el contexto empieza por la regla del protagonista de la ficha y se
 omiten las líneas ``@sin_ficha:`` del contexto global (p. ej. "el protagonista habla SIEMPRE en
@@ -74,6 +76,7 @@ MAX_TERMINOS_PROMPT = 25
 # traducidos UNA vez para que el inventario, la ventana de "Has conseguido..." y los diálogos digan
 # lo mismo. Lo crea ``InyectorRPGMaker`` en workspace/<juego>/ y el usuario puede corregirlo.
 ARCHIVO_GLOSARIO_BD = "glosario_bd.json"
+ARCHIVO_FRASES_FIJAS = "frases_fijas.json"
 # Sección con los nombres que también se piden dentro de las frases (el juego siempre los escribe con
 # mayúscula) y sección con los que solo se usan cuando el texto ES el nombre ("Stick", "Chest": en
 # los diálogos son palabras corrientes, "Stick with me", "my chest").
@@ -115,6 +118,17 @@ def leer_glosario_bd(ruta: Path | None) -> tuple[dict[str, str], set[str]]:
                 if seccion == SECCION_BD_FRASES:
                     frases.add(en.strip())
     return nombres, frases
+
+
+def leer_frases_fijas(ruta: Path | None) -> dict[str, str]:
+    """Lee ``frases_fijas.json``: {frase inglesa entera: traducción hecha a mano}. Las claves que empiezan por
+    "_" son notas ("_info") y no cuentan. La frase inglesa va como la ve el jugador (sin escapes de Ren'Py)."""
+    datos = cargar_json(ruta, {}) if ruta is not None else {}
+    if not isinstance(datos, dict):
+        return {}
+    return {en.strip(): es for en, es in datos.items()
+            if isinstance(en, str) and isinstance(es, str) and en.strip() and es.strip()
+            and not en.startswith("_")}
 
 
 def guardar_glosario_bd(ruta: Path, nombres: dict[str, str], frases) -> Path:
@@ -344,6 +358,9 @@ class Perfil:
     # ``glosario_bd_frases`` además se piden dentro de las frases, con las mayúsculas del original.
     glosario_bd: dict[str, str] = field(default_factory=dict)
     glosario_bd_frases: frozenset = frozenset()
+    # Frases enteras traducidas a mano (frases_fijas.json): juegos de palabras, chistes, dobles sentidos. Si el
+    # texto es exactamente una de ellas, se copia su traducción sin preguntar al modelo.
+    frases_fijas: dict[str, str] = field(default_factory=dict)
     # Palabras con dos sentidos ("chest": cofre / pecho; "safe": caja fuerte): si la frase deja claro el
     # sentido, se pide en su glosario y se comprueba la traducción (``traductor.ambiguas``).
     palabras_ambiguas: bool = True
@@ -424,8 +441,16 @@ class Perfil:
         return next((es for _, en, es in self._patrones_glosario if en.strip().casefold() == clave), None)
 
     def traduccion_exacta(self, texto: str) -> str | None:
-        """Si ``texto`` es exactamente un nombre de la base de datos (con o sin códigos de color alrededor:
-        "\\c[23]Album\\c[0]"), su traducción fijada con esos mismos códigos; si no, None."""
+        """Si ``texto`` es exactamente una frase fija (``frases_fijas.json``), su traducción hecha a mano, con
+        los espacios del principio y del final del original. Si es un nombre de la base de datos (con o sin
+        códigos de color alrededor: "\\c[23]Album\\c[0]"), su traducción fijada con esos mismos códigos.
+        Si no, None."""
+        if self.frases_fijas and texto:
+            fija = self.frases_fijas.get(texto.strip())
+            if fija is not None:
+                inicio = texto[:len(texto) - len(texto.lstrip())]
+                fin = texto[len(texto.rstrip()):]
+                return f"{inicio}{fija.strip()}{fin}"
         if not self.glosario_bd or not texto or len(texto) > self._largo_max_bd + 80:
             return None  # las frases largas no pueden ser un nombre: ni se miran
         prefijo, nucleo, sufijo = separar_bordes(texto)
@@ -452,6 +477,8 @@ class Perfil:
                  f"contexto de {len(self.contexto)} caracteres")
         if self.glosario_bd:
             texto += f", {len(self.glosario_bd)} nombres de la base de datos"
+        if self.frases_fijas:
+            texto += f", {len(self.frases_fijas)} frases fijas"
         if self.personajes is not None:
             texto += f", ficha de personajes: {self.personajes.resumen()}"
         return texto
@@ -638,4 +665,5 @@ def cargar_perfil(juego: str | None = None, ruta_juego: str | Path | None = None
         contexto_legacy=contexto_antiguo,
         glosario_bd=glosario_bd,
         glosario_bd_frases=frozenset(bd_frases),
+        frases_fijas=leer_frases_fijas(carpeta / ARCHIVO_FRASES_FIJAS if carpeta is not None else None),
     )

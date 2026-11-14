@@ -147,6 +147,18 @@ MODISMOS: tuple[Modismo, ...] = (
             "un coñazo, un grano en el culo, un pesado",
             mal=_re(r"\bdolor\s+(?:en|de)\s+(?:el|mi|tu|su)\s+(?:culo|trasero|cuello)\b")),
     Modismo("my bad", _re(r"\bmy\s+bad\b"), "culpa mía, error mío", mal=_re(r"\bmi\s+mal[oa]?\b")),
+    # "It's not like that" (niega lo que el otro insinúa): el modelo puso "No es así de fácil" en 7 de 40
+    # frases de un juego, aunque el inglés no habla de nada fácil.
+    Modismo("it's not like that",
+            re.compile(r"^(?!.*\b(?:easy|easier|simple|simpler)\b).*\bnot\s+like\s+that\b", _I),
+            "no es eso, no es lo que piensas, no es lo que parece",
+            mal=_re(r"\bas[ií]\s+de\s+f[aá]cil\b|\bno\s+es\s+como\s+eso\b")),
+    # "rack" del cuerpo ("nice rack", "her rack") son las tetas, no la cadera ni la barriga.
+    Modismo("rack (tetas)",
+            _re(rf"\b(?:nice|good|great|best|better|glorious|amazing|huge|big|perfect|that|an?|{_POS}|"
+                r"[A-Z]\w+['’]s)\s+rack\b(?!\s+of\b)"),
+            "tetas, delantera (parte del cuerpo)",
+            mal=_re(r"\bcaderas?\b|\bpanzas?\b|\bbarrigas?\b")),
     Modismo("break a leg", _re(r"\bbreak\s+a\s+leg\b"), "mucha suerte",
             mal=_re(r"\bromp\w*\s+(?:una|la)\s+pierna\b")),
     Modismo("screw it", _re(r"\bscrew\s+(?:it|that|this)\b"), "a la mierda, que le den",
@@ -200,6 +212,9 @@ _BIENVENIDO_SOLO = re.compile(_INICIO + r"(?:bienvenid[oa]s?|est[aá]\s+bien)\b(
 _EXCLAMACION = next(m for m in MODISMOS if m.clave == "fuck! (exclamación)")
 _FUCK_SOLO = _re(r"^(?:\{[^}]*\}|[^\w{])*(fu+ck)((?:\{[^}]*\}|[^\w{])*)$")
 _ETIQUETA = re.compile(r"\{[^}]*\}")
+# "It's not like that" -> "No es así de fácil" / "no es como eso": el reintento no lo arregla (el modelo lo repite)
+_NO_ES_ASI = next(m for m in MODISMOS if m.clave == "it's not like that")
+_ASI_DE_FACIL = re.compile(r"\b([Nn])o\s+es\s+(?:as[ií]\s+de\s+f[aá]cil|como\s+eso)\b")
 
 
 def _joder_como(original: str) -> str | None:
@@ -242,10 +257,14 @@ def arreglar(original: str, traduccion: str) -> str:
     - "You're welcome" -> "Eres bienvenida" (al principio de una frase) pasa a "De nada". "Está bien" o
       "¡Bienvenido!" solo se cambian si el original no dice nada más ("Ha! You're welcome, Ana!").
     - "FUUUCK!" (la palabrota sola) -> "¡MAMADA!" o "¡FUEEERROOOO!" pasa a "¡JODEEER!".
+    - "It's not like that" -> "No es así de fácil" / "no es como eso" pasa a "No es lo que piensas" (si el
+      inglés no habla de algo fácil o simple).
     """
     if not original or not traduccion:
         return traduccion
     r = _arreglar_exclamacion(original, traduccion)
+    if _NO_ES_ASI.patron.search(original):
+        r = _ASI_DE_FACIL.sub(lambda m: f"{m.group(1)}o es lo que piensas", r)
     if _LATER.patron.search(original):
         sustituto = "luego" if _LATER_SIN_NADA.search(original) else "hasta luego"
         r = _DESPUES_SUELTO.sub(lambda m: (sustituto[0].upper() if m.group(1) == "D" else sustituto[0])

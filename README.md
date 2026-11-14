@@ -141,6 +141,7 @@ python 1_traducir_juego.py --ruta "D:\Juegos\MiJuego" --solo-genero     # juego 
 | `personajes.json` | Ficha de personajes (Paso 0); se puede editar con `herramientas_extra/editor_personajes.py` |
 | `glosario.json` | Términos obligatorios de ese juego (`{"inglés": "español"}`) |
 | `glosario_bd.json` | Nombres de objetos, habilidades… de RPG Maker, traducidos una vez para que el inventario y los diálogos digan lo mismo (se crea solo; puedes corregirlo) |
+| `frases_fijas.json` | Frases enteras traducidas a mano (`{"frase inglesa": "traducción"}`): juegos de palabras y dobles sentidos que el modelo no sabe adaptar. Si el texto es exactamente esa frase, se copia la traducción sin preguntar al modelo (también con `--solo-genero`) |
 | `contexto.txt` | Tono y ambientación; las líneas con `#` se ignoran |
 | `nombres_protegidos.json` | Nombres que el modelo deforma (nombre -> expresión regular) |
 | `ajustes.json` | Modelo de ese juego (`{"modelo": "auto"}` o uno concreto) y, en Unity, `tablas_unity` (ver `--pretraducir`) |

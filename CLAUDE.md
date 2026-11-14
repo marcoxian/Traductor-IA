@@ -104,7 +104,8 @@ tests/                  unittest; tests/datos/ con archivos de prueba inventados
 
 **Perfil de juego**, en `workspace/<juego>/` (privado): `personajes.json`, `glosario.json`, `contexto.txt`,
 `nombres_protegidos.json`, `ajustes.json` (modelo, `carpeta_juego` y, en Unity, `tablas_unity`: tablas omitidas,
-columna de hablante → personaje de la ficha y variables `{flag=…}` → nombre), `cache/` y `casos_dificiles.jsonl`.
+columna de hablante → personaje de la ficha y variables `{flag=…}` → nombre), `cache/`, `casos_dificiles.jsonl` y
+`frases_fijas.json` (juegos de palabras traducidos a mano: `Perfil.traduccion_exacta` los copia sin pasar por el modelo).
 `config.resolver_juego()` deduce el perfil del nombre de la carpeta, o de `carpeta_juego` si ese nombre no sirve
 (por ejemplo, si está en chino).
 

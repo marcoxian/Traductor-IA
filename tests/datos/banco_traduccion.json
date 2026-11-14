@@ -147,6 +147,9 @@
   {"id": "pa-05", "categoria": "palabrotas", "hablante": "Dario", "en": "Your cousin is such an asshole.", "no_debe": ["hij[oa]s? de puta", "\\bputas?\\b"]},
   {"id": "pa-06", "categoria": "palabrotas", "hablante": "Gael", "en": "I really fucked this whole thing up.", "no_debe": ["\\bf[oó]ll"]},
   {"id": "pa-07", "categoria": "palabrotas", "hablante": "Tomás", "en": "Holy shit, look at the size of that truck!", "no_debe": ["sant[oa] mierda", "sagrada mierda"]},
-  {"id": "pa-08", "categoria": "palabrotas", "hablante": "Paula", "en": "FUUUCK!", "debe": ["(?:jod|mierda|hostia)"], "no_debe": ["mamad", "f[oó]ll"]}
+  {"id": "pa-08", "categoria": "palabrotas", "hablante": "Paula", "en": "FUUUCK!", "debe": ["(?:jod|mierda|hostia)"], "no_debe": ["mamad", "f[oó]ll"]},
+  {"id": "nl-01", "categoria": "modismos", "hablante": "Tomás", "en": "Hey, hey... it's not like that, Nora.", "no_debe": ["as[ií] de f[aá]cil", "como eso"]},
+  {"id": "nl-02", "categoria": "modismos", "hablante": "Irene", "en": "It's not like that. He's just my mechanic.", "no_debe": ["as[ií] de f[aá]cil", "como eso"]},
+  {"id": "rk-01", "categoria": "modismos", "hablante": "Nora", "en": "Wow, check out that rack! Are those even real?", "no_debe": ["panza", "cadera", "barriga"]}
  ]
 }
