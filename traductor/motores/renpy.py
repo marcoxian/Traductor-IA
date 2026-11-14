@@ -27,7 +27,7 @@ from pathlib import Path
 
 from ..ollama import OllamaTranslator
 from ..personajes import InfoLinea, oyentes_por_turnos
-from ..texto import reinsertar_saltos, tiene_texto_visible
+from ..texto import quitar_corchetes_de_mas, reinsertar_saltos, tiene_texto_visible
 from .rpgmaker import traductor_acepta_info
 
 log = logging.getLogger(__name__)
@@ -284,6 +284,7 @@ class InyectorRenPy:
                     continue
                 if len(segs) > 1:
                     trad = reinsertar_saltos(trad, segs)
+                trad = quitar_corchetes_de_mas(p.original, trad)
                 trad = ajustar_porcentajes(p.original, trad)
                 lineas[p.linea] = f"{p.pre}{escapar(trad)}{p.resto}{_fin_de_linea(lineas[p.linea])}"
                 escritas += 1

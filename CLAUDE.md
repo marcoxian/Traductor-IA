@@ -148,8 +148,11 @@ columna de hablante → personaje de la ficha y variables `{flag=…}` → nombr
 
 - **No escribir directamente en la carpeta de un juego.** Primero se prepara una copia en `workspace/<juego>/…`
   con `antes/` (original) y `nuevo/` (corregido).
-- **Instalar solo si el usuario lo pide.** Antes, comprobar que el juego está cerrado (`tasklist`) y que el hash del
-  archivo del juego coincide con el de `antes/`.
+- **Instalar sin pedir permiso** (autorizado por el usuario el 2026-11-14), siempre que: el juego esté cerrado
+  (`tasklist`), el hash del archivo del juego coincida con el de `antes/`, y se guarde antes una copia de
+  respaldo en `workspace/<juego>/respaldo_steam_<fecha>_antes_<motivo>/`. Después, comprobar el hash instalado.
+  Preguntar solo si algo es muy raro (hash distinto, juego abierto, cambio grande) o hay duda real entre dos
+  opciones.
 - **La GPU se comparte con los juegos.** Antes de traducir o entrenar, mirar `nvidia-smi` y los procesos. Si se
   abre un juego, Ollama puede devolver errores 500 sueltos; el traductor reintenta solo.
 - **Ver el texto original:**

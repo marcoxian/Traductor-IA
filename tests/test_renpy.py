@@ -8,6 +8,7 @@ import unittest
 from pathlib import Path
 
 from traductor.motores.detector import detectar_motor
+from traductor.texto import quitar_corchetes_de_mas
 from traductor.motores.renpy import InyectorRenPy, ajustar_porcentajes, buscar_pendientes, escapar, leer_cadenas
 from traductor.personajes import FichaPersonajes, Personaje
 
@@ -203,6 +204,20 @@ class TestRenPy(unittest.TestCase):
         self.assertEqual(escapar("{i}Seguirá...{/i}\nNota"), "{i}Seguirá...{/i}\\nNota")
         self.assertEqual(escapar("Uno\r\nDos"), "Uno\\nDos")
         self.assertEqual(escapar("Ya \\nescrito"), "Ya \\nescrito")
+
+    def test_quitar_corchetes_de_mas(self):
+        """El modelo envolvió la frase en [ ]: Ren'Py la lee como variable y da KeyError."""
+        from traductor.texto import corchetes_de_mas, evaluar_traduccion
+        orig = "[mc], please stop bothering me. That's all."
+        mal = "[mc] [¡Deja de molestarme! Eso es todo.]"
+        self.assertTrue(corchetes_de_mas(orig, mal))
+        self.assertIn("corchetes", evaluar_traduccion(orig, mal))
+        self.assertEqual(quitar_corchetes_de_mas(orig, mal), "[mc] ¡Deja de molestarme! Eso es todo.")
+        self.assertEqual(quitar_corchetes_de_mas(orig, "[mc], deja de molestarme."), "[mc], deja de molestarme.")
+        self.assertEqual(quitar_corchetes_de_mas("Hey, [mc!u]!", "¡Eh, [mc!u]!"), "¡Eh, [mc!u]!")
+        # Cambiar el contenido de un grupo o el corchete literal "[[" no es un fallo
+        self.assertFalse(corchetes_de_mas("[Quest] Go now", "[Misión] Ve ya"))
+        self.assertFalse(corchetes_de_mas("Use [[x]", "Usa [[x]"))
 
     def test_ajustar_porcentajes(self):
         """'10%%' en inglés: la traducción también debe doblar el signo, o Ren'Py lo lee como código."""

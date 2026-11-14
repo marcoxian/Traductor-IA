@@ -1136,6 +1136,7 @@ _PESO_PROBLEMA = {
     "sentido_equivocado": 40,   # "chest" de cuerpo traducido "cofre" (ver traductor.ambiguas)
     "numeros": 40,              # "Afecto+178" -> "Afecto+96", "Tienes:5" -> "Tienes:"
     "longitud_larga": 35,
+    "corchetes": 75,            # "[mc], stop" -> "[mc] [¡Para!]": en Ren'Py los corchetes son variables y el juego se cae
     "lineas_extra": 85,         # saltos de línea reales que el original no tiene (ecos, notas, frase repetida)
     "etiquetas": 15,
     "calco": 30,                # "damn good" -> "maldita buena" (ver traductor.modismos)
@@ -1168,7 +1169,39 @@ PROBLEMAS_GRAVES = frozenset({
     "longitud_corta",
     "longitud_larga",
     "lineas_extra",
+    "corchetes",
 })
+
+
+_GRUPO_CORCHETES = re.compile(r"(?<!\[)\[(?!\[)[^\[\]]*\]")
+
+
+def corchetes_de_mas(original: str, traducido: str) -> bool:
+    """True si la traducción tiene más grupos ``[...]`` que el original.
+
+    Ren'Py lee ``[algo]`` como una variable: "[mc], stop" -> "[mc] [¡Para!]" da ``KeyError`` y el juego se
+    cierra. Cambiar el contenido de un grupo ("[Quest] Go" -> "[Misión] Ve") es legítimo; solo se avisa
+    cuando salen grupos nuevos. ``[[`` (corchete literal) no cuenta."""
+    return len(_GRUPO_CORCHETES.findall(traducido or "")) > len(_GRUPO_CORCHETES.findall(original or ""))
+
+
+def quitar_corchetes_de_mas(original: str, traducido: str) -> str:
+    """Quita los corchetes de los grupos inventados (deja su texto) hasta igualar los del original.
+
+    Los grupos que ya estaban en el original (``[mc]``, ``[mc!u]``) se conservan; se quitan los demás
+    empezando por los que no aparecen tal cual en el original."""
+    if not corchetes_de_mas(original, traducido):
+        return traducido
+    conocidos = list(_GRUPO_CORCHETES.findall(original or ""))
+    nuevos = []
+    for m in _GRUPO_CORCHETES.finditer(traducido):
+        if m.group(0) in conocidos:
+            conocidos.remove(m.group(0))
+        else:
+            nuevos.append(m)
+    sobran = len(_GRUPO_CORCHETES.findall(traducido)) - len(_GRUPO_CORCHETES.findall(original))
+    quitar = {m.start() for m in nuevos[-sobran:]} if sobran > 0 else set()
+    return _GRUPO_CORCHETES.sub(lambda m: m.group(0)[1:-1] if m.start() in quitar else m.group(0), traducido)
 
 
 def _es_onomatopeya_o_interjeccion(vis: str) -> bool:
@@ -1207,6 +1240,7 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
       - ``longitud_larga``: alucinación o fusión de lotes (> 2.8x de la longitud original).
       - ``lineas_extra``: la traducción trae saltos de línea reales y el original no (eco de la corrección,
         notas, frase repetida). En Ren'Py, además, rompen el archivo.
+      - ``corchetes``: la traducción añade grupos ``[...]`` que el original no tenía ("[mc] [¡Para!]").
       - ``etiquetas``: faltan o sobran etiquetas de formato respecto al original.
       - ``numeros`` (leve): faltan, cambian o sobran cifras ("Cum 100000 inside" -> "Córrete dentro").
       - ``ustedes`` (aviso, sin reintento): "ustedes" sin que el inglés sea formal; en España, con
@@ -1292,6 +1326,9 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
 
     if "\n" in traducido.strip() and "\n" not in original:
         problemas.append("lineas_extra")
+
+    if corchetes_de_mas(original, traducido):
+        problemas.append("corchetes")
 
     ok_tags, _, _ = comparar_etiquetas(original, traducido)
     if not ok_tags or etiquetas_desordenadas(original, traducido):
@@ -1553,6 +1590,7 @@ _GUIA_REINTENTO = {
     "longitud_corta": "Traduce TODAS las oraciones del original sin omitir ni recortar ninguna parte.",
     "longitud_larga": "Traduce únicamente la frase indicada, sin añadir explicaciones ni texto extra.",
     "lineas_extra": "Devuelve la traducción en una sola línea, sin añadir líneas nuevas, notas ni versiones.",
+    "corchetes": "No añadas corchetes [ ] que el original no tenga: solo se conservan los que ya estaban (como [mc]).",
     "etiquetas": "Conserva exactamente las etiquetas de formato del original.",
     "nombre_perdido": "Conserva los nombres propios de los personajes tal y como aparecen en el original.",
     "numeros": "Conserva exactamente las cifras del original: no cambies, quites ni añadas ningún número.",
