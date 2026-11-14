@@ -3,6 +3,8 @@
 - ``arreglar_determinantes``: determinante masculino delante de un sustantivo que siempre es femenino
   ("muchos actualizaciones", "un Navidad", "al recepción") -> femenino. Solo con las terminaciones que no
   fallan (-ción, -sión, -dad, -tad, -tud, -umbre): se corrige sin preguntar.
+- ``arreglar_tratamiento_vocativo``: "Mr. Smith, ..." traducido "El Sr. Smith, ..." (al llamar a alguien, en
+  español no lleva artículo: "Sr. Smith, ..."). Solo si el original empieza así.
 - ``imperativo_negativo_mal``: "Don't pretend" traducido "No finge" (indicativo) o "No finja" (usted). Con
   "tú" el verbo acaba en -s ("No finjas") y con "vosotros" en -éis/-áis/-ís. Solo se detecta: el arreglo
   necesita conjugar, así que se reintenta con una nota.
@@ -15,7 +17,7 @@ from __future__ import annotations
 
 import re
 
-__all__ = ["arreglar_determinantes", "imperativo_negativo_mal", "tartamudeo_como_yo"]
+__all__ = ["arreglar_determinantes", "arreglar_tratamiento_vocativo", "imperativo_negativo_mal", "tartamudeo_como_yo"]
 
 _I = re.IGNORECASE
 _L = r"[^\W\d_]"
@@ -137,3 +139,27 @@ def tartamudeo_como_yo(original: str, traduccion: str) -> str | None:
     if _EN_YO.search(sin_tartamudeo):
         return None
     return m.group(1)
+
+
+# --------------------------------------------------------------------------- "Mr. Smith," al llamar a alguien
+_TITULO_EN = r"(?:Mr|Mrs|Ms|Miss|Dr|Mister|Doctor|Professor|Prof)"
+_ORIG_VOCATIVO = re.compile(r"^[\W_]*" + _TITULO_EN + r"\.?\s+[A-Z]\w*\s*[,!]")
+_ART_TITULO_ES = re.compile(
+    r"(?:(?<=^)|(?<=[¡¿\"“«'‘*}\]>\s]))(?:El|La)\s+((?:Sr|Sra|Srta|Dr|Dra)\.|Profesora?|Doctora?|Se[ñn]ora?|Se[ñn]orita)"
+    r"(\s+[A-ZÁÉÍÓÚÑ]\w*\s*[,!])")
+
+
+def arreglar_tratamiento_vocativo(original: str, traduccion: str) -> str:
+    """"Mr. Lopez, we have a problem" -> "El Sr. Lopez, tenemos…": quita el "El/La" del primer tratamiento.
+
+    Solo si el original EMPIEZA con tratamiento + apellido + coma (o !), que es llamar a alguien. Si no aplica,
+    devuelve la traducción igual.
+    """
+    if not original or not traduccion or not _ORIG_VOCATIVO.search(original.lstrip()):
+        return traduccion
+    m = _ART_TITULO_ES.search(traduccion)
+    if not m:
+        return traduccion
+    titulo = m.group(1)
+    titulo = titulo[0].upper() + titulo[1:]
+    return traduccion[:m.start()] + titulo + m.group(2) + traduccion[m.end():]

@@ -204,7 +204,10 @@ Maker) y `glosario_adulto.json`.
 - **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
   siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
   conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»
-  («I-It threw her» → «Yo... la lanzó»).
+  («I-It threw her» → «Yo... la lanzó»). Al llamar a alguien con tratamiento («Mr. Lopez, …») se quita el «El/La»
+  que el modelo añade («El Sr. Lopez, …» → «Sr. Lopez, …»).
+- **Inglés con signos de español.** Una frase corta que sale en inglés pero con «¡» o «¿» («¡DAMN THAT DOOR IS
+  STUCK!») cuenta como `ingles_residual` y se reintenta.
 - **«Coger» → «follar»** cuando el inglés habla de sexo (*fuck*, *bang*) y no de tomar algo (*take*, *grab*).
 - **Frases muy cortas.** Si una frase de 1 a 3 palabras («\*coughs\*», «Help her.») se convierte en una frase
   entera inventada, se rechaza y se reintenta.

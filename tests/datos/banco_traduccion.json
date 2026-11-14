@@ -136,6 +136,9 @@
   {"id": "so-07", "categoria": "sonidos_cortos", "hablante": "Irene", "oyente": "Dario", "en": "[mc]… hold me.", "max_palabras": 5, "debe": ["\\[mc\\]"]},
   {"id": "co-06", "categoria": "concordancia", "hablante": "Gael", "en": "I bet this old couch has seen a lot of action...", "no_debe": ["\\bmucho acci[oó]n"]},
   {"id": "co-07", "categoria": "concordancia", "hablante": "Irene", "en": "Can you send out the invites tomorrow?", "no_debe": ["\\blos invitaciones"]},
-  {"id": "co-08", "categoria": "concordancia", "hablante": "Paula", "en": "This cheese is an import from France.", "no_debe": ["\\bun importaci[oó]n"]}
+  {"id": "co-08", "categoria": "concordancia", "hablante": "Paula", "en": "This cheese is an import from France.", "no_debe": ["\\bun importaci[oó]n"]},
+  {"id": "tr-01", "categoria": "tratamiento", "hablante": "Irene", "en": "Mr. Lopez, we have a small problem with your order.", "no_debe": ["^\\W*El Sr\\."]},
+  {"id": "tr-02", "categoria": "tratamiento", "hablante": "Irene", "en": "Ms. Lopez, I promise the papers will be ready by noon.", "no_debe": ["^\\W*La Sra\\."]},
+  {"id": "tr-03", "categoria": "mayusculas", "hablante": "Irene", "en": "{b}THAT FUCKING DOOR IS STUCK AGAIN!", "no_debe": ["\\bDOOR\\b", "\\bSTUCK\\b"]}
  ]
 }

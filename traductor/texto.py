@@ -15,7 +15,8 @@ from pathlib import Path
 # genero.py y espana.py no importan nada del paquete: no hay ciclo de importación.
 from . import modismos
 from .espana import a_espanol_de_espana
-from .gramatica import arreglar_determinantes, imperativo_negativo_mal, tartamudeo_como_yo
+from .gramatica import (arreglar_determinantes, arreglar_tratamiento_vocativo, imperativo_negativo_mal,
+                        tartamudeo_como_yo)
 from .genero import corregir_primera_persona, es_genero_marcado
 
 # --------------------------------------------------------------------------- Regex
@@ -856,6 +857,7 @@ def postprocesar_traduccion(texto: str, original: str = "") -> str:
     r = a_espanol_de_espana(r, original)
     # 6e. Determinante masculino con sustantivo femenino ("muchos actualizaciones" -> "muchas actualizaciones")
     r = arreglar_determinantes(r)
+    r = arreglar_tratamiento_vocativo(original, r)   # "El Sr. Lopez, …" -> "Sr. Lopez, …" (vocativo)
 
     # 7. Signos dobles de apertura desemparejados al cerrar (ej: "¡¿Qué haces!" -> "¡¿Qué haces?!")
     r = re.sub(r"(¡¿[^?!¡¿]+)!(\s*)$", r"\1?!\2", r)
@@ -1047,6 +1049,14 @@ def limpiar_respuesta(respuesta: str, original: str = "") -> str:
 # existen en inglés ("me", "he", "no" o "a" sí existen y no cuentan).
 _SENAL_ESPANOL = re.compile(
     r"[áéíóúñÁÉÍÓÚÑ¡¿]|\b(?:de|del|la|las|el|los|que|y|en|es|un|una|unos|por|para|con|su|sus|lo|se|al|pero|"
+    r"como|muy|ya|esto|eso|esta|este|estoy|soy|eres|hay|nos|les|te|tu|mi|mis|yo|ella|ellos)\b",
+    re.IGNORECASE,
+)
+
+# Como _SENAL_ESPANOL pero solo con palabras y letras de español: sin "¡", "¿" ni "y", "a", "no"…, que también
+# aparecen en una frase inglesa con signos de español puestos por el modelo.
+_SENAL_ESPANOL_ESTRICTA = re.compile(
+    r"[áéíóúñÁÉÍÓÚÑ]|\b(?:de|del|la|las|el|los|que|en|es|un|una|unos|por|para|con|su|sus|lo|se|al|pero|"
     r"como|muy|ya|esto|eso|esta|este|estoy|soy|eres|hay|nos|les|te|tu|mi|mis|yo|ella|ellos)\b",
     re.IGNORECASE,
 )
@@ -1286,6 +1296,9 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
                 and _SENAL_ESPANOL.search(vis_o) is None:
             # La lista de arriba no tiene "in", "a", "like"...: una frase larga sin una sola señal de español
             # ("In just a few moments, he'd managed to strip...") es inglés aunque no llegue a la proporción
+            problemas.append("ingles_residual")
+        elif total_w >= 3 and len(en_t_reales) >= 2 and not _SENAL_ESPANOL_ESTRICTA.search(vis_t):
+            # Frase corta en inglés con signos de español ("¡DAMN THAT DOOR IS STUCK!"): ¡ y ¿ no son señal
             problemas.append("ingles_residual")
 
     if re.search(
