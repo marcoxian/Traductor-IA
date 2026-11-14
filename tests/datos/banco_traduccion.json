@@ -150,6 +150,22 @@
   {"id": "pa-08", "categoria": "palabrotas", "hablante": "Paula", "en": "FUUUCK!", "debe": ["(?:jod|mierda|hostia)"], "no_debe": ["mamad", "f[oó]ll"]},
   {"id": "nl-01", "categoria": "modismos", "hablante": "Tomás", "en": "Hey, hey... it's not like that, Nora.", "no_debe": ["as[ií] de f[aá]cil", "como eso"]},
   {"id": "nl-02", "categoria": "modismos", "hablante": "Irene", "en": "It's not like that. He's just my mechanic.", "no_debe": ["as[ií] de f[aá]cil", "como eso"]},
-  {"id": "rk-01", "categoria": "modismos", "hablante": "Nora", "en": "Wow, check out that rack! Are those even real?", "no_debe": ["panza", "cadera", "barriga"]}
+  {"id": "rk-01", "categoria": "modismos", "hablante": "Nora", "en": "Wow, check out that rack! Are those even real?", "no_debe": ["panza", "cadera", "barriga"]},
+  {"id": "cc-01", "categoria": "calcos_conversacion", "hablante": "Gael", "en": "Fuck yes, we won!", "no_debe": ["sí,? mierda", "mierda,? sí"]},
+  {"id": "cc-02", "categoria": "calcos_conversacion", "hablante": "Irene", "en": "I really appreciate it, Dario.", "no_debe": ["aprecio"]},
+  {"id": "cc-03", "categoria": "calcos_conversacion", "hablante": "Tomás", "en": "Yeah, I hear you, man.", "no_debe": ["escucho"]},
+  {"id": "cc-04", "categoria": "calcos_conversacion", "hablante": "Paula", "en": "You never know.", "no_debe": ["nunca sabes"]},
+  {"id": "cc-05", "categoria": "calcos_conversacion", "hablante": "Irene", "en": "Good point.", "no_debe": ["buen punto"]},
+  {"id": "cc-06", "categoria": "calcos_conversacion", "hablante": "Gael", "en": "I'll have the steak, medium rare.", "no_debe": ["medi[oa] rar"]},
+  {"id": "cc-07", "categoria": "calcos_conversacion", "hablante": "Paula", "en": "I can't wait to see the beach!", "no_debe": ["no puedo esperar"]},
+  {"id": "cc-08", "categoria": "calcos_conversacion", "hablante": "Dario", "en": "I'll see you later, Irene.", "no_debe": ["te veré"]},
+  {"id": "cc-09", "categoria": "calcos_conversacion", "hablante": "Tomás", "en": "It's true, bro!", "no_debe": ["viejo", "hermano"]},
+  {"id": "cc-10", "categoria": "calcos_conversacion", "hablante": "Irene", "en": "Love you, Nora.", "no_debe": ["te amo"]},
+  {"id": "cc-11", "categoria": "calcos_conversacion", "hablante": "Paula", "en": "I love watching the sea at night.", "no_debe": ["amo ver", "amo mirar"]},
+  {"id": "cc-12", "categoria": "calcos_conversacion", "hablante": "Irene", "en": "Look at me while you kiss me.", "no_debe": ["besarás", "mientras me besar$"]},
+  {"id": "cc-13", "categoria": "calcos_conversacion", "hablante": "Gael", "en": "Uh-huh.", "no_debe": ["mm-mm"]},
+  {"id": "cc-14", "categoria": "calcos_conversacion", "hablante": "Dario", "en": "Got it.", "no_debe": ["lo tengo"]},
+  {"id": "cc-15", "categoria": "calcos_conversacion", "hablante": "Tomás", "en": "Nope.", "no_debe": ["paso"]},
+  {"id": "cc-16", "categoria": "calcos_conversacion", "hablante": "Paula", "en": "Don't worry, my lips are sealed.", "no_debe": ["sellad"]}
  ]
 }

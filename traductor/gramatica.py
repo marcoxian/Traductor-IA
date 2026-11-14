@@ -10,6 +10,8 @@
   necesita conjugar, así que se reintenta con una nota.
 - ``tartamudeo_como_yo``: "I-It threw her" es un tartamudeo de "It", no "yo"; el modelo pone "Yo... La
   lanzó". Solo se detecta.
+- ``tiempo_verbal_imposible``: "as you fuck me" traducido "mientras me follaré" o "mientras te follar", y
+  "Quiero que me follarás". Tras "mientras" y "quiero que" no va futuro. Solo se detecta.
 
 No dependen del resto del paquete (las usa ``texto.evaluar_traduccion`` y se pueden probar solas).
 """
@@ -17,7 +19,8 @@ from __future__ import annotations
 
 import re
 
-__all__ = ["arreglar_determinantes", "arreglar_tratamiento_vocativo", "imperativo_negativo_mal", "tartamudeo_como_yo"]
+__all__ = ["arreglar_determinantes", "arreglar_tratamiento_vocativo", "imperativo_negativo_mal", "tartamudeo_como_yo",
+           "tiempo_verbal_imposible"]
 
 _I = re.IGNORECASE
 _L = r"[^\W\d_]"
@@ -139,6 +142,29 @@ def tartamudeo_como_yo(original: str, traduccion: str) -> str | None:
     if _EN_YO.search(sin_tartamudeo):
         return None
     return m.group(1)
+
+
+# --------------------------------------------------------------------------- Verbo imposible tras "mientras"
+# "as you fuck me" -> "mientras me follaré" / "mientras te follar"; "I want you to fuck me" -> "Quiero que me
+# follarás". Detrás de "mientras" y de "quiero que" nunca va futuro, y detrás de "mientras" + pronombre no va
+# infinitivo. No se miran "la/lo/le" (pueden ser artículos: "mientras la mujer...").
+_PRONOMBRES = r"(?:(?:me|te|se|nos|os|lo|la|le|los|las|les)\s+)*"
+_FUTURO = r"[a-záéíóúñ]+(?:ar|er|ir)(?:é|ás|á|emos|éis|án)"
+_RE_MIENTRAS_FUTURO = re.compile(rf"\bmientras\s+{_PRONOMBRES}{_FUTURO}(?!{_L})", _I)
+_RE_MIENTRAS_INFINITIVO = re.compile(rf"\bmientras\s+(?:me|te|se|nos|os)\s+[a-záéíóúñ]{{2,}}(?:ar|er|ir)(?!{_L})", _I)
+_RE_QUIERO_QUE_FUTURO = re.compile(rf"\bquier(?:o|es|e|en)\s+que\s+{_PRONOMBRES}{_FUTURO}(?!{_L})", _I)
+
+
+def tiempo_verbal_imposible(traduccion: str) -> str | None:
+    """"mientras me follaré", "mientras te follar", "quiero que me follarás": devuelve el trozo o None.
+    Solo se detecta (hay que conjugar de nuevo: "mientras me follas", "quiero que me folles")."""
+    if not traduccion:
+        return None
+    for patron in (_RE_MIENTRAS_FUTURO, _RE_MIENTRAS_INFINITIVO, _RE_QUIERO_QUE_FUTURO):
+        m = patron.search(traduccion)
+        if m:
+            return m.group(0)
+    return None
 
 
 # --------------------------------------------------------------------------- "Mr. Smith," al llamar a alguien

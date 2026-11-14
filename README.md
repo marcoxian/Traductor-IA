@@ -174,7 +174,9 @@ Maker) y `glosario_adulto.json`.
   «dos equipos») vale.
 - **Español de España** (`traductor/espana.py`). Cambia el vocabulario de Latinoamérica que se puede cambiar sin
   riesgo: «enojado» → «enfadado», «lindo» → «bonito», «apúrate» → «date prisa» y «te extraño» → «te echo de
-  menos» (solo si el inglés dice *hurry* o *miss*). «Ustedes» con confianza solo se avisa, porque arreglarlo pide
+  menos» (solo si el inglés dice *hurry* o *miss*). Además: «viejo», «viejo amigo» o «hermano» al llamar a alguien
+  → «tío» (si el inglés dice *bro*, *buddy*, *dude* o *man*), «te amo» → «te quiero», «amo ver…» → «me encanta
+  ver…» y «Buen día» como saludo → «Buenos días». «Ustedes» con confianza solo se avisa, porque arreglarlo pide
   conjugar los verbos y en España también es de respeto.
 - **Palabras con dos sentidos** (`traductor/ambiguas.py`). Pistas como «her chest», «stab you in the chest»,
   «treasure chest», «open the chest» o «get it off your chest» (frase hecha). Solo decide cuando el contexto es
@@ -202,6 +204,13 @@ Maker) y `glosario_adulto.json`.
   «En absoluto no»), se reintenta diciendo lo que significan. Dos se arreglan además en código, solo donde es
   seguro: «You're welcome» → «De nada» (no «Eres bienvenida») y «Later.» como despedida → «Hasta luego» o «Luego»
   (no «Después»).
+- **Calcos de conversación** (`traductor/modismos.py`). Se arreglan en código, solo si el inglés dice la frase
+  hecha: «Lo aprecio» → «Lo agradezco», «Te escucho» (*I hear you*) → «Te entiendo», «Te veré luego» → «Nos vemos
+  luego», «Nunca sabes» → «Nunca se sabe», «Haces un buen punto» → «Tienes razón», «Mi placer» → «Un placer»,
+  «medio raro» → «poco hecho», «No puedo esperar por verte» → «Estoy deseando verte», «¡Sí mierda!» → «¡Joder, sí!»,
+  «mis labios están sellados» → «seré una tumba», «Bueno chica» → «Buena chica». Y frases enteras: «Got it.» →
+  «Entendido.», «Nope.» → «No.» (no «Paso.»), «You think so?» → «¿Tú crees?», «Well?» → «¿Y bien?», «Deal!» →
+  «¡Trato hecho!», «Uh-huh.» → «Ajá.» (no «Mm-mm.»).
 - **Palabrotas que no son sexo.** Si el inglés maldice sin hablar de sexo («I was fucking right», «the fucking
   car», «Fucking do it!») y la traducción dice «follar» o «follón», se reintenta. Ante la duda (la frase habla de
   sexo o «fuck» lleva objeto: «fuck me», «we fucked») no se avisa. También se vigilan «fuck up» («cagarla»),
@@ -214,8 +223,9 @@ Maker) y `glosario_adulto.json`.
 - **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
   siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
   conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»
-  («I-It threw her» → «Yo... la lanzó»). Al llamar a alguien con tratamiento («Mr. Lopez, …») se quita el «El/La»
-  que el modelo añade («El Sr. Lopez, …» → «Sr. Lopez, …»).
+  («I-It threw her» → «Yo... la lanzó»). También el verbo imposible tras «mientras» o «quiero que» («as you fuck
+  me» → «mientras me follaré», «mientras te follar»; es «mientras me follas»). Al llamar a alguien con tratamiento
+  («Mr. Lopez, …») se quita el «El/La» que el modelo añade («El Sr. Lopez, …» → «Sr. Lopez, …»).
 - **Inglés con signos de español.** Una frase corta que sale en inglés pero con «¡» o «¿» («¡DAMN THAT DOOR IS
   STUCK!») cuenta como `ingles_residual` y se reintenta.
 - **«Coger» → «follar»** cuando el inglés habla de sexo (*fuck*, *bang*) y no de tomar algo (*take*, *grab*).

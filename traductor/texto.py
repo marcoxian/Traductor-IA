@@ -16,7 +16,7 @@ from pathlib import Path
 from . import modismos
 from .espana import a_espanol_de_espana
 from .gramatica import (arreglar_determinantes, arreglar_tratamiento_vocativo, imperativo_negativo_mal,
-                        tartamudeo_como_yo)
+                        tartamudeo_como_yo, tiempo_verbal_imposible)
 from .genero import corregir_primera_persona, es_genero_marcado
 
 # --------------------------------------------------------------------------- Regex
@@ -1251,6 +1251,7 @@ _PESO_PROBLEMA = {
     "genero_oyente": 30,        # "¿eres amigo?" a una mujer, según los turnos de la conversación
     "imperativo_negativo": 25,  # "Don't pretend" -> "No finge"
     "tartamudeo": 25,           # "I-It threw her" -> "Yo... la lanzó"
+    "tiempo_verbal": 25,        # "as you fuck me" -> "mientras me follaré"
     "apodo_inventado": 10,      # "Marcos" -> "Honesto Marcos" (solo aviso, ver abajo)
     "ustedes": 5,               # "ustedes" con confianza: en España es "vosotros" (solo aviso, ver abajo)
 }
@@ -1264,7 +1265,8 @@ _HONEST_EN = re.compile(r"honest", re.IGNORECASE)
 # frases reales, al pedirle "vosotros" deja de decir "ustedes" en 20, pero 7 salen peor ("¿Qué piensan tú
 # dos?", "podéis irte cuando quieráis"). Se queda como aviso para el repaso a mano y para los datos de v6.
 # "genero_oyente" lo añade el traductor (necesita saber a quién se habla; ver personajes.oyente_contradicho).
-PROBLEMAS_LEVES_REINTENTO = frozenset({"numeros", "calco", "imperativo_negativo", "tartamudeo", "genero_oyente"})
+PROBLEMAS_LEVES_REINTENTO = frozenset({"numeros", "calco", "imperativo_negativo", "tartamudeo", "genero_oyente",
+                                       "tiempo_verbal"})
 
 # Problemas graves: si persisten tras los reintentos NO se guarda en la caché (se reintentará en otra sesión).
 PROBLEMAS_GRAVES = frozenset({
@@ -1356,6 +1358,8 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
       - ``apodo_inventado`` (aviso, sin reintento): "Honesto Marcos" cuando el inglés dice solo "Marcos".
       - ``imperativo_negativo`` (leve): "Don't pretend" -> "No finge"/"No finja" (con tú es "No finjas").
       - ``tartamudeo`` (leve): "I-It threw her" -> "Yo... la lanzó" (es "E-el camión", no "yo").
+      - ``tiempo_verbal`` (leve): futuro o infinitivo imposible tras "mientras" o "quiero que" ("mientras me
+        follaré", "mientras te follar", "Quiero que me follarás").
       - ``calco`` (leve): frase hecha traducida palabra por palabra ("damn good" -> "maldita buena",
         "busting my ass" -> "darme una patada en el culo"); ver ``traductor.modismos``.
     Las frases de 1-3 palabras también dan ``longitud_larga`` si la traducción se inventa una frase entera.
@@ -1456,6 +1460,8 @@ def evaluar_traduccion(original: str, traducido: str) -> list[str]:
         problemas.append("imperativo_negativo")
     if tartamudeo_como_yo(vis_o, vis_t):
         problemas.append("tartamudeo")
+    if tiempo_verbal_imposible(vis_t):
+        problemas.append("tiempo_verbal")
     if modismos.calcos(vis_o, vis_t):
         problemas.append("calco")
 
@@ -1710,6 +1716,8 @@ _GUIA_REINTENTO = {
     "tartamudeo": ("'I-It', 'I-If' son tartamudeos de 'It'/'If', no la palabra 'yo': repite la primera sílaba en "
                    "español ('E-el coche...', 'S-si...')."),
     "calco": "No traduzcas las frases hechas palabra por palabra: usa la expresión que se dice en España.",
+    "tiempo_verbal": ("Detrás de 'mientras' el verbo va en presente ('as you fuck me' = 'mientras me follas') y "
+                      "detrás de 'quiero que', en subjuntivo ('quiero que me folles'); nunca en futuro ni en infinitivo."),
 }
 
 

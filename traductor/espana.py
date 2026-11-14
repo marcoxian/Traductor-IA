@@ -11,6 +11,13 @@ puede cambiar sin entender la frase:
   inglés dice "hurry", "rush" o "quick". "Apurado" se queda (en España es "en un apuro").
 - "extrañar" -> "echar de menos" solo si el inglés dice "miss" y la forma es claramente un verbo ("te
   extraño", "extraño a mis padres", "voy a extrañarte"). "Extraño" adjetivo (raro) no se toca.
+- "viejo", "viejo amigo" o "hermano" al llamar a alguien -> "tío", si el inglés dice "bro", "buddy", "dude",
+  "pal" o "man" (y no "old friend" ni "brother"): "¡Es verdad, viejo!" -> "¡Es verdad, tío!". "Un viejo
+  amigo" o "mi hermano" no se tocan (no es llamar a nadie).
+- "te amo" -> "te quiero" ("os amo" -> "os quiero"): en España "te amo" suena a telenovela.
+- "amo/amas" + infinitivo ("I love watching you") -> "me/te encanta": "Amo ver cómo..." -> "Me encanta ver
+  cómo...". "El amo", "mi amo" (sustantivo) no se tocan.
+- "Buen día" como saludo -> "Buenos días" ("Que tengas un buen día" no se toca).
 
 "Ustedes" no se cambia aquí: hace falta cambiar también los verbos ("ustedes son" -> "vosotros sois") y a
 veces es respeto. Lo detecta ``texto.evaluar_traduccion`` (problema leve "ustedes", con reintento).
@@ -180,6 +187,69 @@ def coger_a_follar(traduccion: str, original: str) -> str:
     return _COGER.sub(_follar, res)
 
 
+# --------------------------------------------------------------------------- "viejo" (bro) -> "tío"
+_COLEGA_EN = re.compile(r"\b(?:bro|bruh|buddy|dude|pal|man)\b", re.IGNORECASE)
+_VIEJO_AMIGO_EN = re.compile(r"\bold\s+(?:friends?|buddy|pal|man|chap|boy|timer|fella)\b|\bbrothers?\b|\bbros\b",
+                             re.IGNORECASE)
+_FIN_VOCATIVO = r"(?=\s*(?:[,.!?…;:)\"»”'~—-]|$))"
+_DETERMINANTE = (r"(?<!\bun\s)(?<!\bmi\s)(?<!\btu\s)(?<!\bsu\s)(?<!\bel\s)(?<!\bal\s)(?<!\bdel\s)(?<!\bese\s)"
+                 r"(?<!\beste\s)(?<!\bnuestro\s)(?<!\bvuestro\s)(?<!\bmis\s)(?<!\bsus\s)(?<!\btus\s)")
+# "viejo amigo" en cualquier sitio menos detrás de un determinante ("es un viejo amigo")
+_VIEJO_AMIGO = re.compile(_DETERMINANTE + rf"(?<!{_L})(viejo\s+amigo)" + _FIN_VOCATIVO, re.IGNORECASE)
+# "viejo" / "hermano" solos: al principio o detrás de coma, ¡ o ¿ ("¡Es verdad, viejo!", "Viejo...")
+_VIEJO_SOLO = re.compile(r"(?:(?<=^)|(?<=[,¡¿\"«“*}])|(?<=[,¡¿.!?…]\s))(viejo|hermano)" + _FIN_VOCATIVO,
+                         re.IGNORECASE)
+_PALABRA_ANTES = re.compile(rf"({_L})(\s+)$")
+
+
+def _tio(m: re.Match) -> str:
+    return _igual_mayusculas(m.group(1), "tío")
+
+
+def _viejo_a_tio(traduccion: str) -> str:
+    res = _VIEJO_SOLO.sub(_tio, traduccion)
+    # "Lo sé viejo amigo." -> "Lo sé, tío.": si delante hay una palabra sin coma, se pone la coma
+    partes, ultimo = [], 0
+    for m in _VIEJO_AMIGO.finditer(res):
+        antes = res[ultimo:m.start()]
+        pegado = _PALABRA_ANTES.search(antes)
+        if pegado:
+            antes = antes[:pegado.start(2)] + "," + antes[pegado.start(2):]
+        partes.append(antes + _tio(m))
+        ultimo = m.end()
+    partes.append(res[ultimo:])
+    return "".join(partes)
+
+
+# --------------------------------------------------------------------------- "te amo" -> "te quiero"
+_TE_AMO = re.compile(rf"(?<!{_L})(te|os)\s+amo(?!{_L})", re.IGNORECASE)
+_AMO_INFINITIVO = re.compile(
+    # no detrás de un determinante ("el amo"), de una coma ("Sí, amo, cuando...") ni de un relativo ("alguien
+    # que amas cuando..."): ahí "amo/amas" no es "me encanta"
+    rf"(?<!{_L})(?<!\bel\s)(?<!\bmi\s)(?<!\btu\s)(?<!\bsu\s)(?<!\bun\s)(?<!\bal\s)(?<!\bdel\s)(?<!,\s)(?<!,)"
+    rf"(?<!\bque\s)(?<!\bquien\s)(?<!\bquienes\s)(?<!\blo\s)(?<!\bla\s)(?<!\ble\s)(?<!\blos\s)(?<!\blas\s)"
+    rf"(?:(yo|tú|tu)\s+)?(amo|amas)\s+(?=(?:{_L}+(?:ar|er|ir|ír)(?:me|te|se|lo|la|le|los|las|les|nos|os)?|"
+    rf"cuando|cómo)(?!{_L}))", re.IGNORECASE)
+
+
+def _te_quiero(m: re.Match) -> str:
+    return m.group(1) + " " + _igual_mayusculas(m.group(0)[-3:], "quiero")
+
+
+def _me_encanta(m: re.Match) -> str:
+    sujeto, verbo = m.group(1), m.group(2)
+    if verbo.lower() == "amo":
+        nueva = "a mí me encanta " if sujeto else "me encanta "
+    else:
+        nueva = "a ti te encanta " if sujeto else "te encanta "
+    return _igual_mayusculas(sujeto or verbo, nueva)
+
+
+# --------------------------------------------------------------------------- "Buen día" -> "Buenos días"
+_BUEN_DIA = re.compile(r"(?:(?<=^)|(?<=[¡¿\"«“*}])|(?<=[,¡¿.!?…]\s))(buen)\s+d[ií]a(?=\s*(?:[,.!?…]|$))",
+                       re.IGNORECASE)
+
+
 # --------------------------------------------------------------------------- Todo junto
 def a_espanol_de_espana(traduccion: str, original: str = "") -> str:
     """Cambia el vocabulario de Latinoamérica que se puede cambiar sin riesgo (ver el docstring del módulo).
@@ -197,4 +267,9 @@ def a_espanol_de_espana(traduccion: str, original: str = "") -> str:
         res = _EXTRANAR_PEGADO.sub(_echar_de_menos_pegado, res)
     if original:
         res = coger_a_follar(res, original)
+    if original and _COLEGA_EN.search(original) and not _VIEJO_AMIGO_EN.search(original):
+        res = _viejo_a_tio(res)
+    res = _TE_AMO.sub(_te_quiero, res)
+    res = _AMO_INFINITIVO.sub(_me_encanta, res)
+    res = _BUEN_DIA.sub(lambda m: _igual_mayusculas(m.group(1), "buenos") + " días", res)
     return res
