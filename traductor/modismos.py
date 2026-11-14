@@ -34,6 +34,33 @@ _VOCATIVO = (r"(?:\[\w+\]|\\[A-Za-z]+\[\d+\]|(?-i:[A-Z][\w'’-]*)(?:\s+(?-i:[A-
              r"bro|buddy|dude|man|guys|girls?|babe|kids?|sis|pal|mate|honey|sweetie|everyone|everybody|folks|"
              r"all|then)")
 
+# "Fuck" de sexo frente a "fuck" de palabrota. Ante la duda se toma por sexo (no se avisa): solo se busca
+# "follar" en frases donde el inglés maldice sin hablar de sexo ("I was fucking right", "the fucking car").
+_SEXO_VOCAB = (r"\b(?:sex\w*|cocks?|dicks?|puss(?:y|ies)|cunts?|cum\w*|horny|naked|nude|tits|titties|boobs?|"
+               r"nipples?|orgasm\w*|moan\w*|clit\w*|condoms?|penis|vagina|bang(?:s|ed|ing)?|rail(?:s|ed|ing)|"
+               r"blowjobs?|handjobs?|bj|creampie|anal|threesome|sluts?|whores?|naughty|kinky|lewd|"
+               r"inside\s+(?:me|you|her|him)|ride\s+(?:me|you|him|her|it)|in\s+(?:my|your|her|his)\s+(?:ass|mouth))\b")
+_FUCK = r"fu+ck(?:s|ed|ing|in['’])?"
+_FUCK_SEXO = (
+    # con objeto: "fuck me", "fucking her", "fucked Ana", "fuck the first woman", "fuck [mc]"
+    rf"\b{_FUCK}(?:\s|…|\.\.\.)+(?:me|you|ya|him|her|them|us|each\s+other|someone|somebody|anyone|anybody|everyone|"
+    rf"every\w*|my|your|his|their|our|a|an|the|some|girls?|women|guys?|men)\b|"
+    r"\b(?:is|was|were|are|am|be|been|['’]s|['’]re)\s+fucking\s+(?:that|this|those|these)\b|"
+    r"\b(?:is|was|were|are|am|be|been|['’]s|['’]re)\s+fucking\s+(?=(?:in|on|at|for|all|like|again|while|when|every)\b)|"
+    r"\b(?:who|that|women|girls|guys|men|people)\s+(?:\w+\s+){0,3}fucked\b(?!\s+(?:up|off|around))|"
+    rf"\b{_FUCK}\s+(?:\[\w+\]|(?-i:[A-Z][a-z]))|"
+    # sin objeto: "want to fuck", "let's fuck", "we fucked", "get fucked", "fucked like mad"
+    r"\b(?:to|wanna|gonna|let['’]?s|lets|will|would|could|can|should|must|might|did|never|we|they|you|i|he|she)"
+    r"\s+(?:\w+\s+)?fuck(?:ed)?\b(?!\s+(?:around|up|off|with|over|it|that|this|yourself|yourselves|himself|herself|"
+    r"themselves))|"
+    r"\b(?:get|gets|got|getting|be|been|being)\s+fucked\b(?!\s+up)|"
+    rf"\b{_FUCK}\s+(?:like|hard|harder|deeper|rough|senseless|silly|all\s+night)\b|"
+    # sustantivo: "a good fuck", "fuck buddy", "hate-fucked", "much fucking", "start fucking!"
+    r"\b(?:good|great|quick|amazing|luxurious)\s+fuck\b|\bfuck[\s-]*(?:buddy|buddies|toy|doll|boy|girl|fest)\w*|"
+    r"\bhate[\s-]fuck\w*|\b(?:much|more|less|some|any|good|great|love|enjoy|about|without)\s+fucking\b|"
+    r"\b(?:start|stop|keep|go|be|been|was|were|are|is|am)\s+fucking\b(?=\s*(?:[,.!?…\[{]|$))")
+_LIO = r"\b(?:mess|chaos|fuss|ruckus|commotion|racket|shitshow|clusterfuck)\b"
+
 
 @dataclass(frozen=True)
 class Modismo:
@@ -67,15 +94,43 @@ MODISMOS: tuple[Modismo, ...] = (
     Modismo("fucking (en positivo)", _re(rf"\bfucking\s+{_ELOGIO}\b|\b{_ELOGIO}\s+fucking\b"),
             "puto/jodidamente en positivo ('su puto cuerpo perfecto'), nunca 'de mierda'",
             mal=_re(r"\bde\s+mierda\b"), pista=True),
-    Modismo("fuck! (exclamación)", _re(r"^(?:\{[^}]*\}|[^\w{])*(?:(?:oh|ah|aw|ugh),?\s+)?fu+ck(?:ing\s+hell)?"
-                                       r"(?:\{[^}]*\}|[^\w{])*$"),
-            "¡Joder! (exclamación, no es una orden)", mal=_re(r"\bf[oó]ll\w*|\bc[oó]g\w*|\bc[oó]j(?!ones)\w*"),
-            pista=True),
+    Modismo("fuck! (exclamación)", _re(r"^(?:\{[^}]*\}|[^\w{])*(?:(?:oh|ah|aw|ugh),?\s+)?(?:fu+cking\s+)?fu+ck"
+                                       r"(?:ing\s+hell|ing\s+fuck)?(?:\{[^}]*\}|[^\w{])*$"),
+            "¡Joder! (exclamación, no es una orden)",
+            mal=_re(r"\bf[oó]ll\w*|\bc[oó]g\w*|\bc[oó]j(?!ones)\w*|\bmamad\w*"), pista=True),
+    Modismo("holy fuck", _re(r"\bholy\s+(?:fu+ck\w*|shit+|crap)\b"), "¡Hostia!, ¡Joder!, ¡La hostia!",
+            mal=_re(r"\bsant[oa]s?\s+(?:puta|mierda|joder)\w*|\bsagrad[oa]\s+mierda\b"), pista=False),
+    Modismo("fuck yes", _re(r"\bfu+ck(?:ing)?[\s,!.]+(?:yes+|yeah+|yea|yep)\b"), "¡Joder, sí!, ¡Sí, joder!, ¡Y tanto!",
+            mal=_re(r"\bf[oó]ll\w*[\s,!¡.]*s[ií]+\b"), pista=True),
     Modismo("go fuck yourself", _re(r"\b(?:go\s+)?fuck\s+(?:yourself|yourselves|himself|herself|themselves|off)\b"),
             "vete a la mierda, que te jodan, que le den",
-            mal=_re(r"\bc[oó]g\w*|\bcoj\w*|\bf[oó]llate\s+a\s+ti\b|\bfollarse\s+a\s+s[ií]\b|\ba\s+s[ií]\s+mism[oa]\b|"
-                    r"\bvay\w*\s+a\s+follar(?:se|te)\b"),
+            mal=_re(r"\bc[oó]g\w*|\bcoj\w*|\bf[oó]ll\w*|\ba\s+s[ií]\s+mism[oa]\b"),
             pista=True),
+    # "fucked this whole thing up"; no "shut the fuck up" ni "fucking me close up"
+    Modismo("fuck up", _re(rf"(?<!\bthe\s)\b{_FUCK}\s+(?:(?:it|this|that|these|those|things?|everything|me|you|him|her|"
+                           r"us|them|my|your|his|our|their|the|a|an|whole|entire|stuff|plan|job|life)\s+){0,3}up\b|"
+                           r"(?<!\bthe\s)\bfuck[\s-]?ups?\b"),
+            "cagarla, joderla, joder algo ('fucked up' = jodido, hecho polvo; no es sexo)",
+            mal=_re(r"\bf[oó]ll\w*"), pista=True),
+    Modismo("eye-fucking", _re(r"\beye[\s-]?fuck\w*|\bfuck\w*\s+(?:\w+\s+){0,3}with\s+(?:her|his|their|your|my)\s+eyes\b"),
+            "comerse con los ojos (a alguien)", mal=_re(r"\bf[oó]ll\w*"), pista=True),
+    Modismo("fuck around", _re(rf"\b{_FUCK}\s+around\b"),
+            "hacer el tonto, perder el tiempo, tontear (si habla de sexo: acostarse con cualquiera)", pista=True),
+    # "Fuck" de palabrota (sin sexo en la frase) traducido "follar" o "follón": "I was fucking right" ->
+    # "Yo estaba follando", "the fucking desert" -> "el follón del desierto", "Fucking do it!" -> "¡Fóllalo!".
+    Modismo("fuck (palabrota, no sexo)",
+            re.compile(rf"^(?!.*{_SEXO_VOCAB})(?!.*(?:{_FUCK_SEXO}))(?!.*{_LIO})(?=.*\bfu+ck)", re.I | re.S),
+            "aquí 'fuck/fucking' es una palabrota, no sexo: 'joder', 'puto/a' (delante del nombre), 'de los "
+            "cojones' o nada; nunca 'follar' ni 'follón'",
+            mal=_re(r"\bf[oó]ll\w*")),
+    Modismo("fucking + verbo", _re(r"\b(?:fucking|fuckin['’]?)\s+(?:kill|hate|murder|destroy|end|hurt|smash|punch|"
+                                   r"beat|break|ruin|strangle)\w*"),
+            "intensificador ('lo mato, te lo juro', 'lo odio, joder'); 'de puta madre' es 'genial'",
+            mal=_re(r"\bde\s+puta\s+madre\b")),
+    Modismo("asshole", re.compile(r"^(?!.*\b(?:son\s+of\s+a|sonofa|motherfuck\w*|bastards?)\b)(?=.*\bassholes?\b)",
+                                  re.I | re.S),
+            "gilipollas, capullo, cabrón (no 'hijo de puta' ni 'puta')",
+            mal=_re(r"\bhij[oa]s?\s+de\s+puta\b|\bputa\b|\bputas\b"), pista=True),
     Modismo("can't be fucked", _re(r"\bcan['’]?t\s+be\s+(?:fucked|bothered|arsed|assed)\b"),
             "no tener ganas de, pasar de ('paso de correr ahora')",
             mal=_re(r"\bc[oó]gid[oa]\b|\bfollad[oa]\b|\bmolestad[oa]\b"), pista=True),

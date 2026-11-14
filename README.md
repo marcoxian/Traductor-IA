@@ -201,6 +201,12 @@ Maker) y `glosario_adulto.json`.
   «En absoluto no»), se reintenta diciendo lo que significan. Dos se arreglan además en código, solo donde es
   seguro: «You're welcome» → «De nada» (no «Eres bienvenida») y «Later.» como despedida → «Hasta luego» o «Luego»
   (no «Después»).
+- **Palabrotas que no son sexo.** Si el inglés maldice sin hablar de sexo («I was fucking right», «the fucking
+  car», «Fucking do it!») y la traducción dice «follar» o «follón», se reintenta. Ante la duda (la frase habla de
+  sexo o «fuck» lleva objeto: «fuck me», «we fucked») no se avisa. También se vigilan «fuck up» («cagarla»),
+  «eye-fucking» («comerse con los ojos»), «fuck yes» («¡Joder, sí!»), «FUUUCK!» → «¡Mamada…!», «Holy shit» →
+  «Santa mierda», «I'll fucking kill him» → «de puta madre» y «asshole» → «hijo de puta» (es «gilipollas» o
+  «capullo»).
 - **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
   siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
   conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»

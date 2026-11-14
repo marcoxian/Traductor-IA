@@ -1,8 +1,10 @@
-"""Reglas del bloque AD: tratamiento en vocativo sin artículo e inglés corto con signos de español."""
+"""Reglas del bloque AD: tratamiento en vocativo sin artículo, inglés corto con signos de español y palabrotas
+traducidas como palabras de sexo."""
 from __future__ import annotations
 
 import unittest
 
+from traductor import modismos
 from traductor.gramatica import arreglar_tratamiento_vocativo
 from traductor.texto import evaluar_traduccion, postprocesar_traduccion
 
@@ -47,6 +49,80 @@ class TestInglesEnMayusculas(unittest.TestCase):
 
     def test_no_marca_espanol_normal(self):
         self.assertEqual(evaluar_traduccion("That fucking door is stuck!", "¡Joder, la puerta se ha atascado!"), [])
+
+
+def _claves(original: str, traduccion: str) -> set[str]:
+    return {m.clave for m in modismos.calcos(original, traduccion)}
+
+
+class TestPalabrotasNoSonSexo(unittest.TestCase):
+    """"Fuck" de palabrota traducido "follar"/"follón"/"mamada"; "asshole" traducido "hijo de puta"."""
+
+    def test_fuck_palabrota_traducido_follar(self):
+        malas = [
+            ("I was fucking right about the engine!", "¡Yo estaba follando razón con el motor!"),
+            ("Fucking do it already!", "¡Fóllalo ya!"),
+            ("You fucking cheated in that race!", "¡Te follaste la carrera!"),
+            ("We had a dry spell longer than the fucking desert!", "¡Una sequía más larga que el follón del desierto!"),
+            ("Quit fucking around and help me.", "Deja de follar por ahí y ayúdame."),
+        ]
+        for en, es in malas:
+            with self.subTest(en=en):
+                self.assertIn("fuck (palabrota, no sexo)", _claves(en, es))
+                self.assertIn("calco", evaluar_traduccion(en, es))
+
+    def test_fuck_de_sexo_no_se_toca(self):
+        buenas = [
+            ("Keep fucking me, harder…", "Sigue follándome, más fuerte…"),
+            ("Keep… fucking… me…", "Sigue… follándome…"),
+            ("We were fucking in the garage when he came in.", "Estábamos follando en el garaje cuando entró."),
+            ("Tell me about all the women he fucked.", "Háblame de todas las mujeres que se folló."),
+            ("I want to fuck you right now.", "Quiero follarte ahora mismo."),
+            ("You two fucked like crazy that night.", "Esa noche follasteis como locos."),
+            ("I haven't had sex in months. You don't see me fucking around!", "No me ves follando por ahí."),
+            ("What a fucking mess!", "¡Menudo puto follón!"),
+        ]
+        for en, es in buenas:
+            with self.subTest(en=en):
+                self.assertNotIn("fuck (palabrota, no sexo)", _claves(en, es))
+
+    def test_frases_hechas(self):
+        casos = [
+            ("I really fucked this whole thing up.", "La he follado entera.", "fuck up"),
+            ("He was eye-fucking her all night.", "Él la estaba follando con los ojos.", "eye-fucking"),
+            ("FUCK YES! WE WON!", "¡FOLLÓN SÍ! ¡GANAMOS!", "fuck yes"),
+            ("FUUUCK!", "¡MAMADA DE MIERDA!", "fuck! (exclamación)"),
+            ("FUCKING FUCK!", "¡MAMADA DE PUTA!", "fuck! (exclamación)"),
+            ("Holy shit, look at that!", "¡Santa mierda, mira eso!", "holy fuck"),
+            ("She told me to fuck off.", "Me dijo que me follaran.", "go fuck yourself"),
+            ("I'll fucking kill him.", "Le mato de puta madre.", "fucking + verbo"),
+            ("Your cousin is such an asshole.", "Tu primo es un hijo de puta.", "asshole"),
+            ("Asshole.", "Putas.", "asshole"),
+        ]
+        for en, es, clave in casos:
+            with self.subTest(en=en):
+                self.assertIn(clave, _claves(en, es))
+
+    def test_traducciones_buenas_sin_aviso(self):
+        buenas = [
+            ("I really fucked this whole thing up.", "La he cagado del todo."),
+            ("Shut the fuck up and kiss me.", "Cállate de una puta vez y bésame."),
+            ("FUCK YES! WE WON!", "¡JODER, SÍ! ¡HEMOS GANADO!"),
+            ("FUUUCK!", "¡JODEEER!"),
+            ("Holy shit!", "¡Santo cielo!"),
+            ("Your cousin is such an asshole.", "Tu primo es un gilipollas."),
+            ("That son of a bitch is an asshole.", "Ese hijo de puta es un capullo."),
+            ("She is damn good at it.", "Se le da de puta madre."),
+        ]
+        for en, es in buenas:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.calcos(en, es), [])
+
+    def test_pista_en_el_glosario(self):
+        self.assertIn("eye-fucking", [c for c, _ in modismos.terminos("He was eye-fucking her.")])
+        self.assertIn("asshole", [c for c, _ in modismos.terminos("You're an asshole.")])
+        # La regla general no va al glosario: confundiría al modelo en las frases de sexo
+        self.assertNotIn("fuck (palabrota, no sexo)", [c for c, _ in modismos.terminos("I was fucking right.")])
 
 
 if __name__ == "__main__":

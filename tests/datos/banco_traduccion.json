@@ -139,6 +139,14 @@
   {"id": "co-08", "categoria": "concordancia", "hablante": "Paula", "en": "This cheese is an import from France.", "no_debe": ["\\bun importaci[oó]n"]},
   {"id": "tr-01", "categoria": "tratamiento", "hablante": "Irene", "en": "Mr. Lopez, we have a small problem with your order.", "no_debe": ["^\\W*El Sr\\."]},
   {"id": "tr-02", "categoria": "tratamiento", "hablante": "Irene", "en": "Ms. Lopez, I promise the papers will be ready by noon.", "no_debe": ["^\\W*La Sra\\."]},
-  {"id": "tr-03", "categoria": "mayusculas", "hablante": "Irene", "en": "{b}THAT FUCKING DOOR IS STUCK AGAIN!", "no_debe": ["\\bDOOR\\b", "\\bSTUCK\\b"]}
+  {"id": "tr-03", "categoria": "mayusculas", "hablante": "Irene", "en": "{b}THAT FUCKING DOOR IS STUCK AGAIN!", "no_debe": ["\\bDOOR\\b", "\\bSTUCK\\b"]},
+  {"id": "pa-01", "categoria": "palabrotas", "hablante": "Gael", "en": "I was fucking right about the engine!", "no_debe": ["\\bf[oó]ll"]},
+  {"id": "pa-02", "categoria": "palabrotas", "hablante": "Tomás", "oyente": "Dario", "en": "She was eye-fucking you all night.", "no_debe": ["\\bf[oó]ll"]},
+  {"id": "pa-03", "categoria": "palabrotas", "hablante": "Irene", "oyente": "Gael", "en": "Quit fucking around and help me with the boxes.", "no_debe": ["\\bf[oó]ll"]},
+  {"id": "pa-04", "categoria": "palabrotas", "hablante": "Paula", "en": "{b}FUCK YES! WE WON!", "no_debe": ["\\bf[oó]ll", "\\bFOLL"]},
+  {"id": "pa-05", "categoria": "palabrotas", "hablante": "Dario", "en": "Your cousin is such an asshole.", "no_debe": ["hij[oa]s? de puta", "\\bputas?\\b"]},
+  {"id": "pa-06", "categoria": "palabrotas", "hablante": "Gael", "en": "I really fucked this whole thing up.", "no_debe": ["\\bf[oó]ll"]},
+  {"id": "pa-07", "categoria": "palabrotas", "hablante": "Tomás", "en": "Holy shit, look at the size of that truck!", "no_debe": ["sant[oa] mierda", "sagrada mierda"]},
+  {"id": "pa-08", "categoria": "palabrotas", "hablante": "Paula", "en": "FUUUCK!", "debe": ["(?:jod|mierda|hostia)"], "no_debe": ["mamad", "f[oó]ll"]}
  ]
 }
