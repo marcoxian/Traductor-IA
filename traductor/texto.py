@@ -208,6 +208,74 @@ def etiquetas_desordenadas(original: str, traducido: str) -> bool:
     return _cierre_antes_de_abrir(traducido) and not _cierre_antes_de_abrir(original)
 
 
+_PAR_ENFASIS = re.compile(r"\{(i|b|u)\}(.*?)\{/\1\}", re.DOTALL)
+_PALABRA = re.compile(r"[^\W\d_](?:[^\W\d_]|['’-])*", re.UNICODE)
+
+
+def _palabras_visibles(texto: str) -> list[re.Match]:
+    """Palabras del texto que no están dentro de una etiqueta."""
+    cubiertas = [m.span() for m in PATRON_ETIQUETAS.finditer(texto)]
+    return [m for m in _PALABRA.finditer(texto)
+            if not any(a <= m.start() < b for a, b in cubiertas)]
+
+
+def _colocar_enfasis(original: str, traducido: str, pendientes: Counter) -> str:
+    """Las parejas ``{i}palabra{/i}`` que el modelo perdió se ponen alrededor de la palabra que corresponde.
+
+    Antes se pegaban vacías (``{i}{/i}``) al principio y al final, y el énfasis se perdía. Orden de preferencia:
+    1. el mismo texto aparece en la traducción (nombres, extranjerismos);
+    2. la pareja cubría casi toda la frase: se envuelve la frase entera;
+    3. el mismo hueco relativo (hasta 3 palabras). Es cosmético: si la palabra no es la justa, no rompe nada.
+    Si nada sirve, la pareja se queda pendiente y la trata el resto de la función.
+    """
+    palabras_t = _palabras_visibles(traducido)
+    if not palabras_t:
+        return traducido
+    visible_o = PATRON_ETIQUETAS.sub("", original)
+    letras_o = len(_palabras_visibles(original))
+    inserciones: list[tuple[int, int, str]] = []  # (inicio, fin, nombre)
+    ocupadas: set[int] = set()
+    for m in _PAR_ENFASIS.finditer(original):
+        nombre = m.group(1)
+        if pendientes[f"{{{nombre}}}"] <= 0 or pendientes[f"{{/{nombre}}}"] <= 0:
+            continue
+        interior = PATRON_ETIQUETAS.sub("", m.group(2))
+        pal_i = [p.group(0).lower() for p in _PALABRA.finditer(interior)]
+        if not pal_i:
+            continue
+        k = len(pal_i)
+        elegido: tuple[int, int] | None = None
+        # 1. mismas palabras seguidas en la traducción
+        minus = [p.group(0).lower() for p in palabras_t]
+        for j in range(len(minus) - k + 1):
+            if minus[j:j + k] == pal_i and not any(x in ocupadas for x in range(j, j + k)):
+                elegido = (j, j + k - 1)
+                break
+        # 2. casi toda la frase
+        if elegido is None and len(" ".join(pal_i)) >= 0.9 * len(" ".join(p.group(0) for p in _PALABRA.finditer(visible_o))):
+            elegido = (0, len(palabras_t) - 1)
+        # 3. mismo hueco relativo
+        if elegido is None and k <= 3 and len(palabras_t) > k and letras_o:
+            antes = len(_palabras_visibles(original[:m.start()]))
+            j = min(max(round(antes / letras_o * len(palabras_t)), 0), len(palabras_t) - k)
+            if not any(x in ocupadas for x in range(j, j + k)):
+                elegido = (j, j + k - 1)
+        if elegido is None:
+            continue
+        a, b = elegido
+        ocupadas.update(range(a, b + 1))
+        ini, fin = palabras_t[a].start(), palabras_t[b].end()
+        if (a, b) == (0, len(palabras_t) - 1):  # frase entera: incluye los signos de alrededor
+            ini = len(traducido) - len(traducido.lstrip())
+            fin = len(traducido.rstrip())
+        inserciones.append((ini, fin, nombre))
+        pendientes[f"{{{nombre}}}"] -= 1
+        pendientes[f"{{/{nombre}}}"] -= 1
+    for ini, fin, nombre in sorted(inserciones, reverse=True):
+        traducido = f"{traducido[:ini]}{{{nombre}}}{traducido[ini:fin]}{{/{nombre}}}{traducido[fin:]}"
+    return traducido
+
+
 def forzar_etiquetas(original: str, traducido: str) -> str:
     """Último recurso: añade las etiquetas que falten (respetando duplicados).
 
@@ -219,6 +287,7 @@ def forzar_etiquetas(original: str, traducido: str) -> str:
         return traducido
     pendientes = Counter(faltan)
     traducido = _colocar_pausas(original, traducido, pendientes)
+    traducido = _colocar_enfasis(original, traducido, pendientes)
     if not +pendientes:
         return traducido
     mitad = len(original) / 2
@@ -449,6 +518,34 @@ def _aplicar_locales(r: str, orig_low: str, etapa: str) -> str:
             continue
         r = _reemplazar_preservando_mayus(buscar, cambiar, r) if preservar else re.sub(buscar, cambiar, r, flags=flags)
     return r
+
+
+# Palabras corrientes que nunca son un nombre: tras una coma van en minúscula ("Maggie, ¿realmente…?").
+_PALABRAS_CORRIENTES = (
+    "no sí realmente además entonces bueno pero porque pues claro vale mira oye mientras aunque cuando donde dónde "
+    "qué cómo cuándo quién quiénes cuál cuáles cuánto cuánta cuántos cuántas por quieres quiero puedo puedes puede "
+    "podemos podría podrías tengo tienes tiene tenemos tenía hay había es eres soy estoy estás está estamos "
+    "voy vas va vamos vamos haz hago haces hace hice sé sabes sabe sabía creo crees piensas pienso necesito "
+    "necesitas yo tú ella ellos nosotros todavía todo todos nada nadie algo alguien siempre nunca ahora ya "
+    "esto eso esta ese esa estos esos aquí allí así también tampoco incluso solo sólo"
+).split()
+_TRAS_COMA = re.compile(
+    r"(?<=[\w\]\)\}\"”'’…], )([¿¡]?)([A-ZÁÉÍÓÚÑ][a-záéíóúñ]+)(?=\s+[^\W\d_])"
+)
+
+
+def minuscula_tras_coma(texto: str) -> str:
+    """Tras una coma (y ``¿``/``¡``) una palabra corriente va en minúscula: "Maggie, ¿Realmente…" -> "…, ¿realmente…".
+
+    Solo toca una lista de palabras que no pueden ser un nombre propio, y solo si no es la última de la frase
+    (así "Sí, No" de un menú se queda como está).
+    """
+    def arreglar(m: re.Match) -> str:
+        palabra = m.group(2)
+        if palabra.lower() not in _PALABRAS_CORRIENTES:
+            return m.group(0)
+        return m.group(1) + palabra[0].lower() + palabra[1:]
+    return _TRAS_COMA.sub(arreglar, texto)
 
 
 def postprocesar_traduccion(texto: str, original: str = "") -> str:
@@ -858,6 +955,7 @@ def postprocesar_traduccion(texto: str, original: str = "") -> str:
     # 6e. Determinante masculino con sustantivo femenino ("muchos actualizaciones" -> "muchas actualizaciones")
     r = arreglar_determinantes(r)
     r = arreglar_tratamiento_vocativo(original, r)   # "El Sr. Lopez, …" -> "Sr. Lopez, …" (vocativo)
+    r = minuscula_tras_coma(r)                        # "Maggie, ¿Realmente…" -> "Maggie, ¿realmente…"
 
     # 7. Signos dobles de apertura desemparejados al cerrar (ej: "¡¿Qué haces!" -> "¡¿Qué haces?!")
     r = re.sub(r"(¡¿[^?!¡¿]+)!(\s*)$", r"\1?!\2", r)
