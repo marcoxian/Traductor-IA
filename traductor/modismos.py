@@ -97,7 +97,11 @@ MODISMOS: tuple[Modismo, ...] = (
     Modismo("fuck! (exclamación)", _re(r"^(?:\{[^}]*\}|[^\w{])*(?:(?:oh|ah|aw|ugh),?\s+)?(?:fu+cking\s+)?fu+ck"
                                        r"(?:ing\s+hell|ing\s+fuck)?(?:\{[^}]*\}|[^\w{])*$"),
             "¡Joder! (exclamación, no es una orden)",
-            mal=_re(r"\bf[oó]ll\w*|\bc[oó]g\w*|\bc[oó]j(?!ones)\w*|\bmamad\w*"), pista=True),
+            mal=_re(r"\bf[oó]ll\w*|\bc[oó]g\w*|\bc[oó]j(?!ones)\w*|\bmamad\w*"),
+            # "FUUUCK!" -> "¡FUEEERROOOO!": sin ninguna palabrota de España también es un fallo
+            bien=_re(r"\bjod\w*|\bmierd\w*|\bhostia\w*|\bco[ñn]o+\b|\bme\s+cago\b|\bmaldit[oa]\b|\bmaldici[oó]n\b|"
+                     r"\bputa\b|\bostra+s\b"),
+            pista=True),
     Modismo("holy fuck", _re(r"\bholy\s+(?:fu+ck\w*|shit+|crap)\b"), "¡Hostia!, ¡Joder!, ¡La hostia!",
             mal=_re(r"\bsant[oa]s?\s+(?:puta|mierda|joder)\w*|\bsagrad[oa]\s+mierda\b"), pista=False),
     Modismo("fuck yes", _re(r"\bfu+ck(?:ing)?[\s,!.]+(?:yes+|yeah+|yea|yep)\b"), "¡Joder, sí!, ¡Sí, joder!, ¡Y tanto!",
@@ -192,6 +196,42 @@ _ERES_BIENVENIDO = re.compile(
     _INICIO + r"(?:(?:t[uú]|usted)\s+)?(?:eres|es|est[aá]s|est[aá]n?|te\s+est[aá]s)\s+(?:muy\s+)?bienvenid[oa]s?\b",
     re.IGNORECASE)
 _BIENVENIDO_SOLO = re.compile(_INICIO + r"(?:bienvenid[oa]s?|est[aá]\s+bien)\b(?=\s*[,.!…]|\s*$)", re.IGNORECASE)
+# "FUCK!" / "{b}FUUUCK!" como frase entera (sin "oh", "fucking hell"...): la única palabra es la palabrota
+_EXCLAMACION = next(m for m in MODISMOS if m.clave == "fuck! (exclamación)")
+_FUCK_SOLO = _re(r"^(?:\{[^}]*\}|[^\w{])*(fu+ck)((?:\{[^}]*\}|[^\w{])*)$")
+_ETIQUETA = re.compile(r"\{[^}]*\}")
+
+
+def _joder_como(original: str) -> str | None:
+    """"FUUUCK!" -> "¡JODEEER!", "Fuck..." -> "Joder...", "fuck?!" -> "¡¿joder?!" (None si no es la exclamación
+    sola). Tantas "e" como "u" tiene el inglés si la alarga, y en mayúsculas si el inglés va en mayúsculas."""
+    m = _FUCK_SOLO.search(original)
+    if not m:
+        return None
+    palabra, detras = m.group(1), _ETIQUETA.sub("", m.group(2))
+    us = len(palabra) - 3
+    joder = "jod" + ("e" * us if us > 1 else "e") + "r"
+    if palabra.isupper():
+        joder = joder.upper()
+    elif palabra[0].isupper():
+        joder = joder.capitalize()
+    signos = re.sub(r"[^!?.…]", "", detras)
+    abrir = "".join("¡" if c == "!" else "¿" for c in reversed(signos) if c in "!?")
+    return abrir + joder + signos
+
+
+def _arreglar_exclamacion(original: str, traduccion: str) -> str:
+    """La exclamación sola mal traducida ("¡MAMADA!", "¡FUEEERROOOO!") pasa a "¡Joder!". Las etiquetas de la
+    traducción ({b}, {/i}) se conservan: las de apertura delante y las de cierre detrás."""
+    joder = _joder_como(original)
+    if joder is None or not (_EXCLAMACION.mal.search(traduccion) or not _EXCLAMACION.bien.search(traduccion)):
+        return traduccion
+    m = re.match(r"^((?:\{[^}]*\}|[\s\"'‘’“”*])*)(.*?)((?:\{[^}]*\}|[\s\"'‘’“”*])*)$", traduccion, re.S)
+    antes, medio, despues = m.group(1), m.group(2), m.group(3)
+    etiquetas = _ETIQUETA.findall(medio)
+    apertura = "".join(e for e in etiquetas if not e.startswith("{/"))
+    cierre = "".join(e for e in etiquetas if e.startswith("{/"))
+    return f"{antes}{apertura}{joder}{cierre}{despues}"
 
 
 def arreglar(original: str, traduccion: str) -> str:
@@ -201,10 +241,11 @@ def arreglar(original: str, traduccion: str) -> str:
       vale como despedida y como respuesta a "¿cuándo?". "Después de eso" no se toca.
     - "You're welcome" -> "Eres bienvenida" (al principio de una frase) pasa a "De nada". "Está bien" o
       "¡Bienvenido!" solo se cambian si el original no dice nada más ("Ha! You're welcome, Ana!").
+    - "FUUUCK!" (la palabrota sola) -> "¡MAMADA!" o "¡FUEEERROOOO!" pasa a "¡JODEEER!".
     """
     if not original or not traduccion:
         return traduccion
-    r = traduccion
+    r = _arreglar_exclamacion(original, traduccion)
     if _LATER.patron.search(original):
         sustituto = "luego" if _LATER_SIN_NADA.search(original) else "hasta luego"
         r = _DESPUES_SUELTO.sub(lambda m: (sustituto[0].upper() if m.group(1) == "D" else sustituto[0])

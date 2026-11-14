@@ -207,6 +207,9 @@ Maker) y `glosario_adulto.json`.
   «eye-fucking» («comerse con los ojos»), «fuck yes» («¡Joder, sí!»), «FUUUCK!» → «¡Mamada…!», «Holy shit» →
   «Santa mierda», «I'll fucking kill him» → «de puta madre» y «asshole» → «hijo de puta» (es «gilipollas» o
   «capullo»).
+- **La palabrota sola** («FUCK!», «{b}FUUUCK!»): si la traducción no lleva ninguna palabrota de España («¡MAMÁ!»,
+  «¡FUEEERROOOO!») o lleva «mamada/follón», se cambia en código por «¡JODER!» o «¡JODEEER!» (tantas «e» como «u»,
+  y con las mayúsculas y los signos del inglés). «¡Mierda!» o «¡Mierdaaa!» se dejan.
 - **Gramática** (`traductor/gramatica.py`). Se corrige solo el determinante masculino delante de un sustantivo que
   siempre es femenino («muchos actualizaciones», «un Navidad», «al recepción»). Se reintentan las prohibiciones mal
   conjugadas («Don't pretend» → «No finge»/«No finja»; con tú es «No finjas») y el tartamudeo leído como «yo»

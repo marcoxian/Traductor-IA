@@ -118,6 +118,42 @@ class TestPalabrotasNoSonSexo(unittest.TestCase):
             with self.subTest(en=en):
                 self.assertEqual(modismos.calcos(en, es), [])
 
+    def test_exclamacion_sin_palabrota_es_fallo(self):
+        self.assertIn("fuck! (exclamación)", _claves("FUUUCK!", "¡FUEEERROOOO!"))
+        self.assertEqual(modismos.calcos("Fuck!", "¡Mierda!"), [])
+        self.assertEqual(modismos.calcos("Fuck...", "Joder..."), [])
+
+    def test_arreglo_de_la_exclamacion_sola(self):
+        casos = [
+            ("FUUUCK!", "¡FUEEERROOOO!", "¡JODEEER!"),
+            ("FUUUCK!", "¡MAMADA DE MIERDA!", "¡JODEEER!"),
+            ("{b}FUCK!", "{b}¡MAMAD!", "{b}¡JODER!"),
+            ("FUCK!{fast}", "¡MAMÁ!{fast}", "¡JODER!{fast}"),
+            ("{i}FUCK!", "¡{i}MAMADA!{/i}", "{i}¡JODER!{/i}"),
+            ("Fuck...", "Follón...", "Joder..."),
+            ("fuck?!", "¿¡mamada?!", "¡¿joder?!"),
+        ]
+        for en, es, esperado in casos:
+            with self.subTest(en=en, es=es):
+                self.assertEqual(modismos.arreglar(en, es), esperado)
+
+    def test_arreglo_no_toca_lo_bueno_ni_otras_frases(self):
+        intactas = [
+            ("FUCK!", "¡Mierda!"),
+            ("FUUUCK!", "¡JODEEER!"),
+            ("FUUUUCK!", "¡Mierdaaaaa!"),             # palabrota alargada: está bien
+            ("Oh, fuck!", "¡Oh, mamada!"),          # con "oh" no se arregla solo: va al reintento
+            ("Fuck you!", "¡Que te follen!"),
+            ("FUCKING HELL!", "¡MAMADA!"),
+            ("Fuck, yes!", "¡Joder, sí!"),
+        ]
+        for en, es in intactas:
+            with self.subTest(en=en):
+                self.assertEqual(modismos.arreglar(en, es), es)
+
+    def test_arreglo_dentro_del_postproceso(self):
+        self.assertEqual(postprocesar_traduccion("¡FUEEERROOOO!", "FUUUCK!"), "¡JODEEER!")
+
     def test_pista_en_el_glosario(self):
         self.assertIn("eye-fucking", [c for c, _ in modismos.terminos("He was eye-fucking her.")])
         self.assertIn("asshole", [c for c, _ in modismos.terminos("You're an asshole.")])
